@@ -116,7 +116,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
   };
 
   useEffect(() => {
-    let userEmail = userDetails?.user?.email;
+    let userEmail = userDetails?.email;
     axios
       .get(`https://careers.marketsverse.com/users/get?email=${userEmail}`)
       .then((response) => {
@@ -131,7 +131,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
 
   useEffect(() => {
     console.log(showSelectedPath, selectedPath, "lkwefhlkerhflegr")
-    let userEmail = userDetails?.user?.email;
+    let userEmail = userDetails?.email;
     // if(!showSelectedPath && !selectedPathId){
       axios
         .get(
@@ -278,7 +278,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
   const failStep = (stepid, pathid) => {
     // console.log(stepid, "stepid", pathid, 'pathid');
     let obj = {
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       pathId: pathid,
       step_id: stepid,
     };

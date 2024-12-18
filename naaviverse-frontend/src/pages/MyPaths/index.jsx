@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const navigate = useNavigate();
   const { sideNav, setsideNav } = useStore();
-  let userDetails = JSON.parse(localStorage.getItem("user"));
+  let userDetails = JSON.parse(localStorage.getItem("partner"));
   const {
     setCurrentStepData,
     setCurrentStepDataLength,
@@ -52,7 +52,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const getAllPaths = () => {
     setPartnerPathData([]);
     setLoading(true);
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     const endpoint = admin
       ? `https://careers.marketsverse.com/paths/get?status=active`
       : mypathsMenu === "Pending Approval"
@@ -76,7 +76,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const [remainingStepData, setRemainingStepData] = useState([]);
   const getAllStepsForPath = () => {
     setLoading(true);
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
 
     axios
       .get(
@@ -100,7 +100,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const [allServices, setAllServices] = useState([]);
 
   const getAllServices = () => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
 
     // axios.get(`https://comms.globalxchange.io/gxb/product/banker/get?category=education%20consultants`).then(({data}) => {
     //   if(data.status){
@@ -120,7 +120,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   };
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios
       .get(`https://careers.marketsverse.com/paths/get?email=${email}`)
       .then(({ data }) => {
@@ -167,7 +167,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
 
   const getAllSteps = () => {
     setLoading(true);
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios
       .get(`https://careers.marketsverse.com/steps/get?email=${email}`)
       .then((response) => {

@@ -18,7 +18,7 @@ const MyStepsAcc = ({ search,setSearch, admin, fetchAllServicesAgain, stpesMenu,
   const navigate = useNavigate()
   const { sideNav, setsideNav, accsideNav,
     setaccsideNav, } = useStore();
-  let userDetails = JSON.parse(localStorage.getItem("user"));
+  let userDetails = JSON.parse(localStorage.getItem("partner"));
   const { setCurrentStepData, setCurrentStepDataLength,mypathsMenu, setMypathsMenu } = useCoinContextData();
   const [partnerPathData, setPartnerPathData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -49,38 +49,55 @@ const MyStepsAcc = ({ search,setSearch, admin, fetchAllServicesAgain, stpesMenu,
 
   const getAllPaths = () => { 
     setLoading(true);
-    let email = userDetails?.user?.email;
-    const endpoint = admin? `https://careers.marketsverse.com/paths/get?status=active` : `https://careers.marketsverse.com/paths/get?email=${email}`
-    axios
-      .get(endpoint)
-      .then((response) => {
-        let result = response?.data?.data;
-        // console.log(result, "partnerPathData result");
-        setPartnerPathData(result);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log(error, "error in partnerPathData");
-      });
-  };
+    let email = userDetails?.email;
+    const endpoint = admin ? 
+        `https://careers.marketsverse.com/paths/get?status=active` : 
+        `https://careers.marketsverse.com/paths/get?email=${email}`;
+    
+    axios.get(endpoint)
+        .then((response) => {
+            let result = response?.data?.data;
+            if (result) {
+                setPartnerPathData(result);
+            } else {
+                console.error('No data found in response:', response);
+            }
+        })
+        .catch((error) => {
+            console.error(error, "error in partnerPathData");
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+};
 
   const [remainingStepData, setRemainingStepData] = useState([])
   const getAllStepsForPath = () => {
     setLoading(true);
-    let email = userDetails?.user?.email;
-    
-    axios
-    .get(`https://careers.marketsverse.com/paths/getremainingsteps?path_id=${selectedPath?._id}&&email=${email}`)
-      .then((response) => {
-        let result = response?.data?.stepIds;
-        console.log(result, "partnerStepsData result");
-        setRemainingStepData(result);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log(error, "error in partnerStepsData");
-      });
-  };
+    let email = userDetails?.email;
+
+    axios.get(`https://careers.marketsverse.com/paths/getremainingsteps?path_id=${selectedPath?._id}&&email=${email}`)
+        .then((response) => {
+            console.log('Response from getAllStepsForPath:', response);
+            let result = response?.data?.stepIds;
+            if (Array.isArray(result)) {
+                console.log(result, "partnerStepsData result");
+                setRemainingStepData(result);
+            } else {
+                console.error('Unexpected data format:', response);
+            }
+        })
+        .catch((error) => {
+            console.error(error, "error in partnerStepsData");
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+        console.log('Selected Path:', selectedPath);
+        console.log('Selected Path ID:', selectedPath?._id);
+        console.log('Email:', email); 
+};
+
 
   useEffect(() => {
     getAllStepsForPath()
@@ -90,7 +107,7 @@ const MyStepsAcc = ({ search,setSearch, admin, fetchAllServicesAgain, stpesMenu,
   const [allServices, setAllServices] = useState([])
 
   const getAllServices = () => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     
     // axios.get(`https://comms.globalxchange.io/gxb/product/banker/get?category=education%20consultants`).then(({data}) => {
     //   if(data.status){
@@ -106,7 +123,7 @@ const MyStepsAcc = ({ search,setSearch, admin, fetchAllServicesAgain, stpesMenu,
   }
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios.get(`https://careers.marketsverse.com/paths/get?email=${email}`).then(({data}) => {
       if(data.status){
         setBackupPathData(data?.data)
@@ -126,7 +143,7 @@ const MyStepsAcc = ({ search,setSearch, admin, fetchAllServicesAgain, stpesMenu,
       .get(`https://careers.marketsverse.com/paths/get?status=waitingforapproval`)
       .then((response) => {
         let result = response?.data?.data;
-        // console.log(result, "partnerPathData result");
+        console.log(result, "partnerPathData result");
         setPartnerPathData(result);
         setLoading(false);
       })
@@ -148,7 +165,7 @@ const MyStepsAcc = ({ search,setSearch, admin, fetchAllServicesAgain, stpesMenu,
 
   const getAllSteps = (status) => {
     setLoading(true);
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios
       .get(`https://careers.marketsverse.com/steps/get?email=${email}&status=${status}`)
       .then((response) => {

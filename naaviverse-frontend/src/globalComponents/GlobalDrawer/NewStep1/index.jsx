@@ -9,7 +9,7 @@ import arrow from "../../../pages/accDashbaoard/arrow.svg";
 import trash from "../../../pages/accDashbaoard/trash.svg";
 
 const NewStep1 = ({ setpstep }) => {
-  const userDetails = JSON.parse(localStorage.getItem("user"));
+  const userDetails = JSON.parse(localStorage.getItem("partner"));
   const { setaccsideNav, setispopular } = useStore();
   const {
     setMypathsMenu,
