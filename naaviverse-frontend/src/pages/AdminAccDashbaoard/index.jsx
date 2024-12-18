@@ -223,7 +223,7 @@ const AccDashboard = () => {
 
   const secret = "uyrw7826^&(896GYUFWE&*#GBjkbuaf"; // secret not to be disclosed anywhere.
   const emailDev = "rahulrajsb@outlook.com"; // email of the developer.
-  const userDetails = JSON.parse(localStorage.getItem("user"));
+  const userDetails = JSON.parse(localStorage.getItem("partner"));
 
   const handleGrade = (item) => {
     if (grade.includes(item)) {
@@ -455,8 +455,7 @@ const AccDashboard = () => {
 
 
   //upload end here
-
-  const handleFollowerPerAccountants = () => {
+ const handleFollowerPerAccountants = () => {
     setIsLoading(true);
     let mailId = userDetails?.user?.email;
     GetFollowersPerAccount(mailId)

@@ -236,7 +236,7 @@ const AccDashboard = () => {
 
   const secret = "uyrw7826^&(896GYUFWE&*#GBjkbuaf"; // secret not to be disclosed anywhere.
   const emailDev = "rahulrajsb@outlook.com"; // email of the developer.
-  const userDetails = JSON.parse(localStorage.getItem("user"));
+  const userDetails = JSON.parse(localStorage.getItem("partner"));
 
   const handleGrade = (item) => {
     if (grade.includes(item)) {
@@ -325,7 +325,7 @@ const AccDashboard = () => {
       setPathSteps((prev) => {
         return {
           ...prev,
-          email: userDetails?.user?.email,
+          email: userDetails?.email,
         };
       });
     }
@@ -336,7 +336,7 @@ const AccDashboard = () => {
     handleGetCurrencies();
     // setaccsideNav("CRM")
     resetpop();
-    const userDetails = JSON.parse(localStorage.getItem("user"));
+    const userDetails = JSON.parse(localStorage.getItem("partner"));
     if (userDetails === null || userDetails === undefined) {
       navigate("/login");
     }
@@ -509,7 +509,7 @@ const AccDashboard = () => {
 
   const handleFollowerPerAccountants = () => {
     setIsLoading(true);
-    let mailId = userDetails?.user?.email;
+    let mailId = userDetails?.email;
     GetFollowersPerAccount(mailId)
       .then((res) => {
         let result = res?.data;
@@ -545,9 +545,9 @@ const AccDashboard = () => {
     //   });
 
   
-      const userDetails = JSON.parse(localStorage.getItem("user"));
+      const userDetails = JSON.parse(localStorage.getItem("partner"));
       axios.get(
-        `https://careers.marketsverse.com/userpurchase/get?creatoremail=${userDetails?.user?.email}`
+        `https://careers.marketsverse.com/userpurchase/get?creatoremail=${userDetails?.email}`
       ).then(({data})=> {
           if(data?.status){
               console.log(data, "ljefhkjwefkwef")
@@ -621,7 +621,7 @@ const AccDashboard = () => {
     setCoverImageS3url("");
     setImage(null);
     setPathSteps({
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       nameOfPath: "",
       description: "",
       length: "",
@@ -701,14 +701,14 @@ const AccDashboard = () => {
 
   const handleFinalSubmit = () => {
     setIsSubmit(true);
-    let userDetails = JSON.parse(localStorage.getItem("user"));
+    let userDetails = JSON.parse(localStorage.getItem("partner"));
     let objmonthly = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       token: userDetails.idToken,
       product_code: serviceCodeInput,
       product_name: serviceNameInput,
       product_icon: coverImageS3url,
-      revenue_account: userDetails.user.email,
+      revenue_account: userDetails.email,
       client_app: "naavi",
       product_category_code: "CoE",
       sub_category_code: "",
@@ -756,12 +756,12 @@ const AccDashboard = () => {
     };
 
     let objone = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       token: userDetails.idToken,
       product_code: serviceCodeInput,
       product_name: serviceNameInput,
       product_icon: coverImageS3url,
-      revenue_account: userDetails.user.email,
+      revenue_account: userDetails.email,
       client_app: "naavi",
       product_category_code: "CoE",
       sub_category_code: "",
@@ -847,10 +847,10 @@ const AccDashboard = () => {
   };
 
   const addService = () => {
-    let userDetails = JSON.parse(localStorage.getItem("user"));
+    let userDetails = JSON.parse(localStorage.getItem("partner"));
 
     console.log({
-      "productcreatoremail": userDetails.user.email,
+      "productcreatoremail": userDetails.email,
       "name": serviceNameInput,
       "description": serviceDescription,
       "chargingtype": billingType,
@@ -866,7 +866,7 @@ const AccDashboard = () => {
   }, "kjedkjwehfkwehflkwhef")
 
     axios.post(`https://careers.marketsverse.com/services/add`, {
-      "productcreatoremail": userDetails.user.email,
+      "productcreatoremail": userDetails.email,
       "name": serviceNameInput,
       "description": serviceDescription,
       "chargingtype": billingType,
@@ -890,33 +890,46 @@ const AccDashboard = () => {
   }
 
   const getAllServices = () => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
-    axios.get(`https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails.user.email}`)
-    .then(({data}) => {
-      if(data.status){
-        setservicesAcc(data?.data);
-        setIsloading(false)
-      }
-    })
-  }
+    const userDetails = JSON.parse(localStorage.getItem("partner"));
+
+    // Check if userDetails exists and if email is available
+    if (userDetails && userDetails.email) {
+        axios.get(`https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails.email}`)
+            .then(({ data }) => {
+                if (data.status) {
+                    setIsLoading(false);         // Assuming setIsLoading is defined
+                } else {
+                    console.error("Service data is not available.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching services:", error);
+                setIsLoading(false);
+            });
+    } else {
+        console.error("User details or email is missing in localStorage.");
+        setIsLoading(false);
+    }
+};
+
 
   useEffect(() => {
     getAllServices()
   }, [])
 
   const fetchAllServicesAgain = () => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
+    const userDetails = JSON.parse(localStorage.getItem("partner"));
       // console.log(userDetails, "kkk");
       // handleServicesForLogged(userDetails.user.email);
-      getAllServices(userDetails.user.email)
+      getAllServices(userDetails.email)
   }
 
   useEffect(() => {
     if(!ispopular){
-      const userDetails = JSON.parse(localStorage.getItem("user"));
+      const userDetails = JSON.parse(localStorage.getItem("partner"));
       // console.log(userDetails, "kkk");
       // handleServicesForLogged(userDetails.user.email);
-      getAllServices(userDetails.user.email)
+      getAllServices(userDetails.email)
     }
   }, [ispopular])
 
@@ -931,10 +944,10 @@ const AccDashboard = () => {
     } else if (accsideNav == "CRM" && crmMenu == "Purchases") {
       handleAllCustomerLicenses();
     } else if (accsideNav == "My Services" && servicesMenu == "Services") {
-      const userDetails = JSON.parse(localStorage.getItem("user"));
+      const userDetails = JSON.parse(localStorage.getItem("partner"));
       // console.log(userDetails, "kkk");
       // handleServicesForLogged(userDetails.user.email);
-      getAllServices(userDetails.user.email)
+      getAllServices(userDetails.email)
     }
   }, [crmMenu, servicesMenu, accsideNav]);
 
@@ -948,13 +961,13 @@ const AccDashboard = () => {
     setSelectedService("");
     setUpdatedIcon("");
     // handleServicesForLogged(userDetails?.user?.email);
-    getAllServices(userDetails.user.email)
+    getAllServices(userDetails.email)
   }
 
   const deleteService = () => {
     setIsloading(true);
     let obj = {
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       token: userDetails?.idToken,
       product_id: selectedService?.product_id,
     };
@@ -981,7 +994,7 @@ const AccDashboard = () => {
   const changeServiceIcon = () => {
     setIsloading(true);
     let obj = {
-      email: userDetails?.user?.email,
+      email: userDetails?.partner?.email,
       token: userDetails?.idToken,
       field_name: "product_icon",
       field_value: updatedIcon,
@@ -1062,7 +1075,7 @@ const AccDashboard = () => {
     // console.log(numValues, 'numValues');
 
     let obj = {
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       token: userDetails?.idToken,
       app_code: compPlanApp,
       product_id: selectedService?.product_id,
@@ -1138,7 +1151,7 @@ const AccDashboard = () => {
   const getWithCompPlan = () => {
     setGettingData(true);
     let obj = {
-      product_creator: userDetails?.user?.email,
+      product_creator: userDetails?.email,
     };
     axios
       .post(
@@ -1160,7 +1173,7 @@ const AccDashboard = () => {
   }, []);
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios
       .get(`https://careers.marketsverse.com/steps/get?email=${email}`)
       .then((response) => {
@@ -1247,7 +1260,7 @@ const AccDashboard = () => {
   }, []);
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     setClientLoading(true);
     axios
       .get(
@@ -1296,7 +1309,7 @@ const AccDashboard = () => {
 
   // get profile id
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     if (coinAction?.includes("Add") && addActionStep === 1) {
       axios
         .get(`https://comms.globalxchange.io/user/details/get?email=${email}`)

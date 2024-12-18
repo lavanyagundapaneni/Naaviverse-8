@@ -221,12 +221,13 @@ const AccProfile = () => {
 
   const [backupPathList, setBackupPathList] = useState([]);
   const [showBackupPathList, setShowBackupPathList] = useState(false);
+  
 
   // //upload part starts here
-
   const secret = "uyrw7826^&(896GYUFWE&*#GBjkbuaf"; // secret not to be disclosed anywhere.
   const emailDev = "rahulrajsb@outlook.com"; // email of the developer.
-  const userDetails = JSON.parse(localStorage.getItem("user"));
+  const userDetails = JSON.parse(localStorage.getItem("partner"));
+  console.log("Partner data retrieved from localStorage:", userDetails);
 
 
   const [businessName, setBusinessName] = useState('');
@@ -477,7 +478,7 @@ const AccProfile = () => {
   };
 
   const handleAllCustomerLicenses = () => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
+    const userDetails = JSON.parse(localStorage.getItem("partner"));
     setIsPurchaseLoading(true);
     GetAllCustomerLicenses(userDetails.user.email)
       .then((res) => {
@@ -630,7 +631,7 @@ const AccProfile = () => {
 
   const handleFinalSubmit = () => {
     setIsSubmit(true);
-    let userDetails = JSON.parse(localStorage.getItem("user"));
+    let userDetails = JSON.parse(localStorage.getItem("partner"));
     let objmonthly = {
       email: userDetails.user.email,
       token: userDetails.idToken,
@@ -855,7 +856,7 @@ const AccProfile = () => {
   };
 
   const createPartnerProfile = () => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     console.log({
       email: email,
       firstName: firstName,

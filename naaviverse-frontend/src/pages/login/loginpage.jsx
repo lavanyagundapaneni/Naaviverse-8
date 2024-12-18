@@ -65,7 +65,7 @@ const Loginpage = () => {
       password: password,
     };
   
-    Loginservice(obj)
+    Loginservice(obj, loginType)
       .then((response) => {
         const result = response.data; // Accessing data directly
   
@@ -92,7 +92,14 @@ const Loginpage = () => {
             navigate("/dashboard/accountants/profile");
             getProfilePic(email, loginType);
             localStorage.setItem('userType', 'partner');
+            
           }
+          console.log("Partner details (after login):", result.partner); // Log partner details from response
+                
+                // Store partner data in localStorage and log the data
+          localStorage.setItem("partner", JSON.stringify(result.partner));
+          console.log("Stored partner data:", JSON.parse(localStorage.getItem("partner"))); // Log stored partner data
+
   
           setiserror(false); // Reset error state on success
         } else {

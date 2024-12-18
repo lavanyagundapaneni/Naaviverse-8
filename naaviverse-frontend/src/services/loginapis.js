@@ -1,11 +1,13 @@
 import axios from "axios";
 
-
 // Login API
-export const Loginservice = async (object) => {
+export const Loginservice = async (object, loginType) => {
   try {
     console.log("Payload Sent to API:", object); // Debugging step
-    const response = await axios.post(`/auth/login`, object, {
+    // Determine the API endpoint based on login type
+    const endpoint = loginType === "Users" ? `/auth/login` : `/partner/login`;
+
+    const response = await axios.post(endpoint, object, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -16,7 +18,6 @@ export const Loginservice = async (object) => {
     throw error;
   }
 };
-
 
 // Register API
 // export const RegisterOnApp = async (object) => {

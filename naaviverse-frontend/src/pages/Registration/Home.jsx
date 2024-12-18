@@ -178,7 +178,7 @@ const NewHomePage = () => {
       const confirmEmail = () => {
         // Dynamic API for OTP verification
         const verifyOtpUrl = signupRole === "Users" ? `/auth/verifyOTP` : `/partner/verifyOTP`;
-    
+      
         axios
           .post(verifyOtpUrl, {
             email: userEmail,
@@ -186,7 +186,8 @@ const NewHomePage = () => {
           })
           .then(({ data }) => {
             if (data.success) {
-              window.location.href = "/login"; // Navigate to login
+              // Use navigate to go to login with role in URL
+              navigate(`/login?role=${signupRole}`);
             } else {
               setWrongOtp(true); // Show error for incorrect OTP
             }
@@ -199,8 +200,7 @@ const NewHomePage = () => {
             alert("OTP verification failed. Please try again.");
           });
       };
-    
-
+      
     return ( 
         <>
             <div className='regContainer'>
