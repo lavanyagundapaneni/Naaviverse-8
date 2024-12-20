@@ -3216,7 +3216,7 @@ const AccProfile = () => {
                     setFunc={setBusinessCountry}
                     funcValue={businessCountry}
                   /> */}
-                   <div className={styles.inputDivs} style={{ border: '1px solid #e7e7e7', borderRadius:'10px', fontSize:"13px", fontWeight:"500", paddingLeft:'0px', marginTop:'0px' }}>
+                   <div className={styles.inputDivs} style={{ border: '1px solid #2c7cb2', borderRadius:'4px', fontSize:"13px", fontWeight:"500", paddingLeft:'0px', marginTop:'0px' }}>
                   <select name="country" id="country" style={{border:"none", padding:'1rem', width:'90%', fontSize:"16px"}}  onChange={(e) => {
                           setBusinessCountry(e.target.value);
                         }}>
@@ -4249,7 +4249,7 @@ export const ImageUploadDivProfilePic1 = ({ setFunc, funcValue }) => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              border: "none",
+              border: "0.5px solid #2c7cb2 ",
               borderRadius: "50%",
             }}
           >
@@ -4539,7 +4539,7 @@ export const ImageUploadDivProfilePic = ({ setFunc, funcValue }) => {
       style={{
         width: "120px",
         height: "120px",
-        border: "0.5px solid #e7e7e7",
+        border: "0.5px solid #2c7cb2",
         borderRadius: "50%",
       }}
     >
