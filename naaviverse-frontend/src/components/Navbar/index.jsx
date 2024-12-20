@@ -5,7 +5,8 @@ import { useStore } from "../store/store.ts";
 import "./navbar.scss";
 
 //images
-import logo from "../../static/images/logo.svg";
+// import logo from "../../static/images/logo.svg";
+import logo from "../../static/images/naavi_finallogo.png"
 import hamIcon from "../../static/images/icons/hamIcon.svg";
 import cross from "../../static/images/nav/cross.svg";
 
@@ -36,7 +37,8 @@ const Navbar = () => {
             setmobMenuOpen(false);
           }}
         >
-          <img src={logo} alt="logo" />
+          <img src={logo} alt="logo"  style={{ height: "60px", width: "auto", maxWidth: "170px", objectFit: "contain" }} />
+          
         </div>
         <div className="menu-items">
           <div

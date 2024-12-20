@@ -969,13 +969,17 @@
 .acc-popular {
   padding: 20px 35px;
   background: #ffffff;
-  border: 0.5px solid #ededed;
+  border: 0.5px solid #2c7cb2 !important;
   position: absolute;
-  top: 70px;
-  right: 0%;
+  border-radius: 5px !important;
+  top: 25% !important;
+  left: 40%;
+  transform: translate(-50%, -50%);
   z-index: 22;
-  width: 460px;
-  height: calc(100vh - 70px);
+  width: 550px !important;
+  height: auto; /* Adjust height based on content */
+  max-height: calc(100% - 200px) !important; /* Ensures it doesn't exceed screen height */
+  overflow-y: auto; /* Enables scrolling if content overflows */
   -webkit-animation: righttoleft 0.15s ease-in forwards;
   animation: righttoleft 0.15s ease-in forwards;
 
@@ -1467,9 +1471,9 @@
 
 .acc-step-box {
   background: #ffffff;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #2c7cb2 !important;
   border-radius: 15px;
-  height: 84px;
+  height: 70px !important;
   display: flex;
   align-items: center;
   padding-left: 25px;
@@ -1941,7 +1945,7 @@ input[type="file"] {
 
 .create-acc {
   // background: #1f304f;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #2c7cb2 !important;
   border-radius: 15px;
   // font-weight: 500;
   font-size: 18px;
@@ -1949,8 +1953,8 @@ input[type="file"] {
   display: flex;
   align-items: center;
   color: #100f0d;
-  padding: 30px;
-  margin: 35px;
+  padding: 15px !important;
+  margin: 15px !important;
   width: 75vw;
   justify-content: space-between;
   cursor: pointer;
@@ -2131,17 +2135,20 @@ input[type="file"] {
 
 .popularS {
   position: fixed;
-  height: calc(100% - 70px);
-  top: 70px;
-  border-left: 0.5px solid #e5e5e5;
-  // border-top: 0.5px solid #e5e5e5;
-  width: 30%;
-  max-width: 550px;
-  background: white;
-  z-index: 3;
-  padding: 1rem 3rem 20px;
+  top: 60% !important;
+  left: 60% !important;
+  transform: translate(-50%, -50%); /* Ensures perfect centering */
+  height: auto; /* Adjusts to content height */
+  width: 60% !important; /* Adjust the width as needed */
+  max-width: 600px !important; /* Sets a maximum width */
+  max-height: 500px !important; /* Limits the maximum height */
+  padding: 2rem; /* Adds space inside the form */
+  background: white; /* Sets a white background */
+  border: 0.5px solid #2c7cb2; /* Light border around the form */
+  border-left: 0.5px solid #2c7cb2 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  z-index: 3; /* Ensures it appears above other elements */
   transition: all ease-in 0.4s;
-  right: 0;
 
   .head-txt {
     font-size: 1.5rem;
@@ -2162,6 +2169,8 @@ input[type="file"] {
       }
     }
   }
+
+  
 
   .overall-div {
     width: 100%;
