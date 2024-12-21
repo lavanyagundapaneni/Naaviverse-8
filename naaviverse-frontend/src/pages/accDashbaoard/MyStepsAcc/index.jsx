@@ -1592,13 +1592,11 @@ useEffect(() => {
                         setStepActionStep(4);
                     }}>Edit Services</div>
                     <div className="acc-step-box"  
-                    // onClick={() => {
-                    //   setStepActionStep(4);
-                    // }}
+                    onClick={() => {
+                      setStepActionStep();
+                    }}
                     >Edit Step</div>
-                    <div
-                    className="acc-step-box"
-                    >
+                    <div className="acc-step-box" onClick={() => { deleteStep(); }}>
                     Delete step
                     </div>
                 </div>

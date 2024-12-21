@@ -972,13 +972,13 @@
   border: 0.5px solid #2c7cb2 !important;
   position: absolute;
   border-radius: 5px !important;
-  top: 25% !important;
+  top: 20% !important;
   left: 40%;
   transform: translate(-50%, -50%);
   z-index: 22;
   width: 550px !important;
   height: auto; /* Adjust height based on content */
-  max-height: calc(100% - 200px) !important; /* Ensures it doesn't exceed screen height */
+  max-height: calc(100% - 130px) !important; /* Ensures it doesn't exceed screen height */
   overflow-y: auto; /* Enables scrolling if content overflows */
   -webkit-animation: righttoleft 0.15s ease-in forwards;
   animation: righttoleft 0.15s ease-in forwards;
@@ -1622,7 +1622,7 @@
 
 .acc-step-allbox {
   overflow-y: scroll;
-  height: calc(61vh);
+  height: calc(51vh) !important;
 }
 
 .acc-step-allbox1 {
@@ -1632,8 +1632,8 @@
 
 .goBack {
   font-weight: 700;
-  height: 61px;
-  margin-top: 15px;
+  height: 41px !important;
+  margin-top: 5px !important;
   display: flex;
   width: 388.4px;
   justify-content: center;
@@ -1642,7 +1642,7 @@
   border-radius: 10px;
   color: #ffffff;
   @include btn-animate(#fff);
-  position: fixed;
+  // position: fixed;
   bottom: 20px;
 }
 
