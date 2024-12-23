@@ -30,4 +30,4 @@ const stepSchema = new mongoose.Schema({
     timestamps: true
 });
 
-module.exports = mongoose.model('career_step', stepSchema);
+module.exports = mongoose.model('career_steps', stepSchema);
