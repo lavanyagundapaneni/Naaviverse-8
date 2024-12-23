@@ -1683,6 +1683,224 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
                                     </div>
                                 </div>
 
+
+                            </div>
+                            
+                            </>
+                        ))}
+                        </Draggable>
+                    </div>
+                    <div
+                        className="goBack3"
+                        onClick={() => {
+                        setEditPaths("default");
+                        }}
+                    >
+                        Go Back
+                    </div>
+                    </div>
+                )  : editPaths === "Edit who qualifies" ? (
+                    <div className="acc-mt-div">
+                    <div className="acc-sub-text">
+                        Which of the current coordinates do you want to edit?
+                    </div>
+                    <div className="acc-scroll-div">
+                        <div className="acc-step-box4">Grade</div>
+                        <div className="acc-step-box4">Grade point avg</div>
+                        <div className="acc-step-box4">Curriculum</div>
+                        <div className="acc-step-box4">Stream</div>
+                        <div className="acc-step-box4">Financial situation</div>
+                        <div className="acc-step-box4">Personality</div>
+                    </div>
+                    <div
+                        className="goBack3"
+                        onClick={() => {
+                        setEditPaths("default");
+                        }}
+                    >
+                        Go Back
+                    </div>
+                    </div>
+                ) : (
+                    ""
+                ))}
+                {pathActionStep === 5 &&     
+                    <div className="acc-mt-div">
+                    <div className="acc-sub-text">
+                    Are you sure you want to approve this path?
+                    </div>
+                    <div className="acc-scroll-div">
+                        <div
+                        className="acc-step-box4"
+                        onClick={e => handleApprovePath()}
+                        >
+                        Yes
+                        </div>
+                        <div
+                        className="acc-step-box4"
+                        onClick={() => {
+                            setPathActionStep(1);
+                        }}
+                        >
+                        Never mind
+                        </div>
+                    
+                    </div>
+                    <div
+                        className="goBack3"
+                        onClick={() => {
+                        setPathActionStep(1);
+                        }}
+                    >
+                        Go Back
+                    </div>
+                    </div>
+                }
+                {pathActionStep === 6 &&
+                    <div className="acc-mt-div">
+                    <div className="acc-sub-text">
+                    Are you sure you want to reject this path?
+                    </div>
+                    <div className="acc-scroll-div">
+                        <div
+                        className="acc-step-box4"
+                        onClick={() => {
+                            handleRejectPath()
+                        }}
+                        >
+                        Yes
+                        </div>
+                        <div
+                        className="acc-step-box4"
+                        onClick={() => {
+                            setPathActionStep(1);
+                        }}
+                        >
+                        Never mind
+                        </div>
+                        
+                    </div>
+                    <div
+                        className="goBack3"
+                        onClick={() => {
+                        setPathActionStep(1);
+                        }}
+                    >
+                        Go Back
+                    </div>
+                    </div>
+                }
+                {pathActionStep === 7 && (
+                    <div className="success-box2">Path is Approved.</div>
+                )}
+                {pathActionStep === 8 && (
+                    <div className="success-box2">Path is Rejected.</div>
+                )}
+
+                {/* Add Service Steps */}
+
+                {pathActionStep === 9 &&
+                    <div className="acc-mt-div">
+                    <div className="acc-sub-text">
+                    Which step do you want to add the service to?
+                    </div>
+                    <div className="acc-scroll-div">
+                        {selectedPath && selectedPath?.StepDetails?.map(item => (
+                        <div
+                            className="acc-step-box4"
+                            style={{flexDirection:'column', alignItems:'flex-start', justifyContent:'center'}}
+                            onClick={() => {
+                            setAddServiceStep(item)
+                            setPathActionStep(10)
+                        }}
+                        >
+                            <div>{item?.name}</div> 
+                            <div style={{fontSize:'12px', fontWeight: 400, paddingTop:'5px'}}>{item?._id}</div>
+                        </div>
+                        ))}
+                    
+            
+                        
+                    </div>
+                    <div
+                        className="goBack3"
+                        onClick={() => {
+                        setPathActionStep(1);
+                        }}
+                    >
+                        Go Back
+                    </div>
+                    </div>
+                }
+                {pathActionStep === 10 &&
+                    <div className="acc-mt-div">
+                    <div className="acc-sub-text">
+                    Which service do you want to add?
+                    </div>
+                    <div className="acc-scroll-div">
+                        {allServicesToAdd && allServicesToAdd?.serviceDetails?.map(item => (
+                        <div
+                            className="acc-step-box4"
+                            style={{flexDirection:'column', alignItems:'flex-start', justifyContent:'center'}}
+                            onClick={(e) => handleAddService(item?.product_id)}
+                        >
+                            <div>{item?.product_name}</div> 
+                            <div style={{fontSize:'12px', fontWeight: 400, paddingTop:'5px'}}>{item?.product_id}</div>
+                        </div>
+                        ))}
+                    
+            
+                        
+                    </div>
+                    <div
+                        className="goBack3"
+                        onClick={() => {
+                        setPathActionStep(1);
+                        }}
+                    >
+                        Go Back
+                    </div>
+                    </div>
+                }
+            </div>
+            )}
+
+            {stepActionEnabled && (
+            <div className="acc-popular1">
+                <div
+                className="acc-popular-top"
+                style={{ display: stepActionStep === 3 ? "none" : "" }}
+                >
+                <div className="acc-popular-head">My Step Actions</div>
+                <div
+                    className="acc-popular-img-box"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                    setStepActionEnabled(false);
+                    setStepActionStep(1);
+                    setSelectedStepId("");
+                    }}
+                >
+                    <img className="acc-popular-img" src={closepop} alt="" />
+                </div>
+                </div>
+                {stepActionStep === 1 && (
+                <div style={{ marginTop: "3rem" }}>
+                    <div className="acc-step-box"  onClick={() => {
+                        setStepActionStep(4);
+                    }}>Edit Services</div>
+                    <div className="acc-step-box"  
+                    onClick={() => {
+                      setStepActionStep();
+                    }}
+                    >Edit Step</div>
+                    <div className="acc-step-box" onClick={() => { deleteStep(); }}>
+                    Delete step
+                    </div>
+                </div>
+                )}
+
+
                             )}
                             {stepActionStep === 5 && (
                                 // <div className="success-box1">Step Successfully Deleted</div>

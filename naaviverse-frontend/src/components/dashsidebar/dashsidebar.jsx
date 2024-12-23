@@ -4,7 +4,7 @@ import "./dashsidebar.scss";
 import { useStore } from "../store/store.ts";
 import { useNavigate } from "react-router-dom";
 import { useCoinContextData } from "../../context/CoinContext";
-import logo from "./logo.svg";
+import logo from "./naavilogo.png";
 import history from "./history.svg";
 
 const sidebarMenu1 = [
