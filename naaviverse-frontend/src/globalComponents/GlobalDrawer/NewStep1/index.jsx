@@ -22,7 +22,7 @@ const NewStep1 = ({ setpstep }) => {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState("");
   const [stepForm, setStepForm] = useState({
-    email: userDetails?.user?.email,
+    email: userDetails?.email,
     name: "",
     description: "",
     cost: "",
@@ -171,7 +171,7 @@ const NewStep1 = ({ setpstep }) => {
       setStepForm((prev) => {
         return {
           ...prev,
-          email: userDetails?.user?.email,
+          email: userDetails?.email,
         };
       });
     }
@@ -185,7 +185,7 @@ const NewStep1 = ({ setpstep }) => {
     setispopular(false);
     setpstep(1);
     setStepForm({
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       name: "",
       description: "",
       cost: "",
@@ -337,7 +337,7 @@ const NewStep1 = ({ setpstep }) => {
     setLoading(true);
     // console.log(stepForm, "stepform");
     axios
-      .post(`https://careers.marketsverse.com/steps/add`, stepForm)
+      .post(`/steps/add`, stepForm)
       .then((response) => {
         let result = response?.data;
         if (result?.status) {
@@ -353,7 +353,7 @@ const NewStep1 = ({ setpstep }) => {
   useEffect(() => {
     axios
       .get(
-        `https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails?.user?.email}`
+        `https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails?.email}`
       )
       .then((response) => {
         let result = response?.data?.data;

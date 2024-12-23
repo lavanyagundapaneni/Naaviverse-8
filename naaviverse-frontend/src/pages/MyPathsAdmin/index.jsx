@@ -48,7 +48,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const getAllPaths = () => { 
     setLoading(true);
     let email = userDetails?.user?.email;
-    const endpoint = admin? `https://careers.marketsverse.com/paths/get?status=active` : `https://careers.marketsverse.com/paths/get?email=${email}`
+    const endpoint = admin? `/paths/get?status=active` : `/paths/get?email=${email}`
     axios
       .get(endpoint)
       .then((response) => {
@@ -65,7 +65,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const getInactivePath = () => { 
     setLoading(true);
     let email = userDetails?.user?.email;
-    const endpoint = admin? `https://careers.marketsverse.com/paths/get?status=inactive` : `https://careers.marketsverse.com/paths/get?email=${email}`
+    const endpoint = admin? `/paths/get?status=inactive` : `paths/get?email=${email}`
     axios
       .get(endpoint)
       .then((response) => {
@@ -92,7 +92,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
 
   useEffect(() => {
     let email = userDetails?.user?.email;
-    axios.get(`https://careers.marketsverse.com/paths/get?email=${email}`).then(({data}) => {
+    axios.get(`/paths/get?email=${email}`).then(({data}) => {
       if(data.status){
         setBackupPathData(data?.data)
       }
@@ -106,7 +106,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const getNewPath = () => {
     setLoading(true);
     axios
-      .get(`https://careers.marketsverse.com/paths/get?status=waitingforapproval`)
+      .get(`/paths/get?status=waitingforapproval`)
       .then((response) => {
         let result = response?.data?.data;
         // console.log(result, "partnerPathData result");
@@ -333,7 +333,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const handleAddService = (newId) => {
     setActionLoading(true)
       
-      axios.post(`https://careers.marketsverse.com/steps/addproducts/${selectedStepId}`, {
+      axios.post(`/steps/addproducts/${selectedStepId}`, {
         "product_ids": [newId]
        }).then(({data})=> {
         if(data.status){
