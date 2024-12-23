@@ -4,13 +4,13 @@ const axios = require('axios');
 
 const addStep = async (req, res) => {
     // console.log(req.body.country)
-    let existingPath = await pathModel.findOne({ _id: req.body.path_id });
-    if (!existingPath) {
-        return res.json({
-            status: false,
-            message: 'Path not found',
-        })
-    }
+    // let existingPath = await pathModel.findOne({ _id: req.body.path_id });
+    // if (!existingPath) {
+    //     return res.json({
+    //         status: false,
+    //         message: 'Path not found',
+    //     })
+    // }
     
     let createStep = {
         email: req.body.email,
@@ -212,20 +212,58 @@ const updateStep = async (req, res) => {
 
 }
 
+
 const deleteStep = async (req, res) => {
-    let deleteStepData = await stepModel.findOneAndUpdate({ _id: req.params.id }, { status: "delete" }, { new: true });
-    if (!deleteStepData) {
-        return res.json({
+    try {
+        const stepId = req.params.id; // Extract the step ID from request parameters
+
+        // Check if the step exists in the database
+        const step = await stepModel.findById(stepId);
+
+        if (!step) {
+            return res.status(404).json({
+                status: false,
+                message: 'Step not found',
+            });
+        }
+
+        if (step.status === "active") {
+            // Soft delete for active steps (move to inactive)
+            const updatedStep = await stepModel.findByIdAndUpdate(
+                stepId,
+                { status: "inactive" }, // Change status to inactive
+                { new: true }
+            );
+            return res.status(200).json({
+                status: true,
+                message: 'Step moved to Inactive Steps',
+                data: updatedStep,
+            });
+        } else if (step.status === "inactive") {
+            // Permanently delete steps already marked as inactive
+            const deletedStep = await stepModel.findByIdAndDelete(stepId);
+            return res.status(200).json({
+                status: true,
+                message: 'Step permanently deleted',
+                data: deletedStep,
+            });
+        } else {
+            // Handle invalid or unexpected statuses
+            return res.status(400).json({
+                status: false,
+                message: 'Invalid step status. Use "active" or "inactive".',
+            });
+        }
+    } catch (error) {
+        console.error("Error in deleteStep:", error);
+        return res.status(500).json({
             status: false,
-            message: 'Data not found',
-        })
+            message: 'An error occurred while processing the request.',
+        });
     }
-    return res.json({
-        status: true,
-        message: 'Step deleted',
-        data: deleteStepData
-    })
-}
+};
+
+
 
 const restoreStep = async (req, res) => {
     let restoreStepData = await stepModel.findOneAndUpdate({ _id: req.params.id, status: "delete" }, { status: "active" }, { new: true });

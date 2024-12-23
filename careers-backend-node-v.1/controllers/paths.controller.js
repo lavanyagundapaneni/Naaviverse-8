@@ -7,7 +7,7 @@ const mongoose = require('mongoose')
 const addPath = async (req, res) => {
     try {
         // Check if a path with the same name already exists and is active
-        let existingPath = await pathModel.findOne({ nameOfPath: req.body.nameOfPath, status: "active" });
+        let existingPath = await pathModel.findOne({ nameOfPath: req.body.nameOfPath, status: "waitingforapproval" });
 
         if (existingPath) {
             return res.status(400).json({
@@ -317,19 +317,52 @@ const updatePath = async (req, res) => {
 }
 
 const deletePath = async (req, res) => {
-    let deletePathData = await pathModel.findOneAndUpdate({ _id: req.params.id}, { status: "delete" }, { new: true });
-    if (!deletePathData) {
-        return res.json({
+    try {
+        // Check if the path exists
+        const path = await pathModel.findById(req.params.id);
+
+        if (!path) {
+            return res.json({
+                status: false,
+                message: 'Path not found',
+            });
+        }
+
+        if (path.status === "waitingforapproval") {
+            // Soft delete for paths in "Pending Approval"
+            const updatedPath = await pathModel.findOneAndUpdate(
+                { _id: req.params.id },
+                { status: "inactive" },  // Move to Inactive Paths
+                { new: true }
+            );
+            return res.json({
+                status: true,
+                message: 'Path moved to Inactive Paths',
+                data: updatedPath,
+            });
+        } else {
+            // Soft delete for paths already in other statuses (mark as "delete")
+            const updatedPath = await pathModel.findOneAndUpdate(
+                { _id: req.params.id },
+                { status: "delete" },  // Soft delete (mark as deleted)
+                { new: true }
+            );
+            return res.json({
+                status: true,
+                message: 'Path marked as deleted',
+                data: updatedPath,
+            });
+        }
+    } catch (error) {
+        console.error("Error in deletePath:", error);
+        return res.status(500).json({
             status: false,
-            message: 'Data not found',
-        })
+            message: 'An error occurred while deleting the path',
+        });
     }
-    return res.json({
-        status: true,
-        message: 'path deleted',
-        data: deletePathData
-    })
-}
+};
+
+
 
 const restorePath = async (req, res) => {
     let restorePathData = await pathModel.findOneAndUpdate({ _id: req.params.id, status: "delete" }, { status: "active" }, { new: true });
