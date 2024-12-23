@@ -411,7 +411,7 @@ const AccDashboard = () => {
 
 
     let { data } = await axios.post(
-      `https://careers.marketsverse.com/steps/addmultiplesteps`,
+      `/steps/addmultiplesteps`,
       formData,
       {
         headers: {
@@ -1048,7 +1048,7 @@ const AccDashboard = () => {
     console.log(pathSteps, "api body");
     setCreatingPath(true);
     axios
-      .post(`https://careers.marketsverse.com/paths/add`, {
+      .post(`/paths/add`, {
         ...pathSteps,
         performance: gradeAvg,
         curriculum: curriculum,

@@ -54,12 +54,12 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setLoading(true);
     let email = userDetails?.email;
     const endpoint = admin
-      ? `https://careers.marketsverse.com/paths/get?status=active`
+      ? `/paths/get?status=waitingforapproval`
       : mypathsMenu === "Pending Approval"
-      ? `https://careers.marketsverse.com/paths/get?email=${email}&status=waitingforapproval`
+      ? `/paths/get?email=${email}&status=waitingforapproval`
       : mypathsMenu === "Inactive Paths"
-      ? `https://careers.marketsverse.com/paths/get?email=${email}&status=inactive`
-      : `https://careers.marketsverse.com/paths/get?email=${email}&status=active`;
+      ? `/paths/get?email=${email}&status=inactive`
+      : `/paths/get?email=${email}&status=active`;
     axios
       .get(endpoint)
       .then((response) => {
@@ -80,10 +80,13 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
 
     axios
       .get(
-        `https://careers.marketsverse.com/paths/getremainingsteps?path_id=${selectedPath?._id}&&email=${email}`
+        `/paths/getremainingsteps?path_id=${selectedPathId}&&email=${email}`
       )
       .then((response) => {
         let result = response?.data?.stepIds;
+        console.log("selectedPath:", selectedPath);  // Check if selectedPath is being set correctly
+        console.log("selectedPath._Id:", selectedPathId);  // Ensure _Id exists
+
         console.log(result, "partnerStepsData result");
         setRemainingStepData(result);
         setLoading(false);
@@ -122,7 +125,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   useEffect(() => {
     let email = userDetails?.email;
     axios
-      .get(`https://careers.marketsverse.com/paths/get?email=${email}`)
+      .get(`/paths/get?email=${email}`)
       .then(({ data }) => {
         if (data.status) {
           setBackupPathData(data?.data);
@@ -140,7 +143,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setLoading(true);
     axios
       .get(
-        `https://careers.marketsverse.com/paths/get?status=waitingforapproval`
+        `/paths/get?status=waitingforapproval`
       )
       .then((response) => {
         let result = response?.data?.data;
@@ -169,7 +172,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setLoading(true);
     let email = userDetails?.email;
     axios
-      .get(`https://careers.marketsverse.com/steps/get?email=${email}`)
+      .get(`/steps/get?email=${email}`)
       .then((response) => {
         let result = response?.data?.data;
         console.log(result, "partnerStepsData result");
@@ -219,13 +222,15 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setSelectedStepId("");
   }
 
-  const deletePath = () => {
+  const deletePath = (status) => {
     setActionLoading(true);
+  
     axios
-      .delete(`https://careers.marketsverse.com/paths/delete/${selectedPathId}`)
+      .delete(`/paths/delete/${selectedPathId}`, {
+        data: { status }, // Include the status in the request body
+      })
       .then((response) => {
         let result = response?.data;
-        // console.log(result, "deletePath result");
         if (result?.status) {
           setActionLoading(false);
           setPathActionStep(3);
@@ -236,7 +241,8 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
         console.log(error, "error in deletePath");
       });
   };
-
+  
+  
   const deleteStep = () => {
     setActionLoading(true);
     axios
@@ -350,7 +356,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
 
     axios
       .post(
-        `https://careers.marketsverse.com/steps/addproducts/${selectedStepId}`,
+        `/steps/addproducts/${selectedStepId}`,
         {
           product_ids: [newId],
         }
