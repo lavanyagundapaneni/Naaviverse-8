@@ -331,7 +331,7 @@ const AccProfile = () => {
 
 
     let { data } = await axios.post(
-      `https://careers.marketsverse.com/steps/addmultiplesteps`,
+      `/steps/addmultiplesteps`,
       formData,
       {
         headers: {
@@ -480,7 +480,7 @@ const AccProfile = () => {
   const handleAllCustomerLicenses = () => {
     const userDetails = JSON.parse(localStorage.getItem("partner"));
     setIsPurchaseLoading(true);
-    GetAllCustomerLicenses(userDetails.user.email)
+    GetAllCustomerLicenses(userDetails.email)
       .then((res) => {
         let result = res.data;
         if (result.status) {
@@ -559,7 +559,7 @@ const AccProfile = () => {
     setCoverImageS3url("");
     setImage(null);
     setPathSteps({
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       nameOfPath: "",
       description: "",
       length: "",
@@ -633,12 +633,12 @@ const AccProfile = () => {
     setIsSubmit(true);
     let userDetails = JSON.parse(localStorage.getItem("partner"));
     let objmonthly = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       token: userDetails.idToken,
       product_code: serviceCodeInput,
       product_name: serviceNameInput,
       product_icon: coverImageS3url,
-      revenue_account: userDetails.user.email,
+      revenue_account: userDetails.email,
       client_app: "naavi",
       product_category_code: "CoE",
       sub_category_code: "",
@@ -686,12 +686,12 @@ const AccProfile = () => {
     };
 
     let objone = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       token: userDetails.idToken,
       product_code: serviceCodeInput,
       product_name: serviceNameInput,
       product_icon: coverImageS3url,
-      revenue_account: userDetails.user.email,
+      revenue_account: userDetails.email,
       client_app: "naavi",
       product_category_code: "CoE",
       sub_category_code: "",
@@ -809,7 +809,7 @@ const AccProfile = () => {
   }
 
   const handleAccountantData = () => {
-    let mailId = userDetails?.user?.email;
+    let mailId = userDetails?.email;
     CheckStatusAccountant(mailId)
       .then((res) => {
         let result = res?.data;
@@ -830,7 +830,7 @@ const AccProfile = () => {
   };
 
   const createLXProfile = () => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     let token = userDetails?.idToken;
     axios
       .post(
@@ -1119,7 +1119,7 @@ const AccProfile = () => {
   };
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios
       .get(`https://careers.marketsverse.com/steps/get?email=${email}`)
       .then((response) => {
@@ -1136,7 +1136,7 @@ const AccProfile = () => {
     // console.log(personality, "api body");
     setCreatingPath(true);
     axios
-      .post(`https://careers.marketsverse.com/paths/add`, {
+      .post(`/paths/add`, {
         ...pathSteps,
         performance: gradeAvg,
         curriculum: curriculum,

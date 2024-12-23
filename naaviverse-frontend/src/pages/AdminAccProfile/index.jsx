@@ -992,7 +992,7 @@ const AdminAccProfile = () => {
     // console.log(personality, "api body");
     setCreatingPath(true);
     axios
-      .post(`https://careers.marketsverse.com/paths/add`, {
+      .post(`/paths/add`, {
         ...pathSteps,
         performance: gradeAvg,
         curriculum: curriculum,
