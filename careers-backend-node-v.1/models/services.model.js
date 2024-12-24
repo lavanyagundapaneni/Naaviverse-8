@@ -1,9 +1,17 @@
 const mongoose = require('mongoose');
 
 const servicesSchema = new mongoose.Schema({
-    email: { type: String },
-    nameOfService: { type: String, required: true },
+    productcreatoremail: { type: String, required: true },
+    name: { type: String, required: true },
     description: { type: String },
+    chargingtype: { type: String },
+    chargingCurrency: { coin: { type: String } },
+    billing_cycle: {
+        monthly: {
+            price: { type: String },
+            coin: { type: String }
+        }
+    },
     serviceProvider: { type: String },
     access: { type: String },
     goal: { type: String },
