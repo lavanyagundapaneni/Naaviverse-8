@@ -112,7 +112,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     // })
     axios
       .get(
-        `https://careers.marketsverse.com/attachservice/getnotaddedservices?step_id=${selectedStepId}&productcreatoremail=${email}`
+        `/attachservice/getnotaddedservices?step_id=${selectedStepId}&productcreatoremail=${email}`
       )
       .then(({ data }) => {
         if (data.status) {
@@ -246,7 +246,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const deleteStep = () => {
     setActionLoading(true);
     axios
-      .delete(`https://careers.marketsverse.com/steps/delete/${selectedStepId}`)
+      .delete(`/steps/delete/${selectedStepId}`)
       .then((response) => {
         let result = response?.data;
         // console.log(result, "deleteStep result");
@@ -283,7 +283,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
 
     axios
       .put(
-        `https://careers.marketsverse.com/paths/update/${selectedPathId}`,
+        `/paths/update/${selectedPathId}`,
         obj
       )
       .then((response) => {
@@ -304,7 +304,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     console.log(path, "lkwehflwehflwf");
     setViewPathLoading(true);
     axios
-      .get(`https://careers.marketsverse.com/paths/get?nameOfPath=${path}`)
+      .get(`/paths/get?nameOfPath=${path}`)
       .then((response) => {
         let result = response?.data?.data[0];
         // console.log(result, "viewPathData result");
@@ -319,7 +319,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const handleApprovePath = () => {
     setActionLoading(true);
     axios
-      .put(`https://careers.marketsverse.com/paths/update/${selectedPathId}`, {
+      .put(`/paths/update/${selectedPathId}`, {
         status: "active",
       })
       .then(({ data }) => {
@@ -334,7 +334,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const handleRejectPath = () => {
     setActionLoading(true);
     axios
-      .put(`https://careers.marketsverse.com/paths/update/${selectedPathId}`, {
+      .put(`/paths/update/${selectedPathId}`, {
         status: "inactive",
       })
       .then(({ data }) => {
@@ -392,7 +392,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
       axios
         .get(
           // `https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails?.user?.email}`
-          `https://careers.marketsverse.com/attachservice/getnotaddedservices?step_id=${selectedStepId}&productcreatoremail=${userDetails?.user?.email}`
+          `/attachservice/getnotaddedservices?step_id=${selectedStepId}&productcreatoremail=${userDetails?.user?.email}`
         )
         .then(({ data }) => {
           if (data.status) {
@@ -407,7 +407,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     if (selectedStepId) {
       axios
         .get(
-          `https://careers.marketsverse.com/attachservice/get?step_id=${selectedStepId}`
+          `/attachservice/get?step_id=${selectedStepId}`
         )
         .then(({ data }) => {
           if (data.status) {
@@ -500,7 +500,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     // console.log(updatedPathObject, "kjwebfkwjebfkwejf")
     axios
       .put(
-        `https://careers.marketsverse.com/paths/update/${selectedPath?._id}`,
+        `/paths/update/${selectedPath?._id}`,
         { the_ids: updatedPathObject }
       )
       .then((res) => {
@@ -557,7 +557,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     }));
     axios
       .put(
-        `https://careers.marketsverse.com/paths/update/${selectedPath?._id}`,
+        `/paths/update/${selectedPath?._id}`,
         { the_ids: updatedBody }
       )
       .then((res) => {
@@ -583,7 +583,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     );
     axios
       .put(
-        `https://careers.marketsverse.com/paths/update/${selectedPath?._id}`,
+        `/paths/update/${selectedPath?._id}`,
         { the_ids: updatedTheIdsArray }
       )
       .then((res) => {
@@ -621,7 +621,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
       "lkweflkjwhefkjwef"
     );
     axios
-      .post(`https://careers.marketsverse.com/attachservice/add`, {
+      .post(`/attachservice/add`, {
         step_id: selectedStepId,
         service_ids: [...selectedServices],
       })
@@ -638,7 +638,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const removeServiceFromStep = (id) => {
     axios
       .put(
-        `https://careers.marketsverse.com/attachservice/remove/${allServicesToRemove?._id}`,
+        `/attachservice/remove/${allServicesToRemove?._id}`,
         {
           service_id: id,
         }

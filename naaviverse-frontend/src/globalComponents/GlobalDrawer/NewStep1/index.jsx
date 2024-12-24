@@ -353,11 +353,11 @@ const NewStep1 = ({ setpstep }) => {
   useEffect(() => {
     axios
       .get(
-        `https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails?.email}`
+        `/services/get?productcreatoremail=${userDetails?.email}`
       )
       .then((response) => {
         let result = response?.data?.data;
-        // console.log(result, "all services result");
+        console.log(result, "all services result");
         setAllServices(result);
       })
       .catch((error) => {

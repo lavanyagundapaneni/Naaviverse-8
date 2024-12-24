@@ -179,6 +179,8 @@ const AccDashboard = () => {
 
   const [servicePrice, setServicePrice] = useState(null)
   const [selectedServiceCurrency, setSelectedServiceCurrency] = useState(null)
+  
+  
 
   let navigate = useNavigate();
 
@@ -892,30 +894,26 @@ const AccDashboard = () => {
   const getAllServices = () => {
     const userDetails = JSON.parse(localStorage.getItem("partner"));
 
-    // Check if userDetails exists and if email is available
     if (userDetails && userDetails.email) {
-        axios.get(`https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails.email}`)
+        const timestamp = new Date().getTime(); // Cache-busting query parameter
+        axios.get(`/services/get?productcreatoremail=${userDetails.email}&_=${timestamp}`)
             .then(({ data }) => {
+                console.log("Fetched Services:", data);
                 if (data.status) {
-                    setIsLoading(false);         // Assuming setIsLoading is defined
+                    setservicesAcc(data.data || []); // Update state with fetched services
                 } else {
-                    console.error("Service data is not available.");
+                    console.error("Service data not found.");
                 }
             })
-            .catch((error) => {
+            .catch(error => {
                 console.error("Error fetching services:", error);
-                setIsLoading(false);
-            });
+            })
+            .finally(() => setIsLoading(false));
     } else {
         console.error("User details or email is missing in localStorage.");
         setIsLoading(false);
     }
 };
-
-
-  useEffect(() => {
-    getAllServices()
-  }, [])
 
   const fetchAllServicesAgain = () => {
     const userDetails = JSON.parse(localStorage.getItem("partner"));
@@ -981,7 +979,7 @@ const AccDashboard = () => {
     //     setIsloading(false);
     //   }
     // });
-    axios.delete(`https://careers.marketsverse.com/services/delete/${selectedService?._id}`).then(({data}) => {
+    axios.delete(`/services/delete/${selectedService?._id}`).then(({data}) => {
       if(data.status){
         setServiceActionEnabled(false)
         setIsloading(false);
