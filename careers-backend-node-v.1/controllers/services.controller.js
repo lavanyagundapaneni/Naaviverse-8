@@ -2,20 +2,21 @@ const serviceModel = require('../models/services.model');
 const axios = require('axios');
 
 const addService = async (req, res) => {
-    // console.log(req.body.country)
-    let existingStep = await serviceModel.findOne({ nameOfService: req.body.nameOfService });
-    if (existingStep) {
-        return res.json({
-            status: false,
-            message: 'Service already exists',
-        })
-    }
+    console.log('Request to add service:', req.body);
 
     let createService = {
-        email: req.body.email,
-        nameOfService: req.body.nameOfService,
+        productcreatoremail: req.body.productcreatoremail,
+        name: req.body.name,
         icon: req.body.icon,
         description: req.body.description,
+        chargingtype: req.body.chargingtype,
+        chargingCurrency: { coin: req.body['charging currency'].coin }, 
+        billing_cycle: {
+            monthly: {
+                price: req.body.billing_cycle.monthly.price, // Assuming this is sent in the request body
+                coin: req.body.billing_cycle.monthly.coin // Assuming this is sent in the request body
+            }
+        },
         serviceProvider: req.body.serviceProvider,
         access: req.body.access,
         goal: req.body.goal,
@@ -48,36 +49,47 @@ const addService = async (req, res) => {
 }
 
 const getServices = async (req, res) => {
-    let filter = {}
-    if (req.query.status) {
-        filter.status = req.query.status;
-        if (req.query.status == "all")
-            filter = {};
-    } else {
-        filter.status = "active";
-    }
-    if (req.query.email) filter.email = req.query.email;
-    if (req.query.type) filter.type = req.query.type;
-    if (req.query.cost) filter.cost = req.query.cost;
-    
-    let services = await serviceModel.find(filter);
-    if (services.length === 0) {
+    // Check if product creator email is provided
+    if (!req.query.productcreatoremail) {
         return res.json({
             status: false,
-            message: 'No data found',
-        })
+            message: 'Product creator email is required.',
+        });
     }
-    return res.json({
-        status: true,
-        total: services.length,
-        message: 'Service data found',
-        data: services
-    })
-}
+
+    try {
+        // Fetch services from the database based on the product creator email
+        let services = await serviceModel.find({ productcreatoremail: req.query.productcreatoremail });
+
+        // Check if any services were found
+        if (services.length === 0) {
+            return res.json({
+                status: false,
+                message: 'No data found for the provided product creator email.',
+            });
+        }
+
+        // Return the found services
+        return res.json({
+            status: true,
+            total: services.length,
+            message: 'Service data found',
+            data: services,
+        });
+        
+    } catch (error) {
+        console.error("Error fetching services:", error); // Log any errors
+        return res.status(500).json({
+            status: false,
+            message: 'Error fetching services',
+            error: error.message,
+        });
+    }
+};
 
 const updateService = async (req, res) => {
     let updateData = {}
-    if (req.body.nameOfService) updateData.nameOfService = req.body.nameOfService;
+    if (req.body.name) updateData.name = req.body.name;
     if (req.body.grade) updateData.grade = req.body.grade;
     if(req.body.description) updateData.description = req.body.description;
     if(req.body.financialSituation) updateData.financialSituation = req.body.financialSituation;
@@ -114,7 +126,7 @@ const updateService = async (req, res) => {
 }
 
 const deleteService = async (req, res) => {
-    let deleteServiceData = await serviceModel.findOneAndUpdate({ _id: req.params.id }, { status: "delete" }, { new: true });
+    let deleteServiceData = await serviceModel.findOneAndDelete({ _id: req.params.id }, { status: "delete" }, { new: true });
     if (!deleteServiceData) {
         return res.json({
             status: false,
