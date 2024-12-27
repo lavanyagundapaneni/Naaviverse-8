@@ -66,6 +66,7 @@
           display: flex;
 
           input {
+            border: 1px solid #2c7cb2 !important; /* Add border with color */
             border: none;
             border-radius: 45px;
             width: 22rem;
@@ -97,7 +98,8 @@
           height: 3rem;
           display: flex;
           color: white;
-          background: linear-gradient(89deg, #47b4d5 0%, #29449d 100%);
+          // background: linear-gradient(89deg, #47b4d5 0%, #29449d 100%);
+          background: #2c7cb2;
           border-radius: 45px;
           padding: 0 3rem;
           justify-content: center;
@@ -109,6 +111,7 @@
 
           &:hover {
             transform: scale(1.05);
+            background: #0d6efd;
           }
         }
       }
@@ -234,7 +237,7 @@
           transition: all ease 0.2s;
 
           .img-border {
-            border: 1px solid #e7e7e7;
+            border: 1px solid #b2dbf6;
             border-radius: 50%;
             padding: 2rem;
           }

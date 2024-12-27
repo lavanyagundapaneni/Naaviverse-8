@@ -1903,7 +1903,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
                     funcValue={country}
                   /> */}
                   <div style={{paddingTop:'30px'}}>What country are you from? *</div>
-                  <div className={styles.inputDivs} style={{ border: '1px solid #e7e7e7', borderRadius:'30px', fontSize:"13px", fontWeight:"500", paddingLeft:'10px' }}>
+                  <div className={styles.inputDivs} style={{ border: '1px solid #2c7cb2', borderRadius:'30px', fontSize:"13px", fontWeight:"500", paddingLeft:'10px' }}>
                   <select name="country" id="country" style={{border:"none", padding:'1rem', width:'90%', fontSize:"16px"}}  onChange={(e) => {
                           setCountry(e.target.value);
                         }}>
@@ -1915,12 +1915,12 @@ const [countryApiValue, setCountryApiValue] = useState([])
                     </select>
                    </div>
                   <InputDivsWithMT
-                    heading="Please provide your location details"
-                    placeholderText="State,City,Postalcode"
+                    heading="What state are you from?"
+                    placeholderText="State"
                     setFunc={setSelectState}
                     funcValue={selectState}
                   />
-                  {/* <InputDivsWithMT
+                  <InputDivsWithMT
                     heading="What city are you from?"
                     placeholderText="City..."
                     setFunc={setCity}
@@ -1931,7 +1931,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
                     placeholderText="Postal Code..."
                     setFunc={setPostalCode}
                     funcValue={postalCode}
-                  /> */}
+                  />
                   <div className="stepBtns" style={{ marginTop: "3.5rem" }}>
                     <div
                       style={{
