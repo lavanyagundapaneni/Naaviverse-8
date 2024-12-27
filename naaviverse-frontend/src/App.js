@@ -108,7 +108,7 @@ function App() {
       <Route path="/maps" element={<MapsPage />} />
       <Route path="/login" element={<Loginpage />} />
       {/* Admin Routed */}
-      <Route path="" element={<AdminLogin />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/dashboard/profile" element={<AdminAccProfile />} />
       <Route path="/admin/dashboard/accountants" element={<AdminAccDashbaoard />} />
 
