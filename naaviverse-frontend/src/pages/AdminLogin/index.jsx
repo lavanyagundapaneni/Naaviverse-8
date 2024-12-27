@@ -41,31 +41,45 @@ const AdminLogin = () => {
   const [newPassword2, setNewPassword2] = useState("");
   const [passwordResetMsg, setPasswordResetMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
 
   useEffect(() => {
     localStorage.clear();
   }, []);
 
-  useEffect(() => {
-    setLoginType("Accountants")
-  }, [])
-
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setIsLoading(true);
-    let obj = {
+    setErrorMessage(""); // Reset any previous error message
+  
+    const loginPayload = {
       email: email,
       password: password,
     };
-    Loginservice(obj).then((response) => {
-      let result = response?.data;
+  
+    try {
+      const response = await axios.post("/admin/login", loginPayload);
+      const result = response?.data;
+  
       if (result?.status) {
-        let obj = {
-          email,
-          app_code: "naavi",
-        };
-      };
-    });
-  };  
+        console.log("Login Successful, Navigating to /admin/dashboard/profile");
+  
+        
+        console.log("Navigating to /admin/dashboard/profile");
+  
+        navigate("/admin/dashboard/accountants"); 
+      } else {
+        // Handle the case where the login fails
+        setErrorMessage(result?.message || "Invalid email or password.");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      setErrorMessage("Unable to connect to the server. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   const initiateForgotPassword = () => {
     setLoading(true);
