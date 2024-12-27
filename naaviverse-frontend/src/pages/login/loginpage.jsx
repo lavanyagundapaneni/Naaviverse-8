@@ -9,8 +9,8 @@ import eye1 from "../../static/images/login/eye1.svg";
 import eye2 from "../../static/images/login/eye2.svg";
 import { Loginservice} from "../../services/loginapis";
 import { useStore } from "../../components/store/store.ts";
-import logo from "./logo.svg";
-import loadinglogo from "./loadinglogo.svg";
+import logo from "./naavi_final_logo4.jpg";
+import loadinglogo from "./naaviicon.png";
 import axios from "axios";
 import info from "./info.svg";
 
