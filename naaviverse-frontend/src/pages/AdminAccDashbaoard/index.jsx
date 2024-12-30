@@ -312,7 +312,7 @@ const AccDashboard = () => {
       setPathSteps((prev) => {
         return {
           ...prev,
-          email: userDetails?.user?.email,
+          email: userDetails?.email,
         };
       });
     }
@@ -572,7 +572,7 @@ const AccDashboard = () => {
     setCoverImageS3url("");
     setImage(null);
     setPathSteps({
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       nameOfPath: "",
       description: "",
       length: "",
@@ -699,7 +699,7 @@ const AccDashboard = () => {
     };
 
     let objone = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       token: userDetails.idToken,
       product_code: serviceCodeInput,
       product_name: serviceNameInput,

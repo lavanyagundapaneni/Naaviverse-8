@@ -5,6 +5,9 @@ const Schema = mongoose.Schema;
 const stepSchema = new mongoose.Schema({
     email: { type: String },
     name: { type: String },
+    description: { type: String, required: false }, // Added field
+    length: { type: Number, required: false }, // Added field
+    cost: { type: String, enum: ["paid", "free"], required: false }, 
     micro_description: { type: String },
     micro_name: { type: String},
     micro_length: { type: String },

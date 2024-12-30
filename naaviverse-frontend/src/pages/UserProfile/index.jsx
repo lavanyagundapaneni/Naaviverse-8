@@ -521,7 +521,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
   }
 
   const handleProfileData = () => {
-    let mailId = userDetails?.user?.email;
+    let mailId = userDetails?.email;
     CheckStatusNaaviProfile(mailId)
       .then((res) => {
         let result = res?.data;
@@ -541,44 +541,53 @@ const [countryApiValue, setCountryApiValue] = useState([])
       });
   };
 
-  const levelOneProfile = () => {
+ const levelOneProfile = () => {
     setIsLoading(true);
     let body = {
-      email: userDetails?.user?.email,
-      name: fullName,
-      country: country,
-      state: selectState,
-      city: city,
-      postalCode: postalCode,
-      profilePicture: profilePicture,
-      username: userName,
-      phoneNumber: `+91${phoneNo}`,
+        email: userDetails?.email,
+        name: fullName,
+        country: country,
+        state: selectState,
+        city: city,
+        postalCode: postalCode,
+        profilePicture: profilePicture,
+        username: userName,
+        phoneNumber: `+91${phoneNo}`,
     };
 
-    axios
-      .post(`https://careers.marketsverse.com/users/add`, body)
-      .then((response) => {
-        let result = response?.data;
-        console.log(result, "levelOneProfile result");
-        if (result?.status) {
-          setIsLoading(false);
-          setCreateBrandProfileStep(2);
-          myTimeout1();
-        } else {
-          setIsLoading(false);
-        }
-      })
-      .catch((error) => {
-        console.log(error, "levelOneProfile error");
-      });
-  };
+    console.log("Request payload:", body); // Log the request payload
 
-  useEffect(() => {
-    accountantStatus();
-  }, []);
+    axios
+        .post(`/users/add`, body)
+        .then((response) => {
+            let result = response?.data;
+            console.log("Server response:", result); // Log the response from the server
+            if (result?.status) {
+                setIsLoading(false);
+                setCreateBrandProfileStep(2);
+                myTimeout1();
+            } else {
+                console.warn("Server returned an error:", result?.message);
+                setIsLoading(false);
+            }
+        })
+        .catch((error) => {
+            console.error("Axios request failed:", error); // Log the error object
+            if (error.response) {
+                console.error("Error response data:", error.response.data);
+                console.error("Error response status:", error.response.status);
+                console.error("Error response headers:", error.response.headers);
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Error setting up request:", error.message);
+            }
+            setIsLoading(false);
+        });
+};
 
   const accountantStatus = () => {
-    let userEmail = userDetails?.user?.email;
+    let userEmail = userDetails?.email;
     axios
       .get(`https://teller2.apimachine.com/admin/allBankers?email=${userEmail}`)
       .then((response) => {
@@ -594,7 +603,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
 
   const changeStatus = (value) => {
     setChanging(true);
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     let token = userDetails?.idToken;
 
     if (email && token) {
@@ -725,7 +734,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
       [field]: value,
     };
 
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     let token = userDetails?.idToken;
 
     try {
@@ -755,7 +764,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
       setLevelTwoLoading(true);
       axios
         .put(
-          `https://careers.marketsverse.com/users/update/${profileDataId}`,
+          `/users/update/${profileDataId}`,
           levelTwoFields
         )
         .then((response) => {
@@ -1915,12 +1924,12 @@ const [countryApiValue, setCountryApiValue] = useState([])
                     </select>
                    </div>
                   <InputDivsWithMT
-                    heading="Please provide your location details"
-                    placeholderText="State,City,Postalcode"
+                    heading="What state are you from?"
+                    placeholderText="State..."
                     setFunc={setSelectState}
                     funcValue={selectState}
                   />
-                  {/* <InputDivsWithMT
+                  <InputDivsWithMT
                     heading="What city are you from?"
                     placeholderText="City..."
                     setFunc={setCity}
@@ -1931,7 +1940,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
                     placeholderText="Postal Code..."
                     setFunc={setPostalCode}
                     funcValue={postalCode}
-                  /> */}
+                  />
                   <div className="stepBtns" style={{ marginTop: "3.5rem" }}>
                     <div
                       style={{

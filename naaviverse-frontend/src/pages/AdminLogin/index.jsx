@@ -7,7 +7,7 @@ import google from "../../static/images/login/google.svg";
 import realtorfull from "../../static/images/login/realtorfull.svg";
 import eye1 from "../../static/images/login/eye1.svg";
 import eye2 from "../../static/images/login/eye2.svg";
-import { Loginservice } from "../../services/loginapis.js";
+import { Loginservice, RegisterOnApp } from "../../services/loginapis.js";
 import { useStore } from "../../components/store/store.ts";
 import logo from "./logo.svg";
 import loadinglogo from "./loadinglogo.svg";
@@ -41,45 +41,59 @@ const AdminLogin = () => {
   const [newPassword2, setNewPassword2] = useState("");
   const [passwordResetMsg, setPasswordResetMsg] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
 
   useEffect(() => {
     localStorage.clear();
   }, []);
 
-  const handleLogin = async () => {
+  useEffect(() => {
+    setLoginType("Accountants")
+  }, [])
+
+  const handleLogin = () => {
     setIsLoading(true);
-    setErrorMessage(""); // Reset any previous error message
-  
-    const loginPayload = {
+    let obj = {
       email: email,
       password: password,
     };
-  
-    try {
-      const response = await axios.post("/admin/login", loginPayload);
-      const result = response?.data;
-  
+    Loginservice(obj).then((response) => {
+      let result = response?.data;
       if (result?.status) {
-        console.log("Login Successful, Navigating to /admin/dashboard/profile");
-  
-        
-        console.log("Navigating to /admin/dashboard/profile");
-  
-        navigate("/admin/dashboard/accountants"); 
+        let obj = {
+          email,
+          app_code: "naavi",
+        };
+        RegisterOnApp(obj).then((response) => {
+          let result = response?.data;
+          // if (result?.status) {
+          //   console.log(result?.status, "registered on naavi");
+          // }
+        });
+        let obj1 = {
+          email,
+          app_code: "ice",
+          fromAppCreation: true,
+        };
+        RegisterOnApp(obj1).then((response) => {
+          let result = response?.data;
+          // if (result?.status) {
+          //   console.log(result?.status, "registered on ice");
+          // }
+        });
+        localStorage.setItem("user", JSON.stringify(result));
+        setiserror(false);
+        setIsLoading(false);
+        // if (loginType === "Users") {
+        //   navigate("/admin/dashboard/users/profile");
+        // } else {
+          navigate("/admin/dashboard/accountants");
+        // }
       } else {
-        // Handle the case where the login fails
-        setErrorMessage(result?.message || "Invalid email or password.");
+        setiserror(true);
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error during login:", error);
-      setErrorMessage("Unable to connect to the server. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
-  
 
   const initiateForgotPassword = () => {
     setLoading(true);

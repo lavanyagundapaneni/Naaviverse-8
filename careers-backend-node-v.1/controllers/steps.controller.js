@@ -15,6 +15,9 @@ const addStep = async (req, res) => {
     let createStep = {
         email: req.body.email,
         name: req.body.name,
+        description: req.body.description, // Added description field
+        length: req.body.length, // Added length field
+        cost: req.body.cost,
         micro_description: req.body.micro_description,
         micro_name: req.body.micro_name,
         micro_length: req.body.micro_length,
