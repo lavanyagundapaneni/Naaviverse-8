@@ -1912,7 +1912,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
                     funcValue={country}
                   /> */}
                   <div style={{paddingTop:'30px'}}>What country are you from? *</div>
-                  <div className={styles.inputDivs} style={{ border: '1px solid #e7e7e7', borderRadius:'30px', fontSize:"13px", fontWeight:"500", paddingLeft:'10px' }}>
+                  <div className={styles.inputDivs} style={{ border: '1px solid #2c7cb2', borderRadius:'30px', fontSize:"13px", fontWeight:"500", paddingLeft:'10px' }}>
                   <select name="country" id="country" style={{border:"none", padding:'1rem', width:'90%', fontSize:"16px"}}  onChange={(e) => {
                           setCountry(e.target.value);
                         }}>
