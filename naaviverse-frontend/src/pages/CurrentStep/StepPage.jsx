@@ -28,7 +28,7 @@ const StepPage = ({ productDataArray, selectedPathId, showSelectedPath, selected
     const navigate = useNavigate()
     const loc = useLocation()
   console.log(productDataArray, "lkwehflkwheflwef")
-  const userDetails = JSON.parse(localStorage.getItem("partner"));
+  const userDetails = JSON.parse(localStorage.getItem("user"));
   const {
     currentStepData,
     setCurrentStepData,

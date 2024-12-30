@@ -330,7 +330,7 @@ const MyStepsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
 
 const [allServicesToAdd, setAllServicesToAdd] = useState([])
   useEffect(() => {
-    axios.get(`https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails?.user?.email}`).then(({data}) => {
+    axios.get(`https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails?.email}`).then(({data}) => {
       if(data.status){
         setAllServicesToAdd(data?.data)
       }

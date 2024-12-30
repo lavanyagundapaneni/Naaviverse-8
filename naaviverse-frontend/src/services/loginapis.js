@@ -19,7 +19,7 @@ export const Loginservice = async (object, loginType) => {
   }
 };
 
-// Register API
+
 // export const RegisterOnApp = async (object) => {
 //   try {
 //     const response = await axios.post(`/auth/signup`, object);

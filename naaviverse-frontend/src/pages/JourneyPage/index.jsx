@@ -21,7 +21,7 @@ const JourneyPage = () => {
   const [journeyPageData, setJourneyPageData] = useState([]);
   const [currentStepIndication, setCurrentStepIndication] = useState("");
   const [competedSteps, setCompletedSteps] = useState([]);
-  const email = userDetails?.user?.email;
+  const email = userDetails?.email;
 
   useEffect(() => {
     setLoading(true);

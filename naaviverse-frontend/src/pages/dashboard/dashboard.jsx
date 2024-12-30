@@ -226,7 +226,7 @@ const Dashboard = () => {
     if (userDetails) {
       axios
         .get(
-          `https://careers.marketsverse.com/userpaths/getCurrentStep?email=${userDetails?.user?.email}`
+          `https://careers.marketsverse.com/userpaths/getCurrentStep?email=${userDetails?.email}`
         )
         .then(({ data }) => {
           if (data.status) {
@@ -554,7 +554,7 @@ const Dashboard = () => {
 
   //Check if logged in user has a outstanding path to view
   useEffect(() => {
-    let userEmail = userDetails?.user?.email;
+    let userEmail = userDetails?.email;
     axios
       .get(
         `https://careers.marketsverse.com/pre_login/get_path?email=${userEmail}`
