@@ -50,50 +50,42 @@ const AdminLogin = () => {
     setLoginType("Accountants")
   }, [])
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setIsLoading(true);
-    let obj = {
-      email: email,
-      password: password,
-    };
-    Loginservice(obj).then((response) => {
-      let result = response?.data;
-      if (result?.status) {
-        let obj = {
-          email,
-          app_code: "naavi",
-        };
-        RegisterOnApp(obj).then((response) => {
-          let result = response?.data;
-          // if (result?.status) {
-          //   console.log(result?.status, "registered on naavi");
-          // }
-        });
-        let obj1 = {
-          email,
-          app_code: "ice",
-          fromAppCreation: true,
-        };
-        RegisterOnApp(obj1).then((response) => {
-          let result = response?.data;
-          // if (result?.status) {
-          //   console.log(result?.status, "registered on ice");
-          // }
-        });
-        localStorage.setItem("user", JSON.stringify(result));
-        setiserror(false);
+    setErrorMessage("");
+
+    const loginPayload = { email, password };
+
+    try {
+        // Call the admin login API
+        const response = await axios.post("/admin/login", loginPayload);
+        const result = response?.data;
+
+        console.log("Login result:", result); // Debugging log
+
+        // Check if the response indicates a successful login
+        if (result?.status) {
+            console.log("Login Successful. Navigating to /admin/dashboard/accountants");
+
+            // Store user data in local storage (if needed)
+            localStorage.setItem("user", JSON.stringify(result)); // Assuming result contains user info
+
+            // Navigate to the dashboard
+            navigate("/admin/dashboard/accountants");
+        } else {
+            // Handle unsuccessful login attempts
+            setErrorMessage(result?.message || "Invalid email or password.");
+            setIsError(true);
+        }
+    } catch (error) {
+        console.error("Error during login:", error.response || error.message);
+        setErrorMessage("Unable to connect to the server. Please try again.");
+        setIsError(true);
+    } finally {
         setIsLoading(false);
-        // if (loginType === "Users") {
-        //   navigate("/admin/dashboard/users/profile");
-        // } else {
-          navigate("/admin/dashboard/accountants");
-        // }
-      } else {
-        setiserror(true);
-        setIsLoading(false);
-      }
-    });
-  };
+    }
+};
+
 
   const initiateForgotPassword = () => {
     setLoading(true);

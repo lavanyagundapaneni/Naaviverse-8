@@ -2947,7 +2947,7 @@ const AccDashboard = () => {
                   </div>
                 </div>
               ) : pstep === 2 ? (
-                <div className="acc-addpath" style={{height:"75vh"}}>
+                <div className="acc-addpath" style={{height:"65vh"}}>
                   <div className="acc-step-text">Add New {`->`} Service</div>
                   <div className="each-acc-addpath-field">
                     <div>What is the name of this service? *</div>
@@ -3027,7 +3027,7 @@ const AccDashboard = () => {
                   <br/>
                   <div
                     className="goBack"
-                    style={{background: "#59A2DD", borderRadius:"35px"}}
+                    style={{background: "#59A2DD", borderRadius:"35px" , right:"70px"}}
                     onClick={() => {
                       addService();
                     }}
