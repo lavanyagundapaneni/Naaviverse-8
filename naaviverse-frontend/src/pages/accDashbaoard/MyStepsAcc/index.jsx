@@ -1612,7 +1612,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
                                     }}>Edit Services</div>
                                     <div className="acc-step-box"
                                      onClick={() => {
-                                     setStepActionStep();
+                                     setStepActionStep(7);
                                      }}
                                     
                                     >Edit Step</div>
@@ -1759,6 +1759,84 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
                                     </div>
                                 </div>
 
+                            )}
+
+{stepActionStep === 7 && (
+                                <div className="acc-mt-div">
+                                    <div className="acc-sub-text">
+                                        How do you want to edit the steps in this path?
+                                    </div>
+                                    <div className="acc-scroll-div">
+                                        <div
+                                            className="acc-step-box4"
+                                            onClick={() => setStepActionStep(8)} // Navigate to "Add New Step"
+                                        >
+                                            Add New Step
+                                        </div>
+                                        <div
+                                            className="acc-step-box4"
+                                            onClick={() => setStepActionStep(9)} // Navigate to "Remove Existing Step"
+                                        >
+                                            Remove Existing Step
+                                        </div>
+                                        <div
+                                            className="acc-step-box4"
+                                            onClick={() => setStepActionStep(10)} // Navigate to "Reorder Existing Steps"
+                                        >
+                                            Reorder Existing Steps
+                                        </div>
+                                    </div>
+                                    <div
+                                        className="goBack3"
+                                        onClick={() => {
+                                            setStepActionStep(1); // Go back to the main options
+                                        }}
+                                    >
+                                        Go Back
+                                    </div>
+                                </div>
+                            )}
+
+                            {stepActionStep === 8 && (
+                                <div className="acc-mt-div">
+                                    <div className="acc-sub-text">Add New Step Functionality Coming Soon!</div>
+                                    <div
+                                        className="goBack3"
+                                        onClick={() => {
+                                            setStepActionStep(7); // Go back to Edit Step options
+                                        }}
+                                    >
+                                        Go Back
+                                    </div>
+                                </div>
+                            )}
+
+                            {stepActionStep === 9 && (
+                                <div className="acc-mt-div">
+                                    <div className="acc-sub-text">Remove Existing Step Functionality Coming Soon!</div>
+                                    <div
+                                        className="goBack3"
+                                        onClick={() => {
+                                            setStepActionStep(7); // Go back to Edit Step options
+                                        }}
+                                    >
+                                        Go Back
+                                    </div>
+                                </div>
+                            )}
+
+                            {stepActionStep === 10 && (
+                                <div className="acc-mt-div">
+                                    <div className="acc-sub-text">Reorder Existing Steps Functionality Coming Soon!</div>
+                                    <div
+                                        className="goBack3"
+                                        onClick={() => {
+                                            setStepActionStep(7); // Go back to Edit Step options
+                                        }}
+                                    >
+                                        Go Back
+                                    </div>
+                                </div>
                             )}
 
                             {actionLoading ? (

@@ -223,7 +223,7 @@ const AccDashboard = () => {
 
   const secret = "uyrw7826^&(896GYUFWE&*#GBjkbuaf"; // secret not to be disclosed anywhere.
   const emailDev = "rahulrajsb@outlook.com"; // email of the developer.
-  const userDetails = JSON.parse(localStorage.getItem("partner"));
+  const userDetails = JSON.parse(localStorage.getItem("user"));
 
   const handleGrade = (item) => {
     if (grade.includes(item)) {
@@ -792,14 +792,14 @@ const AccDashboard = () => {
   const fetchAllServicesAgain = () => {
     const userDetails = JSON.parse(localStorage.getItem("user"));
       // console.log(userDetails, "kkk");
-      handleServicesForLogged(userDetails.user.email);
+      handleServicesForLogged(userDetails.email);
   }
 
   useEffect(() => {
     if(!ispopular){
       const userDetails = JSON.parse(localStorage.getItem("user"));
       // console.log(userDetails, "kkk");
-      handleServicesForLogged(userDetails.user.email);
+      handleServicesForLogged(userDetails.email);
     }
   }, [ispopular])
 
