@@ -1,4 +1,4 @@
-name: Deploy Frontend to Server
+name: Deploy to Server
 
 on:
   push:
@@ -11,14 +11,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4  # Updated to the latest version for better compatibility
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.5.4  # Updated minor version
         with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # Ensure this matches the secret name
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # Ensure this secret exists in your GitHub repo
 
-      - name: Run deployment script
+      - name: Deploy to EC2 Server
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@www.naaviverse.com << 'EOF'
             cd /home/ubuntu/Naaviverse-8
