@@ -20,7 +20,7 @@ jobs:
 
       - name: Run deployment script
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@stagging.naaviverse.com << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@www.naaviverse.com << 'EOF'
             cd /home/ubuntu/Naaviverse-8
             ./deploy.sh 1-1-25  # Pass the branch name directly
           EOF
