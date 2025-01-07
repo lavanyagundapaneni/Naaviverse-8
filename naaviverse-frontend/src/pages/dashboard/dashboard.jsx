@@ -466,7 +466,7 @@ const Dashboard = () => {
     };
     let userDetails = JSON.parse(localStorage.getItem("user"));
     let data = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       idToken: userDetails.idToken,
     };
     UnfollowBrand(obj, data).then((res) => {

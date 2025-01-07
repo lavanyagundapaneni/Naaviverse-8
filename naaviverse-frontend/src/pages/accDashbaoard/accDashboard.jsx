@@ -426,7 +426,7 @@ const AccDashboard = () => {
 
 
     let { data } = await axios.post(
-      `/steps/addmultiplesteps`,
+      `/api/steps/addmultiplesteps`,
       formData,
       {
         headers: {
@@ -867,7 +867,7 @@ const AccDashboard = () => {
       }
   }, "kjedkjwehfkwehflkwhef")
 
-    axios.post(`/services/add`, {
+    axios.post(`/api/services/add`, {
       "productcreatoremail": userDetails.email,
       "name": serviceNameInput,
       "description": serviceDescription,
@@ -896,7 +896,7 @@ const AccDashboard = () => {
 
     if (userDetails && userDetails.email) {
         const timestamp = new Date().getTime(); // Cache-busting query parameter
-        axios.get(`/services/get?productcreatoremail=${userDetails.email}&_=${timestamp}`)
+        axios.get(`/api/services/get?productcreatoremail=${userDetails.email}&_=${timestamp}`)
             .then(({ data }) => {
                 console.log("Fetched Services:", data);
                 if (data.status) {
@@ -979,7 +979,7 @@ const AccDashboard = () => {
     //     setIsloading(false);
     //   }
     // });
-    axios.delete(`/services/delete/${selectedService?._id}`).then(({data}) => {
+    axios.delete(`/api/services/delete/${selectedService?._id}`).then(({data}) => {
       if(data.status){
         setServiceActionEnabled(false)
         setIsloading(false);
@@ -1188,7 +1188,7 @@ const AccDashboard = () => {
     console.log(pathSteps, "api body");
     setCreatingPath(true);
     axios
-      .post(`/paths/add`, {
+      .post(`/api/paths/add`, {
         
         ...pathSteps,
         performance: gradeAvg,

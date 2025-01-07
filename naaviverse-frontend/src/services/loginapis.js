@@ -5,7 +5,7 @@ export const Loginservice = async (object, loginType) => {
   try {
     console.log("Payload Sent to API:", object); // Debugging step
     // Determine the API endpoint based on login type
-    const endpoint = loginType === "Users" ? `/auth/login` : `/partner/login`;
+    const endpoint = loginType === "Users" ? `/api/auth/login` : `/api/partner/login`;
 
     const response = await axios.post(endpoint, object, {
       headers: {

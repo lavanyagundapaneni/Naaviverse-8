@@ -411,7 +411,7 @@ const AccDashboard = () => {
 
 
     let { data } = await axios.post(
-      `/steps/addmultiplesteps`,
+      `/api/steps/addmultiplesteps`,
       formData,
       {
         headers: {
@@ -646,12 +646,12 @@ const AccDashboard = () => {
     setIsSubmit(true);
     let userDetails = JSON.parse(localStorage.getItem("user"));
     let objmonthly = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       token: userDetails.idToken,
       product_code: serviceCodeInput,
       product_name: serviceNameInput,
       product_icon: coverImageS3url,
-      revenue_account: userDetails.user.email,
+      revenue_account: userDetails.email,
       client_app: "naavi",
       product_category_code: "CoE",
       sub_category_code: "",
@@ -816,7 +816,7 @@ const AccDashboard = () => {
     } else if (accsideNav == "My Services" && servicesMenu == "Services") {
       const userDetails = JSON.parse(localStorage.getItem("user"));
       // console.log(userDetails, "kkk");
-      handleServicesForLogged(userDetails.user.email);
+      handleServicesForLogged(userDetails.email);
     }
   }, [crmMenu, servicesMenu, accsideNav]);
 
@@ -829,13 +829,13 @@ const AccDashboard = () => {
     setServiceActionStep(1);
     setSelectedService("");
     setUpdatedIcon("");
-    handleServicesForLogged(userDetails?.user?.email);
+    handleServicesForLogged(userDetails?.email);
   }
 
   const deleteService = () => {
     setIsloading(true);
     let obj = {
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       token: userDetails?.idToken,
       product_id: selectedService?.product_id,
     };
@@ -854,7 +854,7 @@ const AccDashboard = () => {
   const changeServiceIcon = () => {
     setIsloading(true);
     let obj = {
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       token: userDetails?.idToken,
       field_name: "product_icon",
       field_value: updatedIcon,
@@ -935,7 +935,7 @@ const AccDashboard = () => {
     // console.log(numValues, 'numValues');
 
     let obj = {
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       token: userDetails?.idToken,
       app_code: compPlanApp,
       product_id: selectedService?.product_id,
@@ -1031,9 +1031,9 @@ const AccDashboard = () => {
   }, []);
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios
-      .get(`https://careers.marketsverse.com/steps/get?email=${email}`)
+      .get(`/api/steps/get?email=${email}`)
       .then((response) => {
         let result = response?.data?.data;
         // console.log(result, "all steps fetched");
@@ -1048,7 +1048,7 @@ const AccDashboard = () => {
     console.log(pathSteps, "api body");
     setCreatingPath(true);
     axios
-      .post(`/paths/add`, {
+      .post(`/api/paths/add`, {
         ...pathSteps,
         performance: gradeAvg,
         curriculum: curriculum,
@@ -1118,7 +1118,7 @@ const AccDashboard = () => {
   }, []);
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     setClientLoading(true);
     axios
       .get(
@@ -1167,7 +1167,7 @@ const AccDashboard = () => {
 
   // get profile id
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     if (coinAction?.includes("Add") && addActionStep === 1) {
       axios
         .get(`https://comms.globalxchange.io/user/details/get?email=${email}`)
@@ -1224,7 +1224,7 @@ const AccDashboard = () => {
   const getQuote = () => {
     let obj = {
       token: userDetails?.idToken,
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       app_code: "naavi",
       profile_id: profileId,
       coin_purchased: selectedCoin?.coinSymbol,
@@ -1256,7 +1256,7 @@ const AccDashboard = () => {
 const [adminServices, setAdminServices] = useState([])
   const getAdminServices = () => {
     setIsUserLoading(true)
-    axios.get(`https://careers.marketsverse.com/services/get?status=${crmMenu === "Active Services" ? "active" : "inactive"}`).then(({data}) => {
+    axios.get(`/api/services/getservices?status=${crmMenu === "Active Services" ? "active" : "inactive"}`).then(({data}) => {
       if(data.status){
         setAdminServices(data?.data)
         setIsUserLoading(false)

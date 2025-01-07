@@ -5,7 +5,7 @@ export const login = async (credentials) => {
   try {
     console.log("Payload Sent to API:", credentials); // Debugging step
 
-    const response = await axios.post(`/auth/login`, credentials, {
+    const response = await axios.post(`/api/auth/login`, credentials, {
       headers: {
         "Content-Type": "application/json",
       },

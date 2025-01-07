@@ -10,5 +10,6 @@ router.put("/update/:id",servicesController.updateService);
 // router.put("/complete/:id", stepsController.updateCompletedStep);
 router.delete("/delete/:id",  servicesController.deleteService);
 router.put("/restore/:id",[verifyToken], servicesController.restoreService);
+router.get("/getservices",servicesController.getAllServices);
 
 module.exports = router;

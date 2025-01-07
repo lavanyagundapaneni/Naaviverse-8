@@ -51,8 +51,8 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
         setLoading(true);
         let email = userDetails?.email;
         const endpoint = admin ?
-            `/paths/get?status=active` :
-            `/paths/get?email=${email}`;
+            `/api/paths/get?status=active` :
+            `/api/paths/get?email=${email}`;
 
         axios.get(endpoint)
             .then((response) => {
@@ -76,7 +76,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
         setLoading(true);
         let email = userDetails?.email;
 
-        axios.get(`/paths/getremainingsteps?path_id=${selectedPathId}&&email=${email}`)
+        axios.get(`/api/paths/getremainingsteps?path_id=${selectedPathId}&&email=${email}`)
             .then((response) => {
                 console.log('Response from getAllStepsForPath:', response);
                 let result = response?.data?.stepIds;
@@ -124,7 +124,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
 
     useEffect(() => {
         let email = userDetails?.email;
-        axios.get(`/paths/get?email=${email}`).then(({ data }) => {
+        axios.get(`/api/paths/get?email=${email}`).then(({ data }) => {
             if (data.status) {
                 setBackupPathData(data?.data)
             }
@@ -140,7 +140,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
     const getNewPath = () => {
         setLoading(true);
         axios
-            .get(`/paths/get?status=waitingforapproval`)
+            .get(`/api/paths/get?status=waitingforapproval`)
             .then((response) => {
                 let result = response?.data?.data;
                 console.log(result, "partnerPathData result");
@@ -167,7 +167,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
         setLoading(true);
         let email = userDetails?.email;
         axios
-            .get(`/steps/get?email=${email}&status=${status}`)
+            .get(`/api/steps/get?email=${email}&status=${status}`)
             .then((response) => {
                 let result = response?.data?.data;
                 console.log(result, "partnerStepsData result");
@@ -221,7 +221,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
     const deletePath = () => {
         setActionLoading(true);
         axios
-            .delete(`/paths/delete/${selectedPathId}`)
+            .delete(`/api/paths/delete/${selectedPathId}`)
             .then((response) => {
                 let result = response?.data;
                 // console.log(result, "deletePath result");
@@ -239,7 +239,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
     const deleteStep = () => {
         setActionLoading(true);
         axios
-            .delete(`/steps/delete/${selectedStepId}`, {
+            .delete(`/api/steps/delete/${selectedStepId}`, {
                 // Send status in the request body
             })
             .then((response) => {
@@ -279,7 +279,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
 
         axios
             .put(
-                `/paths/update/${selectedPathId}`,
+                `/api/paths/update/${selectedPathId}`,
                 obj
             )
             .then((response) => {
@@ -300,7 +300,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
         console.log(path, "lkwehflwehflwf")
         setViewPathLoading(true);
         axios
-            .get(`/paths/get?nameOfPath=${path}`)
+            .get(`/api/paths/get?nameOfPath=${path}`)
             .then((response) => {
                 let result = response?.data?.data[0];
                 // console.log(result, "viewPathData result");
@@ -315,7 +315,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
 
     const handleApprovePath = () => {
         setActionLoading(true);
-        axios.put(`/paths/update/${selectedPathId}`,
+        axios.put(`/api/paths/update/${selectedPathId}`,
             { status: "active" })
             .then(({ data }) => {
                 if (data.status) {
@@ -328,7 +328,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
     }
     const handleRejectPath = () => {
         setActionLoading(true);
-        axios.put(`/paths/update/${selectedPathId}`,
+        axios.put(`/api/paths/update/${selectedPathId}`,
             { status: "inactive" })
             .then(({ data }) => {
                 if (data.status) {
@@ -347,7 +347,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
     const handleAddService = (newId) => {
         setActionLoading(true)
 
-        axios.post(`/steps/addproducts/${selectedStepId}`, {
+        axios.post(`/api/steps/addproducts/${selectedStepId}`, {
             "product_ids": [newId]
         }).then(({ data }) => {
             if (data.status) {
@@ -482,7 +482,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
         console.log(item, index, "lwkeflkwefwef")
         const updatedPathObject = addIdToObjectAtIndex(item?.the_ids, stepId, backupPathId, index);
         // console.log(updatedPathObject, "kjwebfkwjebfkwejf")
-        axios.put(`/paths/update/${selectedPath?._id}`, { the_ids: updatedPathObject })
+        axios.put(`/api/paths/update/${selectedPath?._id}`, { the_ids: updatedPathObject })
             .then(res => {
                 if (res.data.status) {
                     resetPathAction();
@@ -528,7 +528,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
 
         // Return the updated array with only step_id and backup_pathId keys
         const updatedBody = updatedTheIds.map(({ step_id, backup_pathId }) => ({ step_id, backup_pathId }));
-        axios.put(`/paths/update/${selectedPath?._id}`, { the_ids: updatedBody })
+        axios.put(`/api/paths/update/${selectedPath?._id}`, { the_ids: updatedBody })
             .then(res => {
                 if (res.data.status) {
                     resetPathAction();
@@ -548,7 +548,7 @@ const MyStepsAcc = ({ search, setSearch, admin, fetchAllServicesAgain, stpesMenu
         updatedTheIds.splice(newIndex, 0, movedObject);
         // console.log(fullObject.the_ids, updatedTheIds, "kjwekfjwefkjwegfkwfgwf")
         const updatedTheIdsArray = updatedTheIds.map(({ step_id, backup_pathId }) => ({ step_id, backup_pathId }));
-        axios.put(`/paths/update/${selectedPath?._id}`, { the_ids: updatedTheIdsArray })
+        axios.put(`/api/paths/update/${selectedPath?._id}`, { the_ids: updatedTheIdsArray })
             .then(res => {
                 if (res.data.status) {
                     resetPathAction();

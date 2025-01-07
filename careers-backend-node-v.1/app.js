@@ -40,18 +40,18 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 // set the body parser to handle urlencoded data
 app.use(bodyParser.json());
-app.use('/services', servicesRouter);
-app.use('/steps', stepsRouter);
-app.use('/auth', authRouter);
-app.use('/users', usersRouter);
-app.use('/universities', universitiesRouter)
-app.use('/paths', pathsRouter)
-app.use('/userpaths', userpathRouter)
-app.use('/pre_login', preLoginRouter)
-app.use('/question', QuestionRouter)
-app.use('/userAnswers', userPersonalityRouter)
-app.use('/partner', partnerRouter)
-app.use('/admin', adminRouter)
+app.use('/api/services', servicesRouter);
+app.use('/api/steps', stepsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/universities', universitiesRouter)
+app.use('/api/paths', pathsRouter)
+app.use('/api/userpaths', userpathRouter)
+app.use('/api/pre_login', preLoginRouter)
+app.use('/api/question', QuestionRouter)
+app.use('/api/userAnswers', userPersonalityRouter)
+app.use('/api/partner', partnerRouter)
+app.use('/api/admin', adminRouter)
 
 
 //Increase body size limit to 50mb to prevent error: request entity too large(413)

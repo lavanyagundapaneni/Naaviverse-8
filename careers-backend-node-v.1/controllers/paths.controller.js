@@ -284,37 +284,49 @@ const getPathNormal = async (req, res) => {
 
 
 const updatePath = async (req, res) => {
-    let updateData = {}
-    if (req.body.nameOfPath) updateData.nameOfPath = req.body.nameOfPath;
-    if (req.body.description) updateData.description = req.body.description;
-    if (req.body.path_type) updateData.path_type = req.body.path_type;
-    if (req.body.path_cat) updateData.path_cat = req.body.path_cat;
-    if (req.body.the_ids) updateData.the_ids = req.body.the_ids;
-    if (req.body.financialSituation) updateData.financialSituation = req.body.financialSituation;
-    if (req.body.destination_degree) updateData.destination_degree = req.body.destination_degree;
-    if (req.body.grade_avg) updateData.grade_avg = req.body.grade_avg;
-    if (req.body.curriculum) updateData.curriculum = req.body.curriculum;
-    if (req.body.grade) updateData.grade = req.body.grade;
-    if (req.body.stream) updateData.stream = req.body.stream;
-    if (req.body.program) updateData.program = req.body.program;
-    if (req.body.university) updateData.university = req.body.university;
-    if (req.body.personality) updateData.personality = req.body.personality
+    const { id } = req.params; // Extract the ID from the request parameters
+    const { status } = req.body; // Extract the status from the request body
 
-    let updatePathData = await pathModel.findOneAndUpdate({ _id: req.params.id }, updateData, { new: true });
-    // console.log(updateStepData)
-    if (!updatePathData) {
-        return res.json({
+    // Check if status is provided and is valid
+    if (!status) {
+        return res.status(400).json({
             status: false,
-            message: 'Data not found',
-        })
+            message: 'Status is required'
+        });
     }
-    return res.json({
-        status: true,
-        message: 'Path updated',
-        data: updatePathData
-    })
 
-}
+    try {
+        // Update the path status in the database
+        const updatedPathData = await pathModel.findOneAndUpdate(
+            { _id: id }, // Find the document by ID
+            { status }, // Update the status field
+            { new: true, runValidators: true } // Return the updated document and apply validators
+        );
+
+        // Check if the path was found and updated
+        if (!updatedPathData) {
+            return res.status(404).json({
+                status: false,
+                message: 'Data not found'
+            });
+        }
+
+        // Respond with success and the updated path data
+        return res.json({
+            status: true,
+            message: 'Path updated successfully',
+            data: updatedPathData
+        });
+    } catch (error) {
+        console.error("Error updating path:", error);
+        
+        // Handle any errors that occur during the update
+        return res.status(500).json({
+            status: false,
+            message: 'Error updating path'
+        });
+    }
+};
 
 const deletePath = async (req, res) => {
     try {
