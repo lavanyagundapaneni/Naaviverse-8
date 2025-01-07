@@ -3,7 +3,7 @@ name: Deploy Frontend to Server
 on:
   push:
     branches:
-      - lavanya18  # Updated to your branch name
+      - 7-1-25  # Branch triggering the workflow
 
 jobs:
   deploy:
@@ -16,11 +16,12 @@ jobs:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # Ensure this matches the secret name
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
       - name: Run deployment script
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@stagging.naaviverse.com << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@www.naaviverse.com << 'EOF'
+            set -e  # Exit immediately if any command fails
             cd /home/ubuntu/Naaviverse-8
-            ./deploy.sh lavanya18  # Pass the branch name directly
+            ./deploy.sh 7-1-25  # Execute the deployment script
           EOF
