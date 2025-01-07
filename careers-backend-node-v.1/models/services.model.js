@@ -8,39 +8,47 @@ const servicesSchema = new mongoose.Schema({
     chargingCurrency: { coin: { type: String } },
     billing_cycle: {
         monthly: {
-            price: { type: String },
+            price: { type: String }, // or Number if you prefer
+            coin: { type: String }
+        },
+        annual: {
+            price: { type: String }, // or Number if you prefer
+            coin: { type: String }
+        },
+        one_time: {
+            price: { type: String }, // or Number if you prefer
             coin: { type: String }
         }
     },
     serviceProvider: { type: String },
     access: { type: String },
     goal: { type: String },
-    icon: { type: String},
-    cost: { type: String},
-    price: { type: String},
-    discountType: { type: String},
-    discountAmount: { type: String},
-    duration: { type: String},
-    features: { type: String},
-    status: { type: String, enum: ['active', 'inactive','delete'], default: 'active' },
-    outcome: { type: String},
-    type: { type: String, enum: ['Macro', 'Micro','Nano']},
+    icon: { type: String },
+    cost: { type: String },
+    price: { type: String }, // Consider if this should be dynamic based on billing type
+    discountType: { type: String },
+    discountAmount: { type: String },
+    duration: { type: String },
+    features: { type: String },
+    status: { type: String, enum: ['active', 'inactive', 'delete'], default: 'active' },
+    outcome: { type: String },
+    type: { type: String, enum: ['Macro', 'Micro', 'Nano'] },
     financialSituation: [
         {
             finance: { type: String, enum: ['0-25L', '25-75L', '75L-3CR', '3CR+', "other"] },
-            description: { type: String },
+            description: { type: String }
         }
     ],
     grade: [
         {
             grade: { type: String, enum: ['9', '10', '11', '12'] },
-            description: { type: String },
+            description: { type: String }
         }
     ],
     stream: [
         {
             stream: { type: String, enum: ['MPC', 'BIPC', 'CEC', 'MEC', 'HEC'] },
-            description: { type: String },
+            description: { type: String }
         }
     ],
     iterations: { type: String }

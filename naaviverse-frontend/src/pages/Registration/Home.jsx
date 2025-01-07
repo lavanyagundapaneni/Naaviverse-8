@@ -136,7 +136,7 @@ const NewHomePage = () => {
           setLoading(true); // Start loading indicator
       
           // Determine the API endpoint based on the role
-          const apiUrl = signupRole === "Users" ? `/auth/signup` : `/partner/signup`;
+          const apiUrl = signupRole === "Users" ? `/api/auth/signup` : `/api/partner/signup`;
       
           axios
             .post(
@@ -177,7 +177,7 @@ const NewHomePage = () => {
       
       const confirmEmail = () => {
         // Dynamic API for OTP verification
-        const verifyOtpUrl = signupRole === "Users" ? `/auth/verifyOTP` : `/partner/verifyOTP`;
+        const verifyOtpUrl = signupRole === "Users" ? `/api/auth/verifyOTP` : `/api/partner/verifyOTP`;
       
         axios
           .post(verifyOtpUrl, {

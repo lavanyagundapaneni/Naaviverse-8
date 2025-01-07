@@ -137,8 +137,7 @@ const forgotPassword = async (req, res) => {
     token: token,
     message: "OTP sent to your emailId",
   });
-
-};
+}
 const sendConfirmationEmail = async (req, res) => {
   try {
     const userFound = await TemporalUser.findOne({ email: req.body.email });

@@ -558,7 +558,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
     console.log("Request payload:", body); // Log the request payload
 
     axios
-        .post(`/users/add`, body)
+        .post(`/api/users/add`, body)
         .then((response) => {
             let result = response?.data;
             console.log("Server response:", result); // Log the response from the server
@@ -764,7 +764,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
       setLevelTwoLoading(true);
       axios
         .put(
-          `/users/update/${profileDataId}`,
+          `/api/users/update/${profileDataId}`,
           levelTwoFields
         )
         .then((response) => {

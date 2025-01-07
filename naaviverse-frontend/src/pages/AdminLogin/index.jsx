@@ -22,7 +22,7 @@ const AdminLogin = () => {
     const handleLogin = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post('/admin/login', { email, password });
+            const response = await axios.post('/api/admin/login', { email, password });
             if (response.status === 200) {
                 localStorage.setItem("user", JSON.stringify({ email })); // Store user details
                 navigate('/admin/dashboard/accountants');
@@ -36,7 +36,7 @@ const AdminLogin = () => {
     };
 
     const initiateForgotPassword = () => {
-      setLoading(true);
+      setIsLoading(true);
       let obj = {
         email: email,
         app_code: "naavi",
@@ -50,7 +50,7 @@ const AdminLogin = () => {
           let result = response?.data;
           // console.log(result, "initiateForgotPassword result");
           if (result?.status) {
-            setLoading(false);
+            setIsLoading(false);
             setForgotPasswordStep(2);
           }
         })
@@ -77,7 +77,7 @@ const AdminLogin = () => {
             setPasswordResetMsg("Password reset successfully");
             setForgotPassword(false);
             setForgotPasswordStep(1);
-            setemail("");
+            setEmail("");
           }
         })
         .catch((error) => {

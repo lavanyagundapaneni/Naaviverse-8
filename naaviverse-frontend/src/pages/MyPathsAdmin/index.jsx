@@ -47,8 +47,8 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
 
   const getAllPaths = () => { 
     setLoading(true);
-    let email = userDetails?.user?.email;
-    const endpoint = admin? `/paths/get?status=active` : `/paths/get?email=${email}`
+    let email = userDetails?.email;
+    const endpoint = admin? `/api/paths/get?status=active` : `/api/paths/get?email=${email}`
     axios
       .get(endpoint)
       .then((response) => {
@@ -64,8 +64,8 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
 
   const getInactivePath = () => { 
     setLoading(true);
-    let email = userDetails?.user?.email;
-    const endpoint = admin? `/paths/get?status=inactive` : `paths/get?email=${email}`
+    let email = userDetails?.email;
+    const endpoint = admin? `/api/paths/get?status=inactive` : `/api/paths/get?email=${email}`
     axios
       .get(endpoint)
       .then((response) => {
@@ -91,8 +91,8 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   }
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
-    axios.get(`/paths/get?email=${email}`).then(({data}) => {
+    let email = userDetails?.email;
+    axios.get(`/api/paths/get?email=${email}`).then(({data}) => {
       if(data.status){
         setBackupPathData(data?.data)
       }
@@ -106,7 +106,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const getNewPath = () => {
     setLoading(true);
     axios
-      .get(`/paths/get?status=waitingforapproval`)
+      .get(`/api/paths/get?status=waitingforapproval`)
       .then((response) => {
         let result = response?.data?.data;
         // console.log(result, "partnerPathData result");
@@ -135,9 +135,9 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
 
   const getAllSteps = () => {
     setLoading(true);
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios
-      .get(`https://careers.marketsverse.com/steps/get?email=${email}`)
+      .get(`/api/steps/get?email=${email}`)
       .then((response) => {
         let result = response?.data?.data;
         console.log(result, "partnerStepsData result");
@@ -190,7 +190,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const deletePath = () => {
     setActionLoading(true);
     axios
-      .delete(`https://careers.marketsverse.com/paths/delete/${selectedPathId}`)
+      .delete(`/api/paths/delete/${selectedPathId}`)
       .then((response) => {
         let result = response?.data;
         // console.log(result, "deletePath result");
@@ -208,7 +208,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const reactivatePath = () => {
     setActionLoading(true);
     axios
-      .put(`https://careers.marketsverse.com/paths/update/${selectedPathId}`, {
+      .put(`/api/paths/update/${selectedPathId}`, {
         status:"active"
         })
       .then((response) => {
@@ -228,7 +228,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const deleteStep = () => {
     setActionLoading(true);
     axios
-      .delete(`https://careers.marketsverse.com/steps/delete/${selectedStepId}`)
+      .delete(`/api/steps/delete/${selectedStepId}`)
       .then((response) => {
         let result = response?.data;
         // console.log(result, "deleteStep result");
@@ -265,7 +265,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
 
     axios
       .put(
-        `https://careers.marketsverse.com/paths/update/${selectedPathId}`,
+        `/api/paths/update/${selectedPathId}`,
         obj
       )
       .then((response) => {
@@ -286,7 +286,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
     console.log(path, "lkwehflwehflwf")
     setViewPathLoading(true);
     axios
-      .get(`https://careers.marketsverse.com/paths/get?nameOfPath=${path}`)
+      .get(`/api/paths/get?nameOfPath=${path}`)
       .then((response) => {
         let result = response?.data?.data[0];
         // console.log(result, "viewPathData result");
@@ -301,20 +301,31 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
 
   const handleApprovePath = () => {
     setActionLoading(true);
-    axios.put(`https://careers.marketsverse.com/paths/update/${selectedPathId}`, 
-    {status:"active"})
-    .then(({data}) => {
-      if(data.status){
-        getNewPath()
-        setPathActionEnabled(false);
+    axios.put(`/api/paths/update/${selectedPathId}`, { status: "active" })
+      .then(({ data }) => {
+        if (data.status) {
+          // Check the current menu and fetch Active Paths
+          if (mypathsMenu === "Pending Approval") {
+            setMypathsMenu("Active Paths"); // Update menu to "Active Paths"
+            getAllPaths(); // Fetch updated paths
+          } else {
+            getAllPaths();
+          }
+          setPathActionEnabled(false);
+          setActionLoading(false);
+          setPathActionStep(1);
+        }
+      })
+      .catch((error) => {
+        console.error(error, "Error approving path");
         setActionLoading(false);
-        setPathActionStep(1)
-      }
-    })
-  }
+      });
+  };
+  
+  
   const handleRejectPath = () => {
     setActionLoading(true);
-    axios.put(`https://careers.marketsverse.com/paths/update/${selectedPathId}`, 
+    axios.put(`/api/paths/update/${selectedPathId}`, 
     {status:"inactive"})
     .then(({data}) => {
       if(data.status){
@@ -333,7 +344,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
   const handleAddService = (newId) => {
     setActionLoading(true)
       
-      axios.post(`/steps/addproducts/${selectedStepId}`, {
+      axios.post(`/api/steps/addproducts/${selectedStepId}`, {
         "product_ids": [newId]
        }).then(({data})=> {
         if(data.status){
@@ -364,7 +375,7 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
 
 const [allServicesToAdd, setAllServicesToAdd] = useState([])
   useEffect(() => {
-    axios.get(`https://careers.marketsverse.com/services/get?productcreatoremail=${userDetails?.user?.email}`).then(({data}) => {
+    axios.get(`/api/services/get?productcreatoremail=${userDetails?.email}`).then(({data}) => {
       if(data.status){
         setAllServicesToAdd(data?.data)
       }
@@ -375,7 +386,7 @@ const [allServicesToAdd, setAllServicesToAdd] = useState([])
   const [allServicesToRemove, setAllServicesToRemove] = useState([])
   useEffect(() => {
     if(selectedStepId){
-      axios.get(`https://careers.marketsverse.com/attachservice/get?step_id=${selectedStepId}`).then(({data}) => {
+      axios.get(`/api/attachservice/get?step_id=${selectedStepId}`).then(({data}) => {
         if(data.status){
           setAllServicesToRemove(data?.data[0])
         }
@@ -461,7 +472,7 @@ const [allServicesToAdd, setAllServicesToAdd] = useState([])
     console.log(item, index, "lwkeflkwefwef")
     const updatedPathObject = addIdToObjectAtIndex(item?.the_ids, stepId, backupPathId, index);
     // console.log(updatedPathObject, "kjwebfkwjebfkwejf")
-    axios.put(`https://careers.marketsverse.com/paths/update/${selectedPath?._id}`, {the_ids: updatedPathObject})
+    axios.put(`/api/paths/update/${selectedPath?._id}`, {the_ids: updatedPathObject})
     .then(res => {
       if(res.data.status){
         resetPathAction();
@@ -1674,7 +1685,7 @@ useEffect(() => {
                   // }}
                   >Edit Step</div>
                 <div
-                  className="acc-step-box"
+                  className="acc-step-box" onClick={() => { deleteStep(); }}
                 >
                   Delete step
                 </div>

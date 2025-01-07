@@ -54,12 +54,12 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setLoading(true);
     let email = userDetails?.email;
     const endpoint = admin
-      ? `/paths/get?status=waitingforapproval`
+      ? `/api/paths/get?status=waitingforapproval`
       : mypathsMenu === "Pending Approval"
-      ? `/paths/get?email=${email}&status=waitingforapproval`
+      ? `/api/paths/get?email=${email}&status=waitingforapproval`
       : mypathsMenu === "Inactive Paths"
-      ? `/paths/get?email=${email}&status=inactive`
-      : `/paths/get?email=${email}&status=active`;
+      ? `/api/paths/get?email=${email}&status=inactive`
+      : `/api/paths/get?email=${email}&status=active`;
     axios
       .get(endpoint)
       .then((response) => {
@@ -80,7 +80,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
 
     axios
       .get(
-        `/paths/getremainingsteps?path_id=${selectedPathId}&&email=${email}`
+        `/api/paths/getremainingsteps?path_id=${selectedPathId}&&email=${email}`
       )
       .then((response) => {
         let result = response?.data?.stepIds;
@@ -112,7 +112,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     // })
     axios
       .get(
-        `/attachservice/getnotaddedservices?step_id=${selectedStepId}&productcreatoremail=${email}`
+        `/api/attachservice/getnotaddedservices?step_id=${selectedStepId}&productcreatoremail=${email}`
       )
       .then(({ data }) => {
         if (data.status) {
@@ -125,7 +125,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   useEffect(() => {
     let email = userDetails?.email;
     axios
-      .get(`/paths/get?email=${email}`)
+      .get(`/api/paths/get?email=${email}`)
       .then(({ data }) => {
         if (data.status) {
           setBackupPathData(data?.data);
@@ -143,7 +143,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setLoading(true);
     axios
       .get(
-        `/paths/get?status=waitingforapproval`
+        `/api/paths/get?status=waitingforapproval`
       )
       .then((response) => {
         let result = response?.data?.data;
@@ -172,7 +172,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setLoading(true);
     let email = userDetails?.email;
     axios
-      .get(`/steps/get?email=${email}`)
+      .get(`/api/steps/get?email=${email}`)
       .then((response) => {
         let result = response?.data?.data;
         console.log(result, "partnerStepsData result");
@@ -226,7 +226,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setActionLoading(true);
   
     axios
-      .delete(`/paths/delete/${selectedPathId}`, {
+      .delete(`/api/paths/delete/${selectedPathId}`, {
         data: { status }, // Include the status in the request body
       })
       .then((response) => {
@@ -246,7 +246,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const deleteStep = () => {
     setActionLoading(true);
     axios
-      .delete(`/steps/delete/${selectedStepId}`)
+      .delete(`/api/steps/delete/${selectedStepId}`)
       .then((response) => {
         let result = response?.data;
         // console.log(result, "deleteStep result");
@@ -283,7 +283,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
 
     axios
       .put(
-        `/paths/update/${selectedPathId}`,
+        `/api/paths/update/${selectedPathId}`,
         obj
       )
       .then((response) => {
@@ -304,7 +304,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     console.log(path, "lkwehflwehflwf");
     setViewPathLoading(true);
     axios
-      .get(`/paths/get?nameOfPath=${path}`)
+      .get(`/api/paths/get?nameOfPath=${path}`)
       .then((response) => {
         let result = response?.data?.data[0];
         // console.log(result, "viewPathData result");
@@ -319,12 +319,16 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const handleApprovePath = () => {
     setActionLoading(true);
     axios
-      .put(`/paths/update/${selectedPathId}`, {
+      .put(`/api/paths/update/${selectedPathId}`, {
         status: "active",
       })
       .then(({ data }) => {
         if (data.status) {
-          getNewPath();
+          if (mypathsMenu === "Active Paths") {
+            getNewPath();
+          } else {
+            getAllPaths();
+          }
           setPathActionEnabled(false);
           setActionLoading(false);
           setPathActionStep(1);
@@ -334,7 +338,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const handleRejectPath = () => {
     setActionLoading(true);
     axios
-      .put(`/paths/update/${selectedPathId}`, {
+      .put(`/api/paths/update/${selectedPathId}`, {
         status: "inactive",
       })
       .then(({ data }) => {
@@ -356,7 +360,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
 
     axios
       .post(
-        `/steps/addproducts/${selectedStepId}`,
+        `/api/steps/addproducts/${selectedStepId}`,
         {
           product_ids: [newId],
         }
@@ -407,7 +411,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     if (selectedStepId) {
       axios
         .get(
-          `/attachservice/get?step_id=${selectedStepId}`
+          `/api/attachservice/get?step_id=${selectedStepId}`
         )
         .then(({ data }) => {
           if (data.status) {
@@ -500,7 +504,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     // console.log(updatedPathObject, "kjwebfkwjebfkwejf")
     axios
       .put(
-        `/paths/update/${selectedPath?._id}`,
+        `/api/paths/update/${selectedPath?._id}`,
         { the_ids: updatedPathObject }
       )
       .then((res) => {
@@ -557,7 +561,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     }));
     axios
       .put(
-        `/paths/update/${selectedPath?._id}`,
+        `/api/paths/update/${selectedPath?._id}`,
         { the_ids: updatedBody }
       )
       .then((res) => {
@@ -583,7 +587,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     );
     axios
       .put(
-        `/paths/update/${selectedPath?._id}`,
+        `/api/paths/update/${selectedPath?._id}`,
         { the_ids: updatedTheIdsArray }
       )
       .then((res) => {
@@ -621,7 +625,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
       "lkweflkjwhefkjwef"
     );
     axios
-      .post(`/attachservice/add`, {
+      .post(`/api/attachservice/add`, {
         step_id: selectedStepId,
         service_ids: [...selectedServices],
       })
@@ -638,7 +642,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
   const removeServiceFromStep = (id) => {
     axios
       .put(
-        `/attachservice/remove/${allServicesToRemove?._id}`,
+        `/api/attachservice/remove/${allServicesToRemove?._id}`,
         {
           service_id: id,
         }

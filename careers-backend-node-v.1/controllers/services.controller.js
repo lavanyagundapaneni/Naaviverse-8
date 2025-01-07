@@ -4,6 +4,7 @@ const axios = require('axios');
 const addService = async (req, res) => {
     console.log('Request to add service:', req.body);
 
+    // Initialize the createService object
     let createService = {
         productcreatoremail: req.body.productcreatoremail,
         name: req.body.name,
@@ -11,42 +12,77 @@ const addService = async (req, res) => {
         description: req.body.description,
         chargingtype: req.body.chargingtype,
         chargingCurrency: { coin: req.body['charging currency'].coin }, 
-        billing_cycle: {
-            monthly: {
-                price: req.body.billing_cycle.monthly.price, // Assuming this is sent in the request body
-                coin: req.body.billing_cycle.monthly.coin // Assuming this is sent in the request body
-            }
-        },
-        serviceProvider: req.body.serviceProvider,
-        access: req.body.access,
-        goal: req.body.goal,
-        grade: req.body.gradeData,
-        financialSituation: req.body.financialData,
-        stream: req.body.stream,
-        cost: req.body.cost,
-        price: req.body.price,
-        discountType: req.body.discountType,
-        discountAmount: req.body.discountAmount,
-        duration: req.body.duration,
-        features: req.body.features,
-        status: req.body.status,
-        outcome: req.body.outcome,
-        type: req.body.type,
-        iterations: req.body.iterations
+        billing_cycle: {}
+    };
+
+    // Check and add monthly billing information if it exists
+    if (req.body.billing_cycle?.monthly) {
+        createService.billing_cycle.monthly = {
+            price: req.body.billing_cycle.monthly.price, // Monthly price
+            coin: req.body.billing_cycle.monthly.coin // Monthly currency
+        };
     }
-    let step = await serviceModel.create(createService);
-    if (!step) {
+
+    // Check and add annual billing information if it exists
+    if (req.body.billing_cycle?.annual) {
+        createService.billing_cycle.annual = {
+            price: req.body.billing_cycle.annual.price, // Annual price
+            coin: req.body.billing_cycle.annual.coin // Annual currency
+        };
+    }
+
+    // Check and add one-time billing information if it exists
+    if (req.body.billing_cycle?.one_time) {
+        createService.billing_cycle.one_time = {
+            price: req.body.billing_cycle.one_time.price, // One-time price
+            coin: req.body.billing_cycle.one_time.coin // One-time currency
+        };
+    }
+
+    // Add other service attributes
+    createService.serviceProvider = req.body.serviceProvider;
+    createService.access = req.body.access;
+    createService.goal = req.body.goal;
+    createService.grade = req.body.gradeData;
+    createService.financialSituation = req.body.financialData;
+    createService.stream = req.body.stream;
+    createService.cost = req.body.cost;
+    createService.price = req.body.price; // Consider if this should be dynamic based on billing type
+    createService.discountType = req.body.discountType;
+    createService.discountAmount = req.body.discountAmount;
+    createService.duration = req.body.duration;
+    createService.features = req.body.features;
+    createService.status = req.body.status;
+    createService.outcome = req.body.outcome;
+    createService.type = req.body.type;
+    createService.iterations = req.body.iterations;
+
+    try {
+        let step = await serviceModel.create(createService);
+        
+        if (!step) {
+            return res.json({
+                status: false,
+                message: 'Error in creating service',
+            });
+        }
+
         return res.json({
+            status: true,
+            message: 'Service created',
+            data: step
+        });
+        
+    } catch (error) {
+        console.error("Error creating service:", error);
+        return res.status(500).json({
             status: false,
-            message: 'Error in creating service',
-        })
+            message: 'Internal server error while creating service'
+        });
     }
-    return res.json({
-        status: true,
-        message: 'Service created',
-        data: step
-    })
-}
+};
+
+
 
 const getServices = async (req, res) => {
     // Check if product creator email is provided
@@ -156,10 +192,53 @@ const restoreService = async (req, res) => {
 }
 
 
+const getAllServices = async (req, res) => {
+    const { status } = req.query;
+
+    // Validate the status parameter
+    if (!status || (status !== "active" && status !== "inactive")) {
+        return res.status(400).json({
+            status: false,
+            message: 'Status parameter is required and must be either "active" or "inactive".'
+        });
+    }
+
+    try {
+        // Fetch services from the database based on their status
+        const services = await serviceModel.find({ status }); // Assuming 'status' is a field in your service model
+
+        // Check if any services were found
+        if (services.length === 0) {
+            return res.json({
+                status: true,
+                message: 'No services found for the specified status.',
+                data: []
+            });
+        }
+
+        // Return the found services
+        return res.json({
+            status: true,
+            total: services.length,
+            message: 'Service data found',
+            data: services,
+        });
+        
+    } catch (error) {
+        console.error("Error fetching services:", error); // Log any errors
+        return res.status(500).json({
+            status: false,
+            message: 'Error fetching services',
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     addService,
     getServices,
     updateService,
     deleteService,
     restoreService,
+    getAllServices,
 }
