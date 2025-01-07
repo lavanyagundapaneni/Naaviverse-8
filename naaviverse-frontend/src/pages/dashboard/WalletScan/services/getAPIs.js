@@ -2,7 +2,7 @@ import axios from "axios";
 import Axios from "axios";
 
 export const getRegisteredApp = () => {
-  const userDetails = JSON.parse(localStorage.getItem("user"));
+  const userDetails = JSON.parse(localStorage.getItem("adminuser"));
   let email = userDetails?.email;
   return axios.get(
     `https://comms.globalxchange.io/gxb/apps/registered/user?email=${email}`
@@ -10,7 +10,7 @@ export const getRegisteredApp = () => {
 };
 
 export const getUserDetails = () => {
-  const userDetails = JSON.parse(localStorage.getItem("user"));
+  const userDetails = JSON.parse(localStorage.getItem("adminuser"));
   let email = userDetails?.email;
   return axios.get(
     `https://comms.globalxchange.io/user/details/get?email=${email}`

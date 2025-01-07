@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) => {
   const navigate = useNavigate()
   const { sideNav, setsideNav } = useStore();
-  let userDetails = JSON.parse(localStorage.getItem("user"));
+  let userDetails = JSON.parse(localStorage.getItem("adminuser"));
   const { setCurrentStepData, setCurrentStepDataLength,mypathsMenu, setMypathsMenu } = useCoinContextData();
   const [partnerPathData, setPartnerPathData] = useState([]);
   const [loading, setLoading] = useState(false);

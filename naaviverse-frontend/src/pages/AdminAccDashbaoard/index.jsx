@@ -223,7 +223,7 @@ const AccDashboard = () => {
 
   const secret = "uyrw7826^&(896GYUFWE&*#GBjkbuaf"; // secret not to be disclosed anywhere.
   const emailDev = "rahulrajsb@outlook.com"; // email of the developer.
-  const userDetails = JSON.parse(localStorage.getItem("user"));
+  const userDetails = JSON.parse(localStorage.getItem("adminuser"));
 
   const handleGrade = (item) => {
     if (grade.includes(item)) {
@@ -323,7 +323,7 @@ const AccDashboard = () => {
     handleGetCurrencies();
     // setaccsideNav("CRM")
     resetpop();
-    const userDetails = JSON.parse(localStorage.getItem("user"));
+    const userDetails = JSON.parse(localStorage.getItem("adminuser"));
     if (userDetails === null || userDetails === undefined) {
       navigate("/login");
     }
@@ -457,7 +457,7 @@ const AccDashboard = () => {
   //upload end here
  const handleFollowerPerAccountants = () => {
     setIsLoading(true);
-    let mailId = userDetails?.user?.email;
+    let mailId = userDetails?.email;
     GetFollowersPerAccount(mailId)
       .then((res) => {
         let result = res?.data;
@@ -477,7 +477,7 @@ const AccDashboard = () => {
   };
 
   const handleAllCustomerLicenses = () => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
+    const userDetails = JSON.parse(localStorage.getItem("adminuser"));
     setIsPurchaseLoading(true);
     GetAllCustomerLicenses(userDetails.user.email)
       .then((res) => {
@@ -644,7 +644,7 @@ const AccDashboard = () => {
 
   const handleFinalSubmit = () => {
     setIsSubmit(true);
-    let userDetails = JSON.parse(localStorage.getItem("user"));
+    let userDetails = JSON.parse(localStorage.getItem("adminuser"));
     let objmonthly = {
       email: userDetails.email,
       token: userDetails.idToken,
@@ -790,14 +790,14 @@ const AccDashboard = () => {
   };
 
   const fetchAllServicesAgain = () => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
+    const userDetails = JSON.parse(localStorage.getItem("adminuser"));
       // console.log(userDetails, "kkk");
       handleServicesForLogged(userDetails.email);
   }
 
   useEffect(() => {
     if(!ispopular){
-      const userDetails = JSON.parse(localStorage.getItem("user"));
+      const userDetails = JSON.parse(localStorage.getItem("adminuser"));
       // console.log(userDetails, "kkk");
       handleServicesForLogged(userDetails.email);
     }
@@ -814,7 +814,7 @@ const AccDashboard = () => {
     } else if (accsideNav == "CRM" && crmMenu == "Purchases") {
       handleAllCustomerLicenses();
     } else if (accsideNav == "My Services" && servicesMenu == "Services") {
-      const userDetails = JSON.parse(localStorage.getItem("user"));
+      const userDetails = JSON.parse(localStorage.getItem("adminuser"));
       // console.log(userDetails, "kkk");
       handleServicesForLogged(userDetails.email);
     }
