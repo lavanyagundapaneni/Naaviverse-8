@@ -384,9 +384,9 @@ const AdminAccProfile = () => {
   };
 
   const handleAllCustomerLicenses = () => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
+    const userDetails = JSON.parse(localStorage.getItem("adminuser"));
     setIsPurchaseLoading(true);
-    GetAllCustomerLicenses(userDetails.user.email)
+    GetAllCustomerLicenses(userDetails.email)
       .then((res) => {
         let result = res.data;
         if (result.status) {
@@ -465,7 +465,7 @@ const AdminAccProfile = () => {
     setCoverImageS3url("");
     setImage(null);
     setPathSteps({
-      email: userDetails?.user?.email,
+      email: userDetails?.email,
       nameOfPath: "",
       description: "",
       length: "",
@@ -530,14 +530,14 @@ const AdminAccProfile = () => {
 
   const handleFinalSubmit = () => {
     setIsSubmit(true);
-    let userDetails = JSON.parse(localStorage.getItem("user"));
+    let userDetails = JSON.parse(localStorage.getItem("adminuser"));
     let objmonthly = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       token: userDetails.idToken,
       product_code: serviceCodeInput,
       product_name: serviceNameInput,
       product_icon: coverImageS3url,
-      revenue_account: userDetails.user.email,
+      revenue_account: userDetails.email,
       client_app: "naavi",
       product_category_code: "CoE",
       sub_category_code: "",
@@ -585,12 +585,12 @@ const AdminAccProfile = () => {
     };
 
     let objone = {
-      email: userDetails.user.email,
+      email: userDetails.email,
       token: userDetails.idToken,
       product_code: serviceCodeInput,
       product_name: serviceNameInput,
       product_icon: coverImageS3url,
-      revenue_account: userDetails.user.email,
+      revenue_account: userDetails.email,
       client_app: "naavi",
       product_category_code: "CoE",
       sub_category_code: "",
@@ -708,7 +708,7 @@ const AdminAccProfile = () => {
   }
 
   const handleAccountantData = () => {
-    let mailId = userDetails?.user?.email;
+    let mailId = userDetails?.email;
     CheckStatusAccountant(mailId)
       .then((res) => {
         let result = res?.data;
@@ -729,7 +729,7 @@ const AdminAccProfile = () => {
   };
 
   const createLXProfile = () => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     let token = userDetails?.idToken;
     axios
       .post(
@@ -756,7 +756,7 @@ const AdminAccProfile = () => {
 
   const createBankerProfile = () => {
     setIsloading(true);
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     let token = userDetails?.idToken;
     axios
       .post(
@@ -992,7 +992,7 @@ const AdminAccProfile = () => {
     // console.log(personality, "api body");
     setCreatingPath(true);
     axios
-      .post(`/paths/add`, {
+      .post(`/api/paths/add`, {
         ...pathSteps,
         performance: gradeAvg,
         curriculum: curriculum,

@@ -24,7 +24,7 @@ const AdminLogin = () => {
         try {
             const response = await axios.post('/api/admin/login', { email, password });
             if (response.status === 200) {
-                localStorage.setItem("user", JSON.stringify({ email })); // Store user details
+                localStorage.setItem("adminuser", JSON.stringify({ email })); // Store user details
                 navigate('/admin/dashboard/accountants');
             }
         } catch (error) {
