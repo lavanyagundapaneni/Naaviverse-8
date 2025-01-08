@@ -32,10 +32,10 @@ const addService = async (req, res) => {
     }
 
     // Check and add one-time billing information if it exists
-    if (req.body.billing_cycle?.one_time) {
-        createService.billing_cycle.one_time = {
-            price: req.body.billing_cycle.one_time.price, // One-time price
-            coin: req.body.billing_cycle.one_time.coin // One-time currency
+    if (req.body.billing_cycle?.lifetime) {
+        createService.billing_cycle.lifetime = {
+            price: req.body.billing_cycle.lifetime.price, // One-time price
+            coin: req.body.billing_cycle.lifetime.coin // One-time currency
         };
     }
 

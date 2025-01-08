@@ -15,7 +15,7 @@ const servicesSchema = new mongoose.Schema({
             price: { type: String }, // or Number if you prefer
             coin: { type: String }
         },
-        one_time: {
+        lifetime: {
             price: { type: String }, // or Number if you prefer
             coin: { type: String }
         }

@@ -331,7 +331,7 @@ const AccProfile = () => {
 
 
     let { data } = await axios.post(
-      `/steps/addmultiplesteps`,
+      `/api/steps/addmultiplesteps`,
       formData,
       {
         headers: {

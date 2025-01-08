@@ -337,7 +337,7 @@ const NewStep1 = ({ setpstep }) => {
     setLoading(true);
     // console.log(stepForm, "stepform");
     axios
-      .post(`/steps/add`, stepForm)
+      .post(`/api/steps/add`, stepForm)
       .then((response) => {
         let result = response?.data;
         if (result?.status) {
@@ -353,7 +353,7 @@ const NewStep1 = ({ setpstep }) => {
   useEffect(() => {
     axios
       .get(
-        `/services/get?productcreatoremail=${userDetails?.email}`
+        `/api/services/get?productcreatoremail=${userDetails?.email}`
       )
       .then((response) => {
         let result = response?.data?.data;
