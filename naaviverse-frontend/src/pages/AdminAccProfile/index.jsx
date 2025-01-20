@@ -729,7 +729,7 @@ const AdminAccProfile = () => {
   };
 
   const createLXProfile = () => {
-    let email = userDetails?.email;
+    let email = userDetails?.user.email;
     let token = userDetails?.idToken;
     axios
       .post(
@@ -1492,7 +1492,7 @@ const AdminAccProfile = () => {
                         setShowDrop(false);
                       }}
                     >
-                      <div>Create An Partner Profile</div>
+                      <div>Create An Admin Profile</div>
                       <div>
                         <img src={colorArrow} alt="" />
                       </div>

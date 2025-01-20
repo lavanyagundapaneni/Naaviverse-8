@@ -1,147 +1,122 @@
-const userDataMiddleware = require("../middlewares/user_middleware")
-const userPersonalityModel = require('../models/userPersonalityAns.model')
-const userModel = require('../models/users.model');
+const User = require('../models/users.model') // Your User model for saving profile data
 
-
-const addUserData = (req, res, next) => {
-    userDataMiddleware.AddUserProfile(req.body)
-        .then((result) => {
-            res.status(201).json({
-                status: true,
-                message: "Successfully Added User Profile",
-                data: result.createProfile,
-            });
-        })
-        .catch((err) => {
-            res.status(500).json({
-                status: false,
-                message: err.message,
-            });
-        });
-};
-
-const getAllUserProfiles = async (req, res, next) => {
-    let condObj = {};
-    let projectObj = {};
-    let sortObj = {};
-    // "userType","name","email","username"
-    let { status, userType, name, email, username } = req.query;
-
-    if (userType) condObj.userType = userType;
-    if (name) condObj.name = name;
-    if (username) condObj.username = username;
-
-    const pointsByCategory = {};
-    let sortedData
-    if (email) {
-        condObj.email = email;
-        let fetchID = await userModel.findOne({ email: req.query.email, status: "active" })
-        if(!fetchID){
-            return res.json({
-                status:false,
-                message:"user not found"
-            })
+// Controller to add profile data for Level 1
+const addUserProfile = async (req, res) => {
+    const { email, name, country, state, city, postalCode, profilePicture, username, phoneNumber } = req.body;
+  
+    try {
+      // Check if the user already exists
+      const existingUser = await User.findOne({ email });
+  
+      if (existingUser) {
+        // Check if the profile is incomplete
+        const isProfileComplete =
+          existingUser.name &&
+          existingUser.country &&
+          existingUser.state &&
+          existingUser.city &&
+          existingUser.postalCode &&
+          existingUser.profilePicture &&
+          existingUser.username &&
+          existingUser.phoneNumber;
+  
+        if (isProfileComplete) {
+          return res.status(400).json({ status: false, message: 'User profile is already complete' });
         }
-        let findUserAnswers = await userPersonalityModel.find({ userId: fetchID._id, status: "active" })
-
-        findUserAnswers.forEach(question => {
-            const { relatedTo, points } = question;
-            pointsByCategory[relatedTo] = (pointsByCategory[relatedTo] || 0) + points;
+  
+        // Update the existing incomplete profile
+        existingUser.name = name;
+        existingUser.country = country;
+        existingUser.state = state;
+        existingUser.city = city;
+        existingUser.postalCode = postalCode;
+        existingUser.profilePicture = profilePicture;
+        existingUser.username = username;
+        existingUser.phoneNumber = phoneNumber;
+  
+        const updatedUser = await existingUser.save();
+  
+        return res.status(200).json({
+          status: true,
+          message: 'Profile updated successfully',
+          data: updatedUser,
         });
-
-        const dataArray = Object.entries(pointsByCategory);
-
-        // Sort the array in descending order based on values
-        dataArray.sort((a, b) => b[1] - a[1]);
-
-        // Convert the sorted array back to an object
-        sortedData = Object.fromEntries(dataArray);
-
+      }
+  
+      // Create a new user profile if it doesn't exist
+      const newUser = new User({
+        email,
+        name,
+        country,
+        state,
+        city,
+        postalCode,
+        profilePicture,
+        username,
+        phoneNumber,
+      });
+  
+      const savedUser = await newUser.save();
+  
+      res.status(200).json({
+        status: true,
+        message: 'Profile created successfully',
+        data: savedUser,
+      });
+    } catch (error) {
+      console.error('Error in addUserProfile:', error);
+      res.status(500).json({ status: false, message: 'Internal server error' });
     }
+  };
+  
 
-    if (status) {
-        if (status.toLowerCase() != 'all')
-            condObj.status = status;
-    } else {
-        condObj.status = 'active';
+const getUserProfile = async (req, res) => {
+    const { email } = req.params;  // Retrieve the email from the request params
+  
+    try {
+      // Find the user profile by email
+      const user = await User.findOne({ email });
+  
+      // Check if user exists
+      if (!user) {
+        return res.status(404).json({ status: false, message: 'User not found' });
+      }
+  
+      // Check if all required profile details are present
+      const isProfileComplete =
+        user.name &&
+        user.country &&
+        user.state &&
+        user.city &&
+        user.postalCode &&
+        user.profilePicture &&
+        user.username &&
+        user.phoneNumber;
+  
+      if (isProfileComplete) {
+        // If profile is complete, return the profile data
+        return res.status(200).json({
+          status: true,
+          message: 'Profile retrieved successfully',
+          data: user,
+        });
+      } else {
+        // If profile is incomplete, return the profile data with an indication that the profile is incomplete
+        return res.status(200).json({
+          status: true,
+          message: 'Profile exists but is incomplete. Please update your profile.',
+          data: user,
+          profileIncomplete: true,  // Indicate that the profile is incomplete
+        });
+      }
+    } catch (error) {
+      console.error('Error in getUserProfile:', error);
+      res.status(500).json({ status: false, message: 'Internal server error' });
     }
-    let queryObj = {
-        condObj,
-        projectObj,
-        sortObj
-    }
-    userDataMiddleware.GetAllUserProfiles(queryObj).then((result) => {
-        if (result?.data?.[0]?.personality) {
-            res.json({
-                status: true,
-                total_profiles: result.data.length,
-                data: result.data,
-                personalitiesData: sortedData
-            });
-        } else {
-            res.json({
-                status: true,
-                total_profiles: result.data.length,
-                data: result.data,
-            });
-        }
-    }).catch((err) => {
-        res.json({
-            status: false,
-            message: err.message,
-        });
-    });
-}
+  };
+  
 
-const updateUserProfile = (req, res, next) => {
-    let bodyObj = {};
-    bodyObj.query = req.query;
-    bodyObj.body = req.body;
-    bodyObj.params = req.params;
-    userDataMiddleware.UpdateUserProfile(bodyObj)
-        .then((result) => {
-            res.status(200).json({
-                status: true,
-                message: "Updated User profile data successfully",
-                data: result.data,
-            });
-        })
-        .catch((err) => {
-            res.status(500).json({
-                status: false,
-                message: err.message,
-            });
-        });
-};
-
-
-//changeUsetype
-const changeUserType = (req, res, next) => {
-    let bodyObj = {};
-    bodyObj.query = req.query;
-    bodyObj.body = req.body;
-    bodyObj.params = req.params;
-    userDataMiddleware.ChangeUserType(bodyObj)
-        .then((result) => {
-            res.status(200).json({
-                status: true,
-                message: "Updated userType to mentor profile data successfully",
-                data: result.data,
-            });
-        })
-        .catch((err) => {
-            res.status(500).json({
-                status: false,
-                message: err.message,
-            });
-        });
-};
-
-
-
-module.exports = {
-    addUserData,
-    getAllUserProfiles,
-    updateUserProfile,
-    changeUserType
-}
+module.exports = { 
+    addUserProfile,
+    getUserProfile,
+ };

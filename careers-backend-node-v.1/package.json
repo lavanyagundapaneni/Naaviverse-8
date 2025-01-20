@@ -19,6 +19,7 @@
   "homepage": "https://bitbucket.org/globalxchange/careers-backend-node-v.1#readme",
   "description": "",
   "dependencies": {
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",

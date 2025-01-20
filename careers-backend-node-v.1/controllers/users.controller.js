@@ -37,33 +37,55 @@ const addUser = async (req, res) => {
     })
 }
 
-const getUsers = async (req, res) => {
-    let filter = {}
+const getUsers = async (req, res) => { 
+    let filter = {};
+
+    // Handle filtering based on the provided query parameters
     if (req.query.status) {
         filter.status = req.query.status;
-        if (req.query.status == "all")
-            filter = {};
+        if (req.query.status == "all") {
+            filter = {}; // If status is 'all', clear the filter
+        }
     } else {
-        filter.status = "active"
+        filter.status = "active"; // Default filter to active status
     }
-    if (req.query.userType) filter.userType = req.query.userType;
-    if (req.query.name) filter.name = req.query.name;
-    if (req.query.email) filter.email = req.query.email;
-    if (req.query.username) filter.username = req.query.username;
 
-    let users = await userModel.find(filter);
-    if (!users) {
+    // Add filter for specific user if username or email is provided
+    if (req.query.username) {
+        filter.username = req.query.username;  // Filter by username
+    }
+    if (req.query.email) {
+        filter.email = req.query.email;  // Filter by email
+    }
+
+    try {
+        // Fetch users based on the filter
+        const users = await userModel.find(filter);
+
+        // If no users are found, return a message indicating so
+        if (users.length === 0) {
+            return res.json({
+                status: false,
+                message: 'No users found matching the criteria',
+            });
+        }
+
+        // Return the users found
+        return res.json({
+            status: true,
+            message: 'User(s) fetched successfully',
+            data: users,
+        });
+    } catch (error) {
+        // Handle error if something goes wrong with the query
+        console.error(error);
         return res.json({
             status: false,
             message: 'Error in fetching users',
-        })
+        });
     }
-    return res.json({
-        status: true,
-        message: 'Users fetched',
-        data: users
-    })
-}
+};
+
 
 let addMentor = async (req, res) => {
     let userData = await userModel.findOneAndUpdate({ email: req.body.email, status: "active" }, { userType: "mentor" }, { new: true });

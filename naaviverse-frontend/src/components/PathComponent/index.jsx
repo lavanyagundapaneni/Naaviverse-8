@@ -263,9 +263,9 @@ const PathComponent = () => {
   };
 
   useEffect(() => {
-    let email = userDetails?.user?.email;
+    let email = userDetails?.email;
     axios
-      .get(`https://careers.marketsverse.com/users/get?email=${email}`)
+      .get(`/api/users/get?email=${email}`)
       .then((response) => {
         let result = response?.data?.data[0];
         // console.log(result, "user profile level 2");

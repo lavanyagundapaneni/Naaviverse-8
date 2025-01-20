@@ -118,7 +118,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
   useEffect(() => {
     let userEmail = userDetails?.email;
     axios
-      .get(`https://careers.marketsverse.com/users/get?email=${userEmail}`)
+      .get(`/api/users/get?email=${userEmail}`)
       .then((response) => {
         let result = response?.data?.data;
         // console.log(result, "userdetails result");
