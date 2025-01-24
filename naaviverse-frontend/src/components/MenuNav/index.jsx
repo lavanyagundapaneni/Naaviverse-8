@@ -13,7 +13,9 @@ const MenuNav = ({showDrop, setShowDrop, searchTerm, setSearchterm, searchPlaceh
         localStorage.clear();
         navigate("/login");
       };
+     
 
+      
       const handleNavifateProfile = () => {
         const userType = localStorage.getItem('userType')
         if(userType === 'user'){

@@ -6,7 +6,7 @@ const addAnswer = async (req, res) => {
         userId: req.body.userId,
         question: req.body.question,
         answer: req.body.answer,
-        relatedTo: req.body.relatedTo
+        
     }
     let userPoints
     if (req.body.answer.toLowerCase() === "dislike") {

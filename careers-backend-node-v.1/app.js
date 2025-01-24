@@ -20,10 +20,10 @@ var pathsRouter = require('./routes/pathRouter')
 var userpathRouter = require('./routes/userpathRouter')
 var cors = require("cors");
 const preLoginRouter = require('./routes/preLoginRouter');
-var QuestionRouter = require('./routes/questionRouter')
 var userPersonalityRouter = require('./routes/userPersonalityRouter')
 var partnerRouter = require('./routes/partnerRouter')
 var adminRouter = require('./routes/adminRouter')
+var personalityRouter = require('./routes/personalityRouter')
 // var usersRouter = require('./routes/users');
 
 var app = express();
@@ -48,10 +48,10 @@ app.use('/api/universities', universitiesRouter)
 app.use('/api/paths', pathsRouter)
 app.use('/api/userpaths', userpathRouter)
 app.use('/api/pre_login', preLoginRouter)
-app.use('/api/question', QuestionRouter)
 app.use('/api/userAnswers', userPersonalityRouter)
 app.use('/api/partner', partnerRouter)
 app.use('/api/admin', adminRouter)
+app.use('/api/personality', personalityRouter)
 
 
 //Increase body size limit to 50mb to prevent error: request entity too large(413)

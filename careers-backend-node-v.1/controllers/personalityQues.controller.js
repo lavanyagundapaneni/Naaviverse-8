@@ -1,70 +1,35 @@
-const personalityQuesModel = require('../models/personalityQues.model')
+// controllers/personalityQuestions.controller.js
+const PersonalityQuestion = require('../models/personalityQues.model'); // Adjust path as needed
 
+// Controller function to fetch all questions from the database
+const getQuestions = async (req, res) => {
+    try {
+        // Fetch all questions that are 'active'
+        const questions = await PersonalityQuestion.find({ status: 'active' });
 
-const addQues = async (req, res) => {
-    let existingQues = await personalityQuesModel.findOne({ question: req.body.question, status: "active" });
+        // Check if no questions are found
+        if (questions.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'No active questions found',
+            });
+        }
 
-    if (existingQues) {
-        return res.status(400).json({
-            status: false,
-            message: 'question already exists',
-        });
-    }
-
-
-    let addQuestion = {
-        question: req.body.question,
-        relatedTo: req.body.relatedTo
-    }
-
-    let questionDetail = await personalityQuesModel.create(addQuestion)
-    if (questionDetail) {
+        // Return the fetched questions
         return res.json({
             status: true,
-            message: "Question Added",
-            data: questionDetail
-        })
-    }
-}
-
-
-
-const getQuestion = async (req, res) => {
-    let filter = {}
-    if (req.query.status) {
-        filter.status = req.query.status;
-        if (req.query.status == "all")
-            filter = {};
-    } else {
-        filter.status = "active";
-    }
-    if (req.query.questionId) filter._id = req.query.questionId;
-    if (req.query.relatedTo) filter.relatedTo = req.query.relatedTo;
-
-    let questionData = await personalityQuesModel.aggregate([
-        {
-             $match:filter
-        },
-        {
-            $sample: { size: 48 }
-        }
-    ])
-    if (questionData.length === 0) {
-        return res.json({
+            message: 'Questions fetched successfully',
+            data: questions,
+        });
+    } catch (error) {
+        console.error('Error fetching questions:', error);
+        return res.status(500).json({
             status: false,
-            message: "question not found"
-        })
+            message: 'Error fetching questions from the database',
+        });
     }
-    res.json({
-        status: true,
-        count: questionData.length,
-        message: "Question Data",
-        data: questionData
-    })
-}
-
+};
 
 module.exports = {
-    addQues,
-    getQuestion
-}
+    getQuestions,
+};

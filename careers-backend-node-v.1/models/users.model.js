@@ -25,9 +25,10 @@ const userSchema = new mongoose.Schema({
     OTPverified: { type: Boolean, default: false },
     blockUntil: { type: Date },
     linkedin: { type: String },
-    user_level: {type: Number},
-    personality: { type: String, enum: ['realistic', 'investigative', 'artistic', 'social', 'enterprising', 'conventional'] },
-    status: { type: String, enum: ['active', 'inactive','false'], default: 'false' },
+    user_level: { type: Number, default: 0 },
+    profileComplete: { type: Boolean, default: false },
+    personality: { type: String, enum: ['realistic', 'investigative', 'artistic', 'social', 'enterprising', 'conventional'],default: 'realistic' },
+    status: { type: String, enum: ['active', 'inactive','false'], default: 'active' },
 }, {
     timestamps: true
 });

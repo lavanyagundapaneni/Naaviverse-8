@@ -4,38 +4,60 @@ const axios = require('axios');
 const userPersonalityModel = require('../models/userPersonalityAns.model')
 
 const addUser = async (req, res) => {
-    let checkuser = await userModel.findOne({ email: req.body.email, status: "active" });
-    
-    if (!checkuser) {
-        return res.json({
-            status: false,
-            message: 'Error in update Profile',
-        })
-    }
-    checkuser.email= req.body.email;
-    checkuser.name= req.body.name;
-    checkuser.country= req.body.country;
-    checkuser.state= req.body.state;
-    checkuser.city= req.body.city;
-    checkuser.postalCode= req.body.postalCode;
-    checkuser.profilePicture= req.body.profilePicture
-    checkuser.status= "active";
-    checkuser.user_level=1;
-    
-    checkuser.save();
+    try {
+        // Find the user by email
+        let user = await userModel.findOne({ email: req.body.email });
 
-    if (!user) {
+        if (!user) {
+            return res.json({
+                status: false,
+                message: 'User not found during profile update',
+            });
+        }
+
+        // Update the user with provided fields
+        user.name = req.body.name || user.name;
+        user.country = req.body.country || user.country;
+        user.state = req.body.state || user.state;
+        user.city = req.body.city || user.city;
+        user.postalCode = req.body.postalCode || user.postalCode;
+        user.profilePicture = req.body.profilePicture || user.profilePicture;
+        user.username = req.body.username || user.username;
+        user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+
+        // Check if any required fields are missing
+        const requiredFields = [
+            user.name,
+            user.country,
+            user.state,
+            user.city,
+            user.postalCode,
+            user.profilePicture,
+            user.username,
+            user.phoneNumber,
+        ];
+
+        const isProfileComplete = requiredFields.every((field) => field && field.trim() !== '');
+
+        // Save the updated user
+        await user.save();
+
+        return res.json({
+            status: true,
+            message: 'User profile updated successfully',
+            data: {
+                ...user.toObject(),
+                profileIncomplete: !isProfileComplete, // Flag for incomplete profile
+            },
+        });
+    } catch (error) {
+        console.error('Error in addUser:', error);
         return res.json({
             status: false,
-            message: 'Error in creating user',
-        })
+            message: 'Error in creating or updating user',
+        });
     }
-    return res.json({
-        status: true,
-        message: 'User created Successfully',
-        data: user
-    })
-}
+};
 
 const getUsers = async (req, res) => { 
     let filter = {};

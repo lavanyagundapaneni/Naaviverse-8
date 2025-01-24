@@ -33,6 +33,7 @@ const signUp = async (req, res) => {
       OTPAttempts: 0,
       OTPCreatedTime: currentTime,
       status: false,
+      profileCompleted: false 
     });
 
     await temporalUser.save();
