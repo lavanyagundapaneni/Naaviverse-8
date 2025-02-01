@@ -109,8 +109,8 @@ const UserProfile = () => {
   const [selectedDropDown, setSelectedDropDown] = useState("");
   const [uploading, setUploading] = useState(false);
   const setFunc = (value) => {
-  setProfilePicture(value);
-};
+    setProfilePicture(value);
+  };
 
 
 
@@ -179,28 +179,28 @@ const UserProfile = () => {
     secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
     region: process.env.REACT_APP_AWS_REGION
   });
-  
+
   // Create an S3 instance
   const s3 = new AWS.S3();
 
   const uploadCoverImage = async (file) => {
     const params = {
-        Bucket: 'naaviprofileuploads',
-        Key: file.name,
-        Body: file,
-        ContentType: file.type,
+      Bucket: 'naaviprofileuploads',
+      Key: file.name,
+      Body: file,
+      ContentType: file.type,
     };
 
     try {
-        const result = await s3.upload(params).promise();
-        console.log('File uploaded successfully:', result);
+      const result = await s3.upload(params).promise();
+      console.log('File uploaded successfully:', result);
 
-        // Update profilePicture state with the URL of the uploaded image
-        setProfilePicture(result.Location); // Use result.Location to get the URL
+      // Update profilePicture state with the URL of the uploaded image
+      setProfilePicture(result.Location); // Use result.Location to get the URL
     } catch (error) {
-        console.error('Error uploading file:', error);
+      console.error('Error uploading file:', error);
     }
-};
+  };
 
   // upload end here
 
@@ -228,7 +228,7 @@ const UserProfile = () => {
         return;
       }
     }
-    setAllLev2Filled(true) 
+    setAllLev2Filled(true)
   };
 
   useEffect(() => {
@@ -273,14 +273,21 @@ const UserProfile = () => {
         });
       });
   };
-const [countryApiValue, setCountryApiValue] = useState([])
+  const [countryApiValue, setCountryApiValue] = useState([]); // ✅ Define state globally in the component
+  const [selectedCountry, setSelectedCountry] = useState(""); // Store selected country
+
   useEffect(() => {
-    axios.get(`https://comms.globalxchange.io/coin/vault/countries/data/get`).then(({data}) => {
-        if(data.status){
-          setCountryApiValue(data?.countries)
-        }
-    })
-  }, [])
+    axios
+      .get("https://restcountries.com/v3.1/all")
+      .then(({ data }) => {
+        // Sort countries alphabetically by common name
+        const sortedCountries = data.sort((a, b) =>
+          a.name.common.localeCompare(b.name.common)
+        );
+        setCountryApiValue(sortedCountries);
+      })
+      .catch((error) => console.error("Error fetching countries:", error));
+  }, []);
 
 
   const resetpop = () => {
@@ -334,25 +341,25 @@ const [countryApiValue, setCountryApiValue] = useState([])
     reader.readAsDataURL(selectedFile); // Read file as Data URL
 
     const params = {
-        Bucket: 'naaviprofileuploads',
-        Key: selectedFile.name,
-        Body: selectedFile,
-        ContentType: selectedFile.type,
+      Bucket: 'naaviprofileuploads',
+      Key: selectedFile.name,
+      Body: selectedFile,
+      ContentType: selectedFile.type,
     };
 
     try {
-        // Upload the file to S3
-        const result = await s3.upload(params).promise();
-        console.log('File uploaded successfully:', result);
+      // Upload the file to S3
+      const result = await s3.upload(params).promise();
+      console.log('File uploaded successfully:', result);
 
-        // Set the profile picture URL
-        setProfilePicture(result.Location); // Use the URL returned from S3
+      // Set the profile picture URL
+      setProfilePicture(result.Location); // Use the URL returned from S3
     } catch (error) {
-        console.error("Error uploading file:", error);
+      console.error("Error uploading file:", error);
     } finally {
-        setUploading(false); // Hide uploading indicator
+      setUploading(false); // Hide uploading indicator
     }
-};
+  };
 
 
   const handleFinalSubmit = () => {
@@ -384,8 +391,8 @@ const [countryApiValue, setCountryApiValue] = useState([])
                 ? parseFloat(firstMonthPrice)
                 : 0
               : monthlyPrice !== ""
-              ? parseFloat(monthlyPrice)
-              : 0,
+                ? parseFloat(monthlyPrice)
+                : 0,
           coin: selectedCurrency.coinSymbol,
         },
       },
@@ -393,20 +400,20 @@ const [countryApiValue, setCountryApiValue] = useState([])
         billingType === "One Time"
           ? 0
           : gracePeriod !== ""
-          ? parseFloat(gracePeriod)
-          : 0,
+            ? parseFloat(gracePeriod)
+            : 0,
       first_retry:
         billingType === "One Time"
           ? 0
           : secondChargeAttempt !== ""
-          ? parseFloat(secondChargeAttempt)
-          : 0,
+            ? parseFloat(secondChargeAttempt)
+            : 0,
       second_retry:
         billingType === "One Time"
           ? 0
           : thirdChargeAttempt !== ""
-          ? parseFloat(thirdChargeAttempt)
-          : 0,
+            ? parseFloat(thirdChargeAttempt)
+            : 0,
       staking_allowed: false,
       staking_details: {},
     };
@@ -437,8 +444,8 @@ const [countryApiValue, setCountryApiValue] = useState([])
                 ? parseFloat(firstMonthPrice)
                 : 0
               : monthlyPrice !== ""
-              ? parseFloat(monthlyPrice)
-              : 0,
+                ? parseFloat(monthlyPrice)
+                : 0,
           coin: selectedCurrency.coinSymbol,
         },
       },
@@ -446,20 +453,20 @@ const [countryApiValue, setCountryApiValue] = useState([])
         billingType === "One Time"
           ? 0
           : gracePeriod !== ""
-          ? parseFloat(gracePeriod)
-          : 0,
+            ? parseFloat(gracePeriod)
+            : 0,
       first_retry:
         billingType === "One Time"
           ? 0
           : secondChargeAttempt !== ""
-          ? parseFloat(secondChargeAttempt)
-          : 0,
+            ? parseFloat(secondChargeAttempt)
+            : 0,
       second_retry:
         billingType === "One Time"
           ? 0
           : thirdChargeAttempt !== ""
-          ? parseFloat(thirdChargeAttempt)
-          : 0,
+            ? parseFloat(thirdChargeAttempt)
+            : 0,
       staking_allowed: false,
       staking_details: {},
     };
@@ -537,17 +544,17 @@ const [countryApiValue, setCountryApiValue] = useState([])
 
   const handleProfileData = async () => {
     const mailId = userDetails?.email;
-  
+
     try {
       const response = await axios.get(`/api/users/get/${mailId}`);
       const result = response.data;
       console.log('API Response:', result);
 
-  
+
       if (result?.status) {
         const profile = result?.data; // Extract profile data
         const userLevel = profile?.user_level || 0; // Default user_level to 0 if not present
-  
+
         if (result.profileComplete === false) {
           console.log('Profile is incomplete. Redirecting to complete profile...');
           setIsProfileData(false);
@@ -559,7 +566,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
           setProfileData(profile); // Set the complete profile data
           setProfileDataId(profile?._id); // Set profile data ID
           setPreviewUrl(profile?.profilePicture);
-  
+
           // Update the button styles dynamically
           manageLevelAccess(userLevel);
         }
@@ -574,7 +581,7 @@ const [countryApiValue, setCountryApiValue] = useState([])
       setProfileData({});
     }
   };
-  
+
   /**
    * Function to dynamically manage button access and behavior based on user level.
    * @param {number} userLevel - The current level of the user.
@@ -589,46 +596,47 @@ const [countryApiValue, setCountryApiValue] = useState([])
     } else {
       console.log('User is at an undefined level or no levels completed.');
     }
-  
+
     // Add any additional logic here to update state or apply changes to the UI dynamically
   };
-  
-  
-const levelOneProfile = async (email) => {
-  if (!fullName || !country || !selectState || !city || !postalCode || !profilePicture || !userName || !phoneNo) {
+
+
+  const levelOneProfile = async (email) => {
+    if (!fullName || !selectedCountry || !selectState || !city || !postalCode || !profilePicture || !userName || !phoneNo) {
       alert('Please fill out all fields');
       return;
-  }
+    }
 
-  const body = {
+    const body = {
       email: userDetails?.email,
       name: fullName,
-      country,
+      country: selectedCountry,
       state: selectState,
       city,
       postalCode,
       profilePicture,
       username: userName,
       phoneNumber: `+91${phoneNo}`,
-  };
+    };
 
-  try {
+    try {
       const response = await axios.post(`/api/users/add`, body);
       const result = response?.data;
 
       if (result?.status) {
-          console.log('Profile created successfully.');
-          setIsProfileData(true);
+        console.log('Profile created successfully.');
+        setIsProfileData(true);
+        setCreateBrandProfile(false);
 
-          // Fetch the updated profile data
-          await handleProfileData();
+        // Fetch the updated profile data
+        await handleProfileData();
       } else {
-          console.error('Error creating profile');
+        console.error('Error creating profile');
       }
-  } catch (error) {
+    } catch (error) {
       console.error('Error in levelOneProfile:', error);
-  }
-};
+    }
+  };
 
   useEffect(() => {
     accountantStatus();
@@ -695,10 +703,10 @@ const levelOneProfile = async (email) => {
   //     const response = await axios.get(
   //       `/api/users/get`
   //     );
-      
+
   //     const data = response.data;
   //     // console.log(data, "username data");
-      
+
   //     if (data?.data && data?.status && userName.length < 1) {
   //       setUserNameAvailable(false);
   //     } else if (!data?.data && data?.status && userName.length > 0) {
@@ -711,7 +719,7 @@ const levelOneProfile = async (email) => {
   //     setUserNameAvailable(false); // Set false in case of an error
   //   }
   // }, 200);
-  
+
   // useEffect(() => {
   //   fetchData();
   // }, [userName]);
@@ -854,7 +862,7 @@ const levelOneProfile = async (email) => {
           </div>
           <div className="dashboard-screens" onClick={() => resetpop()}>
             <div style={{ height: "100%" }}>
-            <MenuNav 
+              <MenuNav
                 showDrop={showDrop}
                 setShowDrop={setShowDrop}
                 // searchTerm={search}
@@ -1310,8 +1318,8 @@ const levelOneProfile = async (email) => {
                             {profileData?.user_level === 2
                               ? "Completed"
                               : profileData?.user_level === 3
-                              ? "Completed"
-                              : "Start Now"}
+                                ? "Completed"
+                                : "Start Now"}
                           </div>
                         </div>
                         <div
@@ -1393,18 +1401,18 @@ const levelOneProfile = async (email) => {
                   <>
                     {isProfileIncomplete && (
                       <div
-                    
-                      className="create-acc"
-                      onClick={() => {
-                        setCreateBrandProfile(true);
-                        setShowDrop(false);
-                      }}
-                    >
-                      <div>Complete Your User Profile</div>
-                      <div>
-                        <img src={colorArrow} alt="" />
+
+                        className="create-acc"
+                        onClick={() => {
+                          setCreateBrandProfile(true);
+                          setShowDrop(false);
+                        }}
+                      >
+                        <div>Complete Your User Profile</div>
+                        <div>
+                          <img src={colorArrow} alt="" />
+                        </div>
                       </div>
-                    </div>
                     )}
                   </>
                 )}
@@ -1622,8 +1630,8 @@ const levelOneProfile = async (email) => {
                             isUploadLoading
                               ? upgif
                               : coverImageS3url !== ""
-                              ? coverImageS3url
-                              : uploadv
+                                ? coverImageS3url
+                                : uploadv
                           }
                           alt=""
                           onClick={handleImageClick}
@@ -1891,12 +1899,12 @@ const levelOneProfile = async (email) => {
         )}
       </>
 
- 
+
 
       <>
         {createBrandProfile && (
           <div
-            className={createLevelThree ? "popularS1":"popularS"}
+            className={createLevelThree ? "popularS1" : "popularS"}
             style={{
               padding:
                 createBrandProfileStep === 2
@@ -1914,7 +1922,7 @@ const levelOneProfile = async (email) => {
                       setUserName("");
                       setFullName("");
                       setProfilePicture("");
-                      setCountry("");
+                      setSelectedCountry("");
                       setSelectState("");
                       setCity("");
                       setPostalCode("");
@@ -1942,77 +1950,77 @@ const levelOneProfile = async (email) => {
                     funcValue={profilePicture}
                   />
                   <div
-  className="imageUploadDiv"
-  onClick={() => setSelectedDropDown("")}
-  style={{
-    minWidth: "140px",
-    minHeight: "140px",
-    maxWidth: "140px",
-    maxHeight: "140px",
-    border: "0.5px solid #e7e7e7",
-    borderRadius: "50%",
-  }}
->
-{profilePicture ? (
-    <div
-      className="imageDiv"
-      style={{ height: "100%", width: "100%", marginRight: "0" }}
-    >
-      <img
-        src={profilePicture}  // Display uploaded profile picture
-        alt="UploadedProfilePic"
-        className="profileImg"
-        htmlFor="profileUpdateImg"
-        style={{ width: "100%", height: "100%" }}
-      />
-    </div>
-  ) : (
-    <label
-      htmlFor="profileUpdateImg"
-      className="uploadFileDiv"
-      style={{
-        width: "100%",
-        height: "100%",
-        marginBottom: "0",
-      }}
-    >
-      <input
-        className="uploadNewPic"
-        type="file"
-        onChange={(e) => {
-          handleFileInputChange(e, setFunc, setUploading);
-        }}
-        accept="image/*"
-        id="profileUpdateImg"
-      />
+                    className="imageUploadDiv"
+                    onClick={() => setSelectedDropDown("")}
+                    style={{
+                      minWidth: "140px",
+                      minHeight: "140px",
+                      maxWidth: "140px",
+                      maxHeight: "140px",
+                      border: "0.5px solid #e7e7e7",
+                      borderRadius: "50%",
+                    }}
+                  >
+                    {profilePicture ? (
+                      <div
+                        className="imageDiv"
+                        style={{ height: "100%", width: "100%", marginRight: "0" }}
+                      >
+                        <img
+                          src={profilePicture}  // Display uploaded profile picture
+                          alt="UploadedProfilePic"
+                          className="profileImg"
+                          htmlFor="profileUpdateImg"
+                          style={{ width: "100%", height: "100%" }}
+                        />
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor="profileUpdateImg"
+                        className="uploadFileDiv"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          marginBottom: "0",
+                        }}
+                      >
+                        <input
+                          className="uploadNewPic"
+                          type="file"
+                          onChange={(e) => {
+                            handleFileInputChange(e, setFunc, setUploading);
+                          }}
+                          accept="image/*"
+                          id="profileUpdateImg"
+                        />
 
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          border: "0.5px solid #2c7cb2 ",
-          borderRadius: "50%",
-        }}
-      >
-        {uploading ? (
-          <div>Uploading...</div>
-        ) : (
-          <div>
-            <img
-              src={uploadGrey}  // Placeholder image while uploading
-              alt="UploadPlaceholder"
-              style={{ width: "40px", height: "40px" }}
-            />
-          </div>
-        )}
-      </div>
-    </label>
-  )}
+                        <div
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            border: "0.5px solid #2c7cb2 ",
+                            borderRadius: "50%",
+                          }}
+                        >
+                          {uploading ? (
+                            <div>Uploading...</div>
+                          ) : (
+                            <div>
+                              <img
+                                src={uploadGrey}  // Placeholder image while uploading
+                                alt="UploadPlaceholder"
+                                style={{ width: "40px", height: "40px" }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </label>
+                    )}
 
-</div>
+                  </div>
                   <InputDivsWithMT
                     heading="What is your full name? *"
                     placeholderText="Name.."
@@ -2038,18 +2046,23 @@ const levelOneProfile = async (email) => {
                     setFunc={setCountry}
                     funcValue={country}
                   /> */}
-                  <div style={{paddingTop:'30px'}}>What country are you from? *</div>
-                  <div className={styles.inputDivs} style={{ border: '1px solid #2c7cb2', borderRadius:'30px', fontSize:"13px", fontWeight:"500", paddingLeft:'10px' }}>
-                  <select name="country" id="country" style={{border:"none", padding:'1rem', width:'90%', fontSize:"16px"}}  onChange={(e) => {
-                          setCountry(e.target.value);
-                        }}>
-                          <option value="">New Country..</option>
-                          {countryApiValue?.map(item => (
-                            <option value={item?.name}>{item?.name}</option>
-                          ))}
-                      
+                  <div style={{ paddingTop: "30px" }}>What country are you from? *</div>
+                  <div className={styles.inputDivs} style={{ border: "1px solid #2c7cb2", borderRadius: "30px", fontSize: "13px", fontWeight: "500", paddingLeft: "10px" }}>
+                    <select
+                      name="country"
+                      id="country"
+                      style={{ border: "none", padding: "1rem", width: "90%", fontSize: "16px" }}
+                      onChange={(e) => setSelectedCountry(e.target.value)}
+                    >
+                      <option value="">New Country..</option>
+                      {countryApiValue?.map((item) => (
+                        <option key={item.cca2} value={item?.name?.common}>
+                          {item?.name?.common}
+                        </option>
+                      ))}
                     </select>
-                   </div>
+                  </div>
+
                   <InputDivsWithMT
                     heading="What state are you from?"
                     placeholderText="State"
@@ -2081,7 +2094,7 @@ const levelOneProfile = async (email) => {
                         setUserName("");
                         setFullName("");
                         setProfilePicture("");
-                        setCountry("");
+                        setSelectedCountry("");
                         setSelectState("");
                         setCity("");
                         setPostalCode("");
@@ -2095,26 +2108,26 @@ const levelOneProfile = async (email) => {
                         maxHeight: "3.5rem",
                         opacity:
                           profilePicture &&
-                          fullName &&
-                          userName.length > 0 &&
-                          // && userNameAvailable
-                          country &&
-                          selectState &&
-                          city &&
-                          postalCode &&
-                          phoneNo
+                            fullName &&
+                            userName.length > 0 &&
+                            // && userNameAvailable
+                            selectedCountry &&
+                            selectState &&
+                            city &&
+                            postalCode &&
+                            phoneNo
                             ? "1"
                             : "0.25",
                         cursor:
                           profilePicture &&
-                          fullName &&
-                          userName.length > 0 &&
-                          // && userNameAvailable
-                          country &&
-                          selectState &&
-                          city &&
-                          postalCode &&
-                          phoneNo
+                            fullName &&
+                            userName.length > 0 &&
+                            // && userNameAvailable
+                            selectedCountry &&
+                            selectState &&
+                            city &&
+                            postalCode &&
+                            phoneNo
                             ? "pointer"
                             : "not-allowed",
                         background: "#59A2DD",
@@ -2126,7 +2139,7 @@ const levelOneProfile = async (email) => {
                           fullName &&
                           userName.length > 0 &&
                           // && userNameAvailable
-                          country &&
+                          selectedCountry &&
                           selectState &&
                           city &&
                           postalCode &&
@@ -2935,7 +2948,7 @@ const levelOneProfile = async (email) => {
                         }
                       }}
                     >
-                     Submit
+                      Submit
                     </div>
                   </div>
                 </>
@@ -2998,7 +3011,7 @@ const levelOneProfile = async (email) => {
               <div className="linee"></div>
             </div>
             <div className="each-action1">
-              
+
               <input
                 type="text"
                 placeholder="New Country.."

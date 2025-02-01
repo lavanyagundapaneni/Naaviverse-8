@@ -2868,8 +2868,10 @@ const AccProfile = () => {
                           });
                         }}>
                           <option value="">Country..</option>
-                          {countryApiValue?.map(item => (
-                            <option value={item?.name}>{item?.name}</option>
+                          {countryApiValue?.map((item) => (
+                        <option key={item.cca2} value={item?.name?.common}>
+                          {item?.name?.common}
+                        </option>
                           ))}
                       
                     </select>
@@ -3222,8 +3224,10 @@ const AccProfile = () => {
                           setBusinessCountry(e.target.value);
                         }}>
                           <option value="">Click to Select</option>
-                          {countryApiValue?.map(item => (
-                            <option value={item?.name}>{item?.name}</option>
+                          {countryApiValue?.map((item) => (
+                        <option key={item.cca2} value={item?.name?.common}>
+                          {item?.name?.common}
+                        </option>
                           ))}
                       
                     </select>
@@ -3433,8 +3437,10 @@ const AccProfile = () => {
                           setHeadquarter(e.target.value);
                         }}>
                           <option value="">Click to Select</option>
-                          {countryApiValue?.map(item => (
-                            <option value={item?.name}>{item?.name}</option>
+                          {countryApiValue?.map((item) => (
+                        <option key={item.cca2} value={item?.name?.common}>
+                          {item?.name?.common}
+                        </option>
                           ))}
                       
                     </select>
@@ -3587,9 +3593,10 @@ const AccProfile = () => {
             <select name="country" id="country" style={{border:"none", padding:'1.5rem', width:'90%', fontSize:"16px"}}  onChange={(e) => {
                           setNewCountry(e.target.value);
                         }}>
-                          <option value="">New Country..</option>
-                          {countryApiValue?.map(item => (
-                            <option value={item?.name}>{item?.name}</option>
+                          {countryApiValue?.map((item) => (
+                        <option key={item.cca2} value={item?.name?.common}>
+                          {item?.name?.common}
+                        </option>
                           ))}
                       
                     </select>

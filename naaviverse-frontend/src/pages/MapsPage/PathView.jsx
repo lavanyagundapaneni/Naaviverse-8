@@ -120,12 +120,12 @@ const Pathview = ({
                   onClick={() => {
                     // console.log(e, 'selected path');
                     toggleButtonVisibility(i);
-                    setSelectedLocation(e?.destination_institution);
+                    setSelectedLocation(e?.school);
                   }}
                 >
                   <div className="each-pv-name1-div">
                     <div className="each-pv-name1">
-                      {e?.destination_institution}
+                      {e?.school}
                     </div>
                     <div className="each-pv-name1">{e?.program}</div>
                   </div>

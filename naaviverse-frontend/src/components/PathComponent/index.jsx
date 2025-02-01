@@ -53,6 +53,7 @@ const PathComponent = () => {
   const [pathDirections, setPathDirections] = useState(null);
   const [pathSelectedLocation, setPathSelectedLocation] = useState(null);
   const [pathShowDirections, setPathShowDirections] = useState(true);
+  const [userProfile, setUserProfile] = useState(null);
   const {
     searchTerm,
     setSearchterm,
@@ -84,7 +85,7 @@ const PathComponent = () => {
     setRefetchPaths,
   } = useContext(GlobalContex);
   const [loading, setLoading] = useState(false);
-  const [levelTwoData, setLevelTwoData] = useState([]);
+  const [levelThreeData, setLevelThreeData] = useState([]);
 
   let userDetails = JSON.parse(localStorage.getItem("user"));
 
@@ -262,21 +263,29 @@ const PathComponent = () => {
       });
   };
 
+  const fetchUserProfile = async () => {
+    try {
+      const email = userDetails?.email; // Ensure email is defined
+      const response = await fetch(`/api/users/get/${email}`);
+      const result = await response.json();
+
+      console.log("Fetched User Data:", result);
+
+      if (result.status) {
+        localStorage.setItem("userProfile", JSON.stringify(result.data));
+        setUserProfile(result.data); // Adjust based on actual structure
+      } else {
+        console.log("No user found");
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
+
   useEffect(() => {
-    let email = userDetails?.email;
-    axios
-      .get(`/api/users/get?email=${email}`)
-      .then((response) => {
-        let result = response?.data?.data[0];
-        // console.log(result, "user profile level 2");
-        if (result?.user_level === 2 || result?.user_level === 3) {
-          setLevelTwoData(result);
-        }
-      })
-      .catch((error) => {
-        console.log(error, "error in user profile level 2");
-      });
-  }, []);
+    fetchUserProfile();
+  }, []);  // Run only once when the component mounts
+
 
   return (
     <div className="mapspage1">
@@ -292,36 +301,6 @@ const PathComponent = () => {
                   pathItemSelected && pathItemStep === 3 ? "none" : "flex",
               }}
             >
-              {/* <div
-                className="each-icon1"
-                // onClick={() => {
-                //   setOption("Career");
-                // }}
-                style={{
-                  cursor: "not-allowed",
-                  opacity: 0.5,
-                }}
-              >
-                <div
-                  className="border-div1"
-                  style={{
-                    border:
-                      option === "Career"
-                        ? "1px solid #100F0D"
-                        : "1px solid #e7e7e7",
-                  }}
-                >
-                  <img src={careerIcon} alt="" />
-                </div>
-                <div
-                  className="icon-name-txt1"
-                  style={{
-                    fontWeight: option === "Career" ? "600" : "",
-                  }}
-                >
-                  Career
-                </div>
-              </div> */}
               <div
                 className="each-icon1"
                 onClick={() => {
@@ -348,37 +327,8 @@ const PathComponent = () => {
                   Education
                 </div>
               </div>
-              {/* <div
-                className="each-icon1"
-                // onClick={() => {
-                //   setOption("Immigration");
-                // }}
-                style={{
-                  cursor: "not-allowed",
-                  opacity: 0.5,
-                }}
-              >
-                <div
-                  className="border-div1"
-                  style={{
-                    border:
-                      option === "Immigration"
-                        ? "1px solid #100F0D"
-                        : "1px solid #e7e7e7",
-                  }}
-                >
-                  <img src={immigrationIcon} alt="" />
-                </div>
-                <div
-                  className="icon-name-txt1"
-                  style={{
-                    fontWeight: option === "Immigration" ? "600" : "",
-                  }}
-                >
-                  Immigration
-                </div>
-              </div> */}
             </div>
+  
             {pathItemSelected && pathItemStep === 1 ? (
               <div className="mid-area1" style={{ borderBottom: "none" }}>
                 <div
@@ -395,10 +345,7 @@ const PathComponent = () => {
                     className="reset-btn1"
                     style={{ fontWeight: "400", textAlign: "left" }}
                     onClick={() => {
-                      // setsideNav("My Journey");
-                      // setShowPathDetails(true);
-                      navigate(`/dashboard/path/${selectedPathItem?._id}`)
-                      
+                      navigate(`/dashboard/path/${selectedPathItem?._id}`);
                     }}
                   >
                     Explore Path
@@ -472,151 +419,156 @@ const PathComponent = () => {
               <div className="mid-area1">
                 <div className="current-coord-container">
                   <div className="current-text">Current Coordinates</div>
-                  <div className="each-coo-field">
-                    <div className="field-name">Grade</div>
-
-                    <div
-                      className="toggleContainer"
-                      onClick={(e) => setGradeToggle(!gradeToggle)}
-                    >
-                      <div
-                        className="toggle"
-                        style={{
-                          transform: !gradeToggle
-                            ? "translateX(0px)"
-                            : "translateX(20px)",
-                        }}
-                      >
-                        &nbsp;
+  
+                  {userProfile ? (
+                    <>
+                      <div className="each-coo-field">
+                        <div className="field-name">Grade: {userProfile.grade}</div>
+                        <div
+                          className="toggleContainer"
+                          onClick={(e) => setGradeToggle(!gradeToggle)}
+                        >
+                          <div
+                            className="toggle"
+                            style={{
+                              transform: !gradeToggle
+                                ? "translateX(0px)"
+                                : "translateX(20px)",
+                            }}
+                          >
+                            &nbsp;
+                          </div>
+                        </div>
+                        <div className="field-value">
+                          {userProfile?.grade}
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="field-value">
-                      {levelTwoData ? levelTwoData?.grade : ""}
-                    </div>
-                  </div>
-
-                  <div className="each-coo-field">
-                    <div className="field-name">Curriculum</div>
-                    <div
-                      className="toggleContainer"
-                      onClick={(e) => setCurriculumToggle(!curriculumToggle)}
-                    >
-                      <div
-                        className="toggle"
-                        style={{
-                          transform: !curriculumToggle
-                            ? "translateX(0px)"
-                            : "translateX(20px)",
-                        }}
-                      >
-                        &nbsp;
+  
+                      <div className="each-coo-field">
+                        <div className="field-name">Curriculum: {userProfile.curriculum}</div>
+                        <div
+                          className="toggleContainer"
+                          onClick={(e) => setCurriculumToggle(!curriculumToggle)}
+                        >
+                          <div
+                            className="toggle"
+                            style={{
+                              transform: !curriculumToggle
+                                ? "translateX(0px)"
+                                : "translateX(20px)",
+                            }}
+                          >
+                            &nbsp;
+                          </div>
+                        </div>
+                        <div className="field-value">
+                          {userProfile?.curriculum}
+                        </div>
                       </div>
-                    </div>
-                    <div className="field-value">
-                      {levelTwoData ? levelTwoData?.curriculum : ""}
-                    </div>
-                  </div>
-                  <div className="each-coo-field">
-                    <div className="field-name">Stream</div>
-                    <div
-                      className="toggleContainer"
-                      onClick={(e) => setStreamToggle(!streamToggle)}
-                    >
-                      <div
-                        className="toggle"
-                        style={{
-                          transform: !streamToggle
-                            ? "translateX(0px)"
-                            : "translateX(20px)",
-                        }}
-                      >
-                        &nbsp;
+  
+                      <div className="each-coo-field">
+                        <div className="field-name">Stream</div>
+                        <div
+                          className="toggleContainer"
+                          onClick={(e) => setStreamToggle(!streamToggle)}
+                        >
+                          <div
+                            className="toggle"
+                            style={{
+                              transform: !streamToggle
+                                ? "translateX(0px)"
+                                : "translateX(20px)",
+                            }}
+                          >
+                            &nbsp;
+                          </div>
+                        </div>
+                        <div className="field-value">
+                         {console.log("stream:", userProfile?.stream)}
+                          {userProfile?.stream}
+                        </div>
                       </div>
-                    </div>
-                    <div className="field-value">
-                      {levelTwoData ? levelTwoData?.stream : ""}
-                    </div>
-                  </div>
-                  <div className="each-coo-field">
-                    <div className="field-name">Performance</div>
-                    <div
-                      className="toggleContainer"
-                      onClick={(e) => setPerformanceToggle(!performanceToggle)}
-                    >
-                      <div
-                        className="toggle"
-                        style={{
-                          transform: !performanceToggle
-                            ? "translateX(0px)"
-                            : "translateX(20px)",
-                        }}
-                      >
-                        &nbsp;
+  
+                      <div className="each-coo-field">
+                        <div className="field-name">Performance</div>
+                        <div
+                          className="toggleContainer"
+                          onClick={(e) => setPerformanceToggle(!performanceToggle)}
+                        >
+                          <div
+                            className="toggle"
+                            style={{
+                              transform: !performanceToggle
+                                ? "translateX(0px)"
+                                : "translateX(20px)",
+                            }}
+                          >
+                            &nbsp;
+                          </div>
+                        </div>
+                        <div className="field-value">
+                          {userProfile?.performance}
+                        </div>
                       </div>
-                    </div>
-                    <div className="field-value">
-                      {levelTwoData ? levelTwoData?.performance : ""}
-                    </div>
-                  </div>
-                  <div className="each-coo-field">
-                    <div className="field-name">Financial</div>
-                    <div
-                      className="toggleContainer"
-                      onClick={(e) => setFinancialToggle(!financialToggle)}
-                    >
-                      <div
-                        className="toggle"
-                        style={{
-                          transform: !financialToggle
-                            ? "translateX(0px)"
-                            : "translateX(20px)",
-                        }}
-                      >
-                        &nbsp;
+  
+                      <div className="each-coo-field">
+                        <div className="field-name">Financial</div>
+                        <div
+                          className="toggleContainer"
+                          onClick={(e) => setFinancialToggle(!financialToggle)}
+                        >
+                          <div
+                            className="toggle"
+                            style={{
+                              transform: !financialToggle
+                                ? "translateX(0px)"
+                                : "translateX(20px)",
+                            }}
+                          >
+                            &nbsp;
+                          </div>
+                        </div>
+                        <div className="field-value">
+                          {userProfile?.financialSituation}
+                        </div>
                       </div>
-                    </div>
-                    <div className="field-value">
-                      {levelTwoData ? levelTwoData?.financialSituation : ""}
-                    </div>
-                  </div>
-                  <div className="each-coo-field">
-                    <div className="field-name">Personality</div>
-                    <div
-                      className="toggleContainer"
-                      onClick={(e) => {
-                        if (levelTwoData?.personality) {
-                          setPersonalityToggle(!personalityToggle);
-                        }
-                      }}
-                    >
-                      <div
-                        className="toggle"
-                        style={{
-                          transform: !personalityToggle
-                            ? "translateX(0px)"
-                            : "translateX(20px)",
-                        }}
-                      >
-                        &nbsp;
+  
+                      <div className="each-coo-field">
+                        <div className="field-name">Personality: {userProfile?.personality}</div>
+                        <div
+                          className="toggleContainer"
+                          onClick={(e) => setPersonalityToggle(!personalityToggle)}
+                        >
+                          <div
+                            className="toggle"
+                            style={{
+                              transform: !personalityToggle
+                                ? "translateX(0px)"
+                                : "translateX(20px)",
+                            }}
+                          >
+                            &nbsp;
+                          </div>
+                        </div>
+                        <div className="field-value">
+                          {console.log("Personality Data:", userProfile?.personality)}
+                          {userProfile?.personality?? "--"}
+                        </div>
                       </div>
-                    </div>
-                    <div className="field-value">
-                      {levelTwoData ? levelTwoData?.personality : "--"}
-                    </div>
-                  </div>
-                  <div className="each-coo-field">
-                    <div className="field-name">School</div>
-                    <div
-                      className="toggleContainer"
-                      style={{ border: "0px" }}
-                    ></div>
-                    <div className="field-value" style={{ borderLeft: "0px" }}>
-                      {levelTwoData ? levelTwoData?.school : ""}
-                    </div>
-                  </div>
+  
+                      <div className="each-coo-field">
+                        <div className="field-name">School</div>
+                        <div className="toggleContainer" style={{ border: "0px" }}></div>
+                        <div className="field-value" style={{ borderLeft: "0px" }}>
+                          {userProfile?.school}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <p>Loading user profile...</p>
+                  )}
                 </div>
-
+  
                 <div className="maps-btns-div1">
                   <div
                     className="gs-Btn-maps1"
@@ -628,6 +580,7 @@ const PathComponent = () => {
               </div>
             )}
           </div>
+  
           <div className="maps-content-area1">
             <Pathview />
           </div>
@@ -635,6 +588,5 @@ const PathComponent = () => {
       )}
     </div>
   );
-};
-
-export default PathComponent;
+}
+export default PathComponent;  

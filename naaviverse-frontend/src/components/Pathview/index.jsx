@@ -33,20 +33,24 @@ const Pathview = () => {
   } = useContext(GlobalContex);
   const [loading, setLoading] = useState(false);
   const [pathViewData, setPathViewData] = useState([]);
+  const userProfile = JSON.parse(localStorage.getItem("userProfile"));
+
 
   useEffect(() => {
+    
     setLoading(true);
     axios
-      .get(`https://careers.marketsverse.com/paths/get/specific`, {
+      .get(`/api/userpaths/programs`, {
         params: {
           email: JSON.parse(localStorage.getItem("user"))?.user?.email,
-          grade: gradeToggle,
-          curriculum: curriculumToggle,
-          stream: streamToggle,
-          performance: performanceToggle,
-          financialSituation: financialToggle,
-          personality: personalityToggle,
+          ...(gradeToggle && { grade: userProfile.grade }),
+          ...(curriculumToggle && { curriculum: userProfile.curriculum }),
+          ...(streamToggle && { stream: userProfile.stream }),
+          ...(performanceToggle && { performance: userProfile.performance }),
+          ...(financialToggle && { financialSituation: userProfile.finance}),
+          ...(personalityToggle && { personality: userProfile.personality})
         },
+
       })
       .then((response) => {
         let result = response?.data?.data;
@@ -63,7 +67,7 @@ const Pathview = () => {
 
   const filteredPathViewData = pathViewData?.filter(
     (entry) =>
-      entry?.destination_institution
+      entry?.personality
         ?.toLowerCase()
         ?.includes(searchTerm?.toLowerCase()) ||
       entry?.program?.toLowerCase()?.includes(searchTerm?.toLowerCase())
@@ -111,7 +115,7 @@ const Pathview = () => {
                   setSelectedPathItem(e);
                 }}
               >
-                <div className="each-pv-name">{e?.destination_institution}</div>
+                <div className="each-pv-name">{e?.school}</div>
                 <div className="each-pv-name">{e?.program}</div>
                 <div className="each-pv-desc">{e?.description}</div>
               </div>
@@ -136,3 +140,4 @@ const Pathview = () => {
 };
 
 export default Pathview;
+

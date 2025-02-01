@@ -225,7 +225,7 @@ const MapsPage = () => {
   useEffect(() => {
     setLoading1(true);
     axios
-      .post(`https://careers.marketsverse.com/paths/get`)
+      .get(`/api/userpaths/programs`)
       .then((response) => {
         let result = response?.data?.data;
         // console.log(result, "path view result");

@@ -24,6 +24,7 @@ var userPersonalityRouter = require('./routes/userPersonalityRouter')
 var partnerRouter = require('./routes/partnerRouter')
 var adminRouter = require('./routes/adminRouter')
 var personalityRouter = require('./routes/personalityRouter')
+var programRouter = require('./routes/programRouter')
 // var usersRouter = require('./routes/users');
 
 var app = express();
@@ -52,6 +53,7 @@ app.use('/api/userAnswers', userPersonalityRouter)
 app.use('/api/partner', partnerRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/personality', personalityRouter)
+app.use('/api/userpaths', programRouter)
 
 
 //Increase body size limit to 50mb to prevent error: request entity too large(413)

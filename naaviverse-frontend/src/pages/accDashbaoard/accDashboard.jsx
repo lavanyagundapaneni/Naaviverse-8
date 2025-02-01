@@ -3976,8 +3976,10 @@ const AccDashboard = () => {
                           });
                         }}>
                           <option value="">Country..</option>
-                          {countryApiValue?.map(item => (
-                            <option value={item?.name}>{item?.name}</option>
+                          {countryApiValue?.map((item) => (
+                        <option key={item.cca2} value={item?.name?.common}>
+                          {item?.name?.common}
+                        </option>
                           ))}
                       
                     </select>

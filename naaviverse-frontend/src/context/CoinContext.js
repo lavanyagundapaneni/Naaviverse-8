@@ -41,6 +41,7 @@ export const CoinContextProvider = ({ children }) => {
   const [addApiValueCoin, setAddApiValueCoin] = useState();
   const [toCurrencyApiValue, setToCurrencyApiValue] = useState();
   const [countryApiValue, setCountryApiValue] = useState();
+  
   const [payMethodApiValue, setPayMethodApiValue] = useState();
   const [eachCardShowValue, setEachCardShowValue] = useState();
   const [fundingCurrency, setFundingCurrency] = useState(false);
@@ -203,12 +204,17 @@ export const CoinContextProvider = ({ children }) => {
   }, [coinType]);
 
   useEffect(() => {
-    axios.get(`https://comms.globalxchange.io/coin/vault/countries/data/get`).then(({data}) => {
-        if(data.status){
-          setCountryApiValue(data?.countries)
-        }
-    })
-  }, [])
+    axios
+      .get("https://restcountries.com/v3.1/all")
+      .then(({ data }) => {
+        // Sort countries alphabetically by common name
+        const sortedCountries = data.sort((a, b) =>
+          a.name.common.localeCompare(b.name.common)
+        );
+        setCountryApiValue(sortedCountries);
+      })
+      .catch((error) => console.error("Error fetching countries:", error));
+  }, []);
 
   return (
     <CoinContext.Provider
