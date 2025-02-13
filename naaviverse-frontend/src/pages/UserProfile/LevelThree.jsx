@@ -47,7 +47,7 @@ const LevelThree = ({
       .get(`/api/userAnswers/get?userId=${profileData?._id}`)
       .then(({ data }) => {
         const answers = Array(48).fill(null);
-        data.data.forEach((answer) => {
+        data.forEach((answer) => {
           const index = allQuestions.findIndex((q) => q.question === answer.question);
           if (index !== -1) answers[index] = answer.answer;
         });

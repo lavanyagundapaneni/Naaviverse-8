@@ -494,9 +494,9 @@ const AccDashboard = () => {
   };
 
   const getPartnerData = () => {
-    axios.get(`https://careers.marketsverse.com/partner/get`).then(({data}) => {
-      if(data.status){
-        setPartnerData(data?.data)
+    axios.get(`/api/partner/getpartners`).then(({data}) => {
+      if (data.success) {  // Change 'status' to 'success'
+        setPartnerData(data?.partners);  // Change 'data' to 'partners'
       }
     })
   }
@@ -1122,10 +1122,10 @@ const AccDashboard = () => {
     setClientLoading(true);
     axios
       .get(
-        `https://careers.marketsverse.com/users/get`
+        `/api/auth/get`
       )
       .then((response) => {
-        let result = response?.data?.data;
+        let result = response.data.data;
         // console.log(result, "brands crm clients data");
         setClientLoading(false);
         setCrmClientData(result);

@@ -1,17 +1,24 @@
 const mongoose = require('mongoose');
 
-const programSchema = new mongoose.Schema({
+const StepSchema = new mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId, // Unique ID for each step
+  name: String,
+  description: String
+});
+
+const ProgramSchema = new mongoose.Schema({
   school: { type: String, required: true },
   program: { type: String, required: true },
   description: { type: String, required: true },
-  grade: { type: String, required: false }, // e.g., "Grade 10", "Grade 12"
-  curriculum: { type: String, required: false }, // e.g., "CBSE", "IB", "IGCSE"
-  stream: { type: String, required: false }, // e.g., "Science", "Commerce", "Arts"
-  performance: { type: String, required: false }, // e.g., "High", "Medium", "Low"
-  financialSituation: { type: String, required: false }, // e.g., ">25 Lakhs", "<25 Lakhs"
-  personality: { type: String, required: false }, // e.g., "Analytical", "Creative"
+  grade: { type: String, required: true },
+  curriculum: { type: String, required: true },
+  stream: { type: String, required: true },
+  performance: { type: String, required: true },
+  financialSituation: { type: String, required: true },
+  personality: { type: String, required: true },
+  steps: [StepSchema] // Store steps as subdocuments with IDs
 });
 
-const Program = mongoose.model('Program', programSchema);
+const Program = mongoose.model('Program', ProgramSchema);
 
 module.exports = Program;

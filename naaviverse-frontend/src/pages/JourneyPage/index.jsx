@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useStore } from "../../components/store/store.ts";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "./journey.scss";
 import Skeleton from "react-loading-skeleton";
 import axios from "axios";
@@ -9,142 +10,113 @@ import { useCoinContextData } from "../../context/CoinContext";
 import arrow from "./arrow.svg";
 
 const JourneyPage = () => {
-  const {
-    setCurrentStepData,
-    setCurrentStepDataLength,
-    currentStepdataPathId,
-    setCurrentStepDataPathId,
-  } = useCoinContextData();
-  let userDetails = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate(); // Initialize navigate function
+  const { setCurrentStepData, setCurrentStepDataLength } = useCoinContextData();
   const { sideNav, setsideNav } = useStore();
   const [loading, setLoading] = useState(false);
-  const [journeyPageData, setJourneyPageData] = useState([]);
-  const [currentStepIndication, setCurrentStepIndication] = useState("");
-  const [competedSteps, setCompletedSteps] = useState([]);
-  const email = userDetails?.email;
+  const [journeyPageData, setJourneyPageData] = useState(null);
+  const [selectedPathId, setSelectedPathId] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get(`https://careers.marketsverse.com/userpaths/get?email=${email}`)
-      .then((response) => {
-        let result = response?.data?.data[0];
-        // console.log(result, "journeyPageData result");
-        let pathId = response?.data?.data[0]?.pathId;
-        // console.log(pathId, "journeyPageData pathId");
-        let currentStep = response?.data?.data[0]?.currentStep;
-        // console.log(currentStep, "currentStep");
-        let completedStepData = response?.data?.data[0]?.completedSteps;
-        // console.log(completedStepData, "completedStepData");
-        setJourneyPageData(result);
-        setCurrentStepDataPathId(pathId);
-        setCurrentStepIndication(currentStep);
-        setCompletedSteps(completedStepData);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log(error, "error in fetching journeyPageData");
-        setLoading(false);
-      });
-  }, []);
+    const storedPathId = localStorage.getItem("selectedPathId"); // Retrieve pathId from localStorage
+    console.log("Stored PathId in LocalStorage:", storedPathId);  // 🔍 Debugging
 
+    if (storedPathId) {
+        setSelectedPathId(storedPathId);
+        fetchJourneyData(storedPathId);
+    } else {
+        console.warn("No pathId selected in localStorage!");
+    }
+}, []);
+
+
+  const fetchJourneyData = async (pathId) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/userpaths/steps?pathId=${pathId}`);
+      console.log(response.data, "Fetched Steps Response"); // Debug log
+
+      if (response.data.success) {
+        setJourneyPageData(response.data.data); // Ensure correct data is stored
+      } else {
+        console.warn("No valid data received.");
+      }
+    } catch (error) {
+      console.error("Error fetching steps:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStepClick = (step) => {
+    const stepId = step._id;
+    console.log("Step clicked:", step);
+  
+    setsideNav("Current Step");
+    setCurrentStepData(step);
+    setCurrentStepDataLength(journeyPageData?.StepDetails?.length);
+  
+    localStorage.setItem("selectedStepId", stepId);
+    
+    navigate("/dashboard/users");
+  };
+  
   return (
     <div className="journeypage">
       <div className="journey-top-area">
-        <div>{journeyPageData?.PathDetails?.length > 0 ? "Your Selected Path:" : "Go to Paths and select journey."}</div>
+        <div>
+          {journeyPageData
+            ? "Your Selected Path:"
+            : "Go to Paths and select a journey."}
+        </div>
+
         {loading ? (
           <Skeleton width={150} height={30} />
         ) : (
-          <div className="bold-text">
-            {journeyPageData?.PathDetails?.length > 0
-              ? journeyPageData?.PathDetails?.[0]?.nameOfPath
-              : ""}
-          </div>
+          <div className="bold-text">{journeyPageData?.school || ""}</div>
         )}
+
         {loading ? (
           <Skeleton width={500} height={20} />
         ) : (
           <div className="journey-des">
-            {journeyPageData?.PathDetails?.length > 0
-              ? journeyPageData?.PathDetails?.[0]?.description
-              : ""}
+            {journeyPageData?.description || ""}
           </div>
         )}
       </div>
+
       <div className="journey-steps-area">
-        {loading
-          ? Array(6)
-              .fill("")
-              .map((e, i) => {
-                return (
-                  <div className="each-j-step relative-div" key={i}>
-                    <div className="each-j-img">
-                      <Skeleton width={75} height={75} />
-                    </div>
-                    <div className="each-j-step-text">
-                      <Skeleton width={200} height={30} />
-                    </div>
-                    <div className="each-j-step-text1">
-                      <Skeleton width={250} height={25} />
-                    </div>
-                    <div className="each-j-amount-div">
-                      <div className="each-j-amount">
-                        <Skeleton width={100} height={30} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-          : journeyPageData?.PathDetails?.length > 0
-          ? journeyPageData?.PathDetails?.[0]?.StepDetails?.map((e, i) => {
-              return (
-                <div
-                  className="each-j-step-container"
-                  onClick={() => {
-                    setsideNav("Current Step");
-                    // console.log(e, "currentStepdata");
-                    // console.log(
-                    //   journeyPageData?.PathDetails?.[0]?.length,
-                    //   "currentStepdataLength"
-                    // );
-                    setCurrentStepData(e);
-                    setCurrentStepDataLength(
-                      journeyPageData?.PathDetails?.[0]?.length
-                    );
-                  }}
-                  key={i}
-                >
-                  <div className="each-j-stepp">
-                    <div className="each-j-img">
-                      <img src={e?.icon} alt="" />
-                    </div>
-                    <div className="each-j-step-text">{e?.name}</div>
-                    <div className="each-j-step-text1">{e?.description}</div>
-                    <div className="each-j-amount-div">
-                      <div className="each-j-amount">{e?.cost}</div>
-                    </div>
-                  </div>
-                  <div
-                    className="current-step-indicator"
-                    style={{
-                      display:
-                        e?._id === currentStepIndication ? "flex" : "none",
-                    }}
-                  >
-                    Current Step
-                  </div>
-                  <div
-                    className="completed-step-indicator"
-                    style={{
-                      display: competedSteps?.includes(e?._id) ? "flex" : "none",
-                    }}
-                  >
-                    Completed
-                  </div>
-                </div>
-              );
-            })
-          : ""}
+        {loading ? (
+          Array(3)
+            .fill("")
+            .map((_, i) => (
+              <div className="each-j-step" key={i}>
+                <Skeleton width={250} height={25} />
+              </div>
+            ))
+        ) : (
+          journeyPageData?.steps?.map((step, i) => (
+            <div
+              className="each-j-step-container"
+              key={step._id.$oid}
+              onClick={() => handleStepClick(step)}
+              style={{ cursor: "pointer" }}
+            >
+              <div
+                className="each-j-step-name"
+                style={{ fontWeight: "600", fontFamily: "Montserrat, sans-serif" }} // Updated to semi-bold
+              >
+                {step.name}
+              </div>
+              <div
+                className="each-j-step-description"
+                style={{ fontSize: "0.9em", color: "#7d8085", lineHeight: "1.5", fontFamily: "Montserrat, sans-serif" }} // Updated styling
+              >
+                {step.description}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

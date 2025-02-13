@@ -46,6 +46,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/journey" component={JourneyPage} />
       {/* <Route path="/dashboard" element={<DashboardLoginPage />} /> */}
       <Route
         exact

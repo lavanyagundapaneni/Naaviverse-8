@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as jose from 'jose';
 import { predefinedToast } from './toast';
+import AWS from 'aws-sdk';
 
 const secret = 'uyrw7826^&(896GYUFWE&*#GBjkbuaf'; // secret not to be disclosed anywhere.
 const emailDev = 'pavithran@inr.group'; // email of the developer.
@@ -25,55 +26,46 @@ const signJwt = async (fileName, emailDev, secret) => {
   }
 };
 
+
+
+AWS.config.update({
+  accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
+  region: process.env.REACT_APP_AWS_REGION,
+});
+
+// Create an S3 instance
+const s3 = new AWS.S3();
+
 export const uploadImageFunc = async (e, setImage, setLoading) => {
   setLoading(true);
-  const fileName = `${new Date().getTime()}${e.target.files[0].name.substr(
-    e.target.files[0].name.lastIndexOf('.')
-  )}`;
-  const formData = new FormData();
-  const file = renameFile(e.target.files[0], fileName);
-  formData.append('files', file);
-  const path_inside_brain = 'root/';
 
-  const jwts = await signJwt(fileName, emailDev, secret);
-  // console.log(jwts, 'lkjkswedcf');
-  // let { data } = await axios.post(
-  //   `https://drivetest.globalxchange.io/file/dev-upload-file?email=${emailDev}&path=${path_inside_brain}&token=${jwts}&name=${fileName}`,
-  //   formData,
-  //   {
-  //     headers: {
-  //       'Access-Control-Allow-Origin': '*',
-  //     },
-  //   }
-  // );
-  let { data } = await axios.post(
-    `https://insurance.apimachine.com/insurance/general/upload`,
-    formData,
-    {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
-    }
-  );
-  if (data?.length > 0) {
-    console.log(data[0], 'dfile name upload');
-    setImage(
-      // (prev) => {
-      // console.log(
-      //   { ...prev, eachItem: data[0]?.originalname },
-      //   "{ ...prev, eachItem: data[0]?.originalname }"
-      // );
-      // return { ...prev, [eachItem]: data[0]?.originalname };
-      // }
-      data[0]?.urlName
-    );
+  const file = e.target.files[0];
+  if (!file) {
     setLoading(false);
-    return data[0]?.urlName;
-  } else {
-    predefinedToast('Error while uploading file');
+    return;
+  }
+
+  const timestamp = new Date().getTime();
+  const fileName = `${timestamp}-${file.name}`;
+  const folderPath = `partner-profile-pics/`; // You can change this to your desired folder
+
+  const params = {
+    Bucket: 'naaviprofileuploads', // Replace with your S3 bucket name
+    Key: `${folderPath}${fileName}`,
+    Body: file,
+    ContentType: file.type,
+  };
+
+  try {
+    const result = await s3.upload(params).promise();
+    console.log('File uploaded successfully:', result);
+
+    setImage(result.Location); // Store the S3 file URL
+    setLoading(false);
+    return result.Location;
+  } catch (error) {
+    console.error('Error uploading file:', error);
     setLoading(false);
   }
-  // console.log(data.payload.url, 'drive uploaded img');
-  // setImage(data.payload.url);
-  // setLoading(false);
 };

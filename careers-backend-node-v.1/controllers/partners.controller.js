@@ -399,6 +399,132 @@ const updatePassword = async (req, res) => {
   }
 };
 
+const getAllPartners = async (req, res) => {
+  try {
+    const partners = await Partner.find({}, { password: 0 }); // Exclude password for security
+
+    return res.status(200).json({
+      success: true,
+      message: "Partners retrieved successfully",
+      partners,
+    });
+  } catch (error) {
+    console.error("Error fetching partners:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+
+const updatePartnerProfile = async (req, res) => {
+  try {
+      const { email } = req.body; // Identify the partner by email
+
+      if (!email) {
+          return res.status(400).json({ success: false, message: "Email is required" });
+      }
+
+      // Find the partner by email
+      let partner = await Partner.findOne({ email });
+
+      if (!partner) {
+          return res.status(404).json({ success: false, message: "Partner not found" });
+      }
+
+      // Update profile details
+      const updatedFields = {
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          businessName: req.body.businessName,
+          logo: req.body.logo,
+          street: req.body.street,
+          city: req.body.city,
+          state: req.body.state,
+          pincode: req.body.pincode,
+          country: req.body.country,
+          description: req.body.description,
+          website: req.body.website,
+          type: req.body.type,
+          yourPosition: req.body.yourPosition
+      };
+
+      // Remove undefined values (only update provided fields)
+      Object.keys(updatedFields).forEach(
+          (key) => updatedFields[key] === undefined && delete updatedFields[key]
+      );
+
+      // Update the partner's profile
+      await Partner.updateOne({ email }, { $set: updatedFields });
+
+      res.status(200).json({ success: true, message: "Profile updated successfully!" });
+
+  } catch (error) {
+      console.error("Error updating partner profile:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+const getPartnerByEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+    console.log("Email received:", email);
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    const partner = await Partner.findOne({ email });
+    console.log("Partner found:", partner);
+
+    if (!partner) {
+      return res.status(200).json({ success: false, message: "No profile found" });
+    }
+
+    const requiredFields = [
+      "firstName", "lastName", "businessName", "logo", "street", 
+      "city", "state", "pincode", "country", "description", 
+      "website", "type", "yourPosition"
+    ];
+
+    const missingFields = requiredFields.filter(field => !partner[field]);
+    console.log("Missing fields:", missingFields);
+
+    if (missingFields.length > 0) {
+      return res.status(200).json({ success: false, message: "Profile incomplete", missingFields });
+    }
+
+    res.status(200).json({ success: true, data: partner });
+
+  } catch (error) {
+    console.error("Error fetching partner:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const getPartnerProfilePic = async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).json({ status: false, message: "Email is required" });
+  }
+
+  try {
+    const partner = await Partner.findOne({ email });
+
+    if (!partner || !partner.logo) {
+      return res.status(404).json({ status: false, message: "Partner logo not found" });
+    }
+
+    res.json({ status: true, profilePic: partner.logo });
+  } catch (error) {
+    console.error("Error fetching partner logo:", error);
+    res.status(500).json({ status: false, message: "Server Error" });
+  }
+};
+
+
 module.exports = {
   signUp,
   forgotPassword,
@@ -409,4 +535,8 @@ module.exports = {
   logout,
   verifyOTP,
   updatePassword,
+  getAllPartners,
+  updatePartnerProfile,
+  getPartnerByEmail,
+  getPartnerProfilePic,
 };

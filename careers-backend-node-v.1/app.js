@@ -47,7 +47,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/universities', universitiesRouter)
 app.use('/api/paths', pathsRouter)
-app.use('/api/userpaths', userpathRouter)
+app.use('/api/fetch', userpathRouter)
 app.use('/api/pre_login', preLoginRouter)
 app.use('/api/userAnswers', userPersonalityRouter)
 app.use('/api/partner', partnerRouter)

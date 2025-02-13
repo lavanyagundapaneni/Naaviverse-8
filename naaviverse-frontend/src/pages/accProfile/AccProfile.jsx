@@ -117,6 +117,8 @@ const AccProfile = () => {
   const [cashback, setcashback] = useState("");
   const [category, setcategory] = useState("");
   const [subcategory, setsubcategory] = useState("");
+  const [shouldReload, setShouldReload] = useState(false);
+
 
   // create brand profile
   const [createBrandProfile, setCreateBrandProfile] = useState(false);
@@ -221,6 +223,8 @@ const AccProfile = () => {
 
   const [backupPathList, setBackupPathList] = useState([]);
   const [showBackupPathList, setShowBackupPathList] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(false);
+  
   
 
   // //upload part starts here
@@ -249,40 +253,40 @@ const AccProfile = () => {
   businessState && businessCountry && firstName && lastName && position
 
 
-  const uploadCoverImage = async (file) => {
-    setIsUploadLoading(true);
+  // const uploadCoverImage = async (file) => {
+  //   setIsUploadLoading(true);
 
-    const fileName = `${new Date().getTime()}${file.name.substr(
-      file.name.lastIndexOf(".")
-    )}`;
+  //   const fileName = `${new Date().getTime()}${file.name.substr(
+  //     file.name.lastIndexOf(".")
+  //   )}`;
 
-    const formData = new FormData();
-    const newfile = renameFile(file, fileName);
-    formData.append("files", newfile);
-    const path_inside_brain = "root/";
+  //   const formData = new FormData();
+  //   const newfile = renameFile(file, fileName);
+  //   formData.append("files", newfile);
+  //   const path_inside_brain = "root/";
 
-    const jwts = await signJwt(fileName, emailDev, secret);
-    // console.log(jwts, "lkjkswedcf");
-    let { data } = await axios.post(
-      `https://insurance.apimachine.com/insurance/general/upload`,
-      formData,
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+  //   const jwts = await signJwt(fileName, emailDev, secret);
+  //   // console.log(jwts, "lkjkswedcf");
+  //   let { data } = await axios.post(
+  //     `https://insurance.apimachine.com/insurance/general/upload`,
+  //     formData,
+  //     {
+  //       headers: {
+  //         "Access-Control-Allow-Origin": "*",
+  //       },
+  //     }
+  //   );
 
-    if (data?.length > 0) {
-      console.log(data[0], "dfile name upload");
-      setCoverImageS3url(data[0]?.urlName);
-      setIsUploadLoading(false);
-      return data[0]?.urlName;
-    } else {
-      // setIsUploadLoading(false);
-      console.log("error in uploading image");
-    }
-  };
+  //   if (data?.length > 0) {
+  //     console.log(data[0], "dfile name upload");
+  //     setCoverImageS3url(data[0]?.urlName);
+  //     setIsUploadLoading(false);
+  //     return data[0]?.urlName;
+  //   } else {
+  //     // setIsUploadLoading(false);
+  //     console.log("error in uploading image");
+  //   }
+  // };
 
   const uploadBulkPath = async (file) => {
     setIsUploadLoading(true);
@@ -607,7 +611,7 @@ const AccProfile = () => {
 
   const handleFileInputChange = (e) => {
     setImage(e.target.files[0]);
-    uploadCoverImage(e.target.files[0]);
+    uploadImageFunc(e.target.files[0]);
   };
   const handleFileInputChange1 = (e) => {
     setImage(e.target.files[0]);
@@ -812,91 +816,75 @@ const AccProfile = () => {
     let mailId = userDetails?.email;
     CheckStatusAccountant(mailId)
       .then((res) => {
-        let result = res?.data;
-        // console.log(result, 'resultttt')
-        if (result.status) {
-          // console.log(result?.data)
+        if (res.success && res.data) {
+
           setIsProfileData(true);
-          setProfileData(result?.data[0]);
-          setprofileSpecalities(result?.data?.specialities);
+          setProfileData(res.data);
+          setprofileSpecalities(res.data.specialities || []);
+          setCreateBrandProfile(false); // Hide "Create Profile" for existing users
         } else {
+      
+          console.log("No profile found, enabling profile creation.");
           setIsProfileData(false);
           setProfileData({});
+           // 🔥 Ensure new users see the "Create Profile" form
         }
       })
       .catch((err) => {
-        console.log("err");
+        console.log("Error fetching profile data:", err);
+        setIsProfileData(false);
+        setProfileData({});
+        // Assume new user in case of API error
       });
   };
-
-  const createLXProfile = () => {
-    let email = userDetails?.email;
-    let token = userDetails?.idToken;
-    axios
-      .post(
-        "https://teller2.apimachine.com/lxUser/register",
-        {
-          profilePicURL: profilePicture,
-          firstName: firstName,
-          lastName: lastName,
-          lxTag: userName,
-        },
-        { headers: { email, token } }
-      )
-      .then((response) => {
-        let result = response?.data;
-        // console.log(result, 'createLXProfile result');
-        if (result?.message === "Email is Already Registered as LX User") {
-          setCreateBrandProfileStep(2);
-        }
-      })
-      .catch((error) => {
-        console.log(error, "error in createLXProfile");
-      });
-  };
-
+  
+  
   const createPartnerProfile = () => {
     let email = userDetails?.email;
+    if (!email) return;
+  
     console.log({
-      email: email,
-      firstName: firstName,
-      lastName: lastName,
-      businessName: businessName,
+      email,
+      firstName,
+      lastName,
+      businessName,
       logo: businessLogo,
-      street: street,
-      city: city,
+      street,
+      city,
       state: businessState,
       pincode: pinCode,
       country: businessCountry,
       description: businessDesc,
-      website: website,
+      website,
+      type: businessType,
+      yourPosition: position,
+    }, "Creating Partner Profile");
+  
+    axios.put(`/api/partner/add`, {
+      email,
+      firstName,
+      lastName,
+      businessName,
+      logo: businessLogo,
+      street,
+      city,
+      state: businessState,
+      pincode: pinCode,
+      country: businessCountry,
+      description: businessDesc,
+      website,
       type: businessType,
       yourPosition: position
-  }, "kjwelwfefw")
-
-  axios.post(`https://careers.marketsverse.com/partner/add`, {
-    email: email,
-    firstName: firstName,
-    lastName: lastName,
-    businessName: businessName,
-    logo: businessLogo,
-    street: street,
-    city: city,
-    state: businessState,
-    pincode: pinCode,
-    country: businessCountry,
-    description: businessDesc,
-    website: website,
-    type: businessType,
-    yourPosition: position
-}).then(({data}) => {
-  if(data.status){
-    handleAccountantData()
-    window.location.reload()
-  }
-})
-
-  }
+    })
+    .then(({ data }) => {
+      if (data.success) {
+        handleAccountantData();
+        window.location.reload(); // ✅ Reloads the page
+        
+      }
+    })
+    .catch(err => console.error("Profile creation error:", err));
+  };
 
   const createBankerProfile = () => {
     setIsloading(true);
@@ -929,7 +917,7 @@ const AccProfile = () => {
         // console.log(result, 'createBankerProfile result');
         setIsloading(false);
         setCreateBrandProfileStep(3);
-        myTimeout1();
+
       })
       .catch((error) => {
         console.log(error, "error in createBankerProfile");
@@ -3133,7 +3121,7 @@ const AccProfile = () => {
     
 
       <>
-        {createBrandProfile && (
+        {createBrandProfile &&   (
           <div
             className="popularS"
             style={{
@@ -3214,11 +3202,7 @@ const AccProfile = () => {
                     setFunc={setBusinessState}
                     funcValue={businessState}
                   />
-                  {/* <InputDivsCreatePartner
-                    placeholderText="country...."
-                    setFunc={setBusinessCountry}
-                    funcValue={businessCountry}
-                  /> */}
+                  
                    <div className={styles.inputDivs} style={{ border: '1px solid #2c7cb2', borderRadius:'4px', fontSize:"13px", fontWeight:"500", paddingLeft:'0px', marginTop:'0px' }}>
                   <select name="country" id="country" style={{border:"none", padding:'1rem', width:'90%', fontSize:"16px"}}  onChange={(e) => {
                           setBusinessCountry(e.target.value);
@@ -3232,8 +3216,7 @@ const AccProfile = () => {
                       
                     </select>
                    </div>
-                  {/* <input type="text" className={styles.inputClass} placeholder="state.."/> */}
-                  {/* <input type="text" className={styles.inputClass} placeholder="country.."/> */}
+                  
                   <div className={styles.labelClass} style={{paddingTop:"30px"}}>Your information *</div>
                   <InputDivsCreatePartner
                     placeholderText="First name...."
@@ -3251,96 +3234,6 @@ const AccProfile = () => {
                     funcValue={position}
                   />
                   <div className={styles.submitBtn} style={{opacity: allSelected ? 1 : 0.4}} onClick={e => allSelected && createPartnerProfile()}>Become a partner</div>
-                  {/* hello */}
-                  {/* <InputDivsWithMT
-                    heading="Business information"
-                    placeholderText="Business name...."
-                    setFunc={setBusinessName}
-                    funcValue={businessName}
-                  /> */}
-                  {/* <div
-                    style={{
-                      marginBottom: "0.5rem",
-                      fontSize: "1rem",
-                      marginTop: "2rem",
-                    }}
-                  >
-                    Upload Profile Picture *
-                  </div>
-                  <ImageUploadDivProfilePic1
-                    setFunc={setProfilePicture}
-                    funcValue={profilePicture}
-                  />
-                  <InputDivsWithMT
-                    heading="What is your first name? *"
-                    placeholderText="First Name.."
-                    setFunc={setFirstName}
-                    funcValue={firstName}
-                  />
-                  <InputDivsWithMT
-                    heading="What is your last name? *"
-                    placeholderText="Last Name.."
-                    setFunc={setLastName}
-                    funcValue={lastName}
-                  />
-                  <InputDivsCheckFunctionality
-                    heading="Select a username *"
-                    placeholderText="Username..."
-                    setFunc={setUserName}
-                    funcValue={userName}
-                    userNameAvailable={userNameAvailable}
-                  /> */}
-                  {/* <div className="stepBtns" style={{ marginTop: "3.5rem" }}>
-                    <div
-                      style={{
-                        opacity: "0.25",
-                        cursor: "not-allowed",
-                        background: "#1F304F",
-                        width: "48%",
-                        minHeight: "4rem",
-                        maxHeight: "4rem",
-                      }}
-                    >
-                      Go Back
-                    </div>
-                    <div
-                      style={{
-                        minHeight: "4rem",
-                        maxHeight: "4rem",
-                        opacity:
-                          profilePicture &&
-                          firstName &&
-                          lastName &&
-                          userName.length > 0 &&
-                          userNameAvailable
-                            ? "1"
-                            : "0.25",
-                        cursor:
-                          profilePicture &&
-                          firstName &&
-                          lastName &&
-                          userName.length > 0 &&
-                          userNameAvailable
-                            ? "pointer"
-                            : "not-allowed",
-                        background: "#59A2DD",
-                        width: "48%",
-                      }}
-                      onClick={() => {
-                        if (
-                          profilePicture &&
-                          firstName &&
-                          lastName &&
-                          userName.length > 0 &&
-                          userNameAvailable
-                        ) {
-                          createLXProfile();
-                        }
-                      }}
-                    >
-                      Next Step
-                    </div>
-                  </div> */}
                   
                 </div>
               </>
@@ -3425,12 +3318,7 @@ const AccProfile = () => {
                       funcValue={brandColorCode}
                       colorCode={brandColorCode}
                     />
-                    {/* <InputDivsWithMT
-                      heading="Select Country"
-                      placeholderText="Click To Select"
-                      setFunc={setHeadquarter}
-                      funcValue={headquarter}
-                    /> */}
+                    
                     <div style={{paddingTop:'30px'}}>Select Country *</div>
                   <div className={styles.inputDivs} style={{ border: '1px solid #e7e7e7', borderRadius:'30px', fontSize:"13px", fontWeight:"500", paddingLeft:'10px' }}>
                   <select name="country" id="country" style={{border:"none", padding:'1rem', width:'90%', fontSize:"16px"}}  onChange={(e) => {

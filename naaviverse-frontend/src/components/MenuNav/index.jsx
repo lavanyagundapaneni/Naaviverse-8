@@ -18,9 +18,12 @@ const MenuNav = ({showDrop, setShowDrop, searchTerm, setSearchterm, searchPlaceh
       
       const handleNavifateProfile = () => {
         const userType = localStorage.getItem('userType')
+        
+
         if(userType === 'user'){
             navigate('/dashboard/users/profile')
         }else if (userType === 'partner'){
+
             navigate('/dashboard/accountants/profile')
         }else{
             navigate('/admin/dashboard/profile')

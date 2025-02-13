@@ -9,6 +9,8 @@ const {
   logout,
   verifyOTP,
   updatePassword,
+  getAllUsers,
+  getUserProfilePic,
 
 } = require("../controllers/authControllers");
 
@@ -22,4 +24,6 @@ router.post("/updatepassword", updatePassword);
 router.post("/resetPassword/:token", resetPassword);
 router.post("/confirmation", sendConfirmationEmail);
 router.post("/login", login);
+router.get("/get", getAllUsers);
+router.get("/get-profile-pic", getUserProfilePic);
 module.exports = router;

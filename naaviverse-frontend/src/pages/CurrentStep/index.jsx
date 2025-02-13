@@ -118,7 +118,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
   useEffect(() => {
     let userEmail = userDetails?.email;
     axios
-      .get(`/api/users/get?email=${userEmail}`)
+      .get(`/api/users/get/${userEmail}`)
       .then((response) => {
         let result = response?.data?.data;
         // console.log(result, "userdetails result");
@@ -130,31 +130,22 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
   }, []);
 
   useEffect(() => {
-    console.log(showSelectedPath, selectedPath, "lkwefhlkerhflegr")
-    let userEmail = userDetails?.email;
-    // if(!showSelectedPath && !selectedPathId){
+    const storedStepId = localStorage.getItem("selectedStepId"); // Retrieve the Step ID from localStorage
+    if (storedStepId) {
       axios
-        .get(
-          `https://careers.marketsverse.com/userpaths/getCurrentStep?email=${userEmail}`
-        )
-        .then((response) => {
-          console.log(response.data, "kjbwefkjwbfkjerf")
-          let result = response?.data?.data[0]?.StepDetails[0];
-          // console.log(result, "currentStepPageData result");
-          let pathId = response?.data?.data[0]?.pathId;
-          // console.log(pathId, "currentStepPageData pathId");
-          setCurrentStepPageData(result);
-          setCurrentStepPagePathId(pathId);
-          setStepServices(response?.data?.data[0]?.ConnectedServices)
+        .get(`/api/fetch/steps/get?step_id=${storedStepId}`)
+        .then(({ data }) => {
+          if (data.status) {
+            console.log(data, "lkwehfkjewhfkejrf");
+            setCurrentStepData(data?.data);
+          }
         })
         .catch((error) => {
-          console.log(error, "error in fetching currentStepPageData");
+          console.error("Error fetching step data:", error);
         });
-    // }else{
-    //   setCurrentStepPageData(showSelectedPath);
-    //   setCurrentStepPagePathId(selectedPathId);
-    // }
-  }, []);
+    }
+  }, []); // Run the effect only once when the component mounts
+  
 
   
 
@@ -330,15 +321,11 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
               : currentStepPageData?.name}
           </div>
           <div>
-            Apx Takes{" "}
-            {currentStepDataLength
-              ? currentStepDataLength
-              : currentStepPageData?.length}{" "}
-            Days
+            Apx Takes 3 Days
           </div>
         </div>
         <div style={{fontSize:'16px', fontWeight:300, lineHeight:'30px'}}>
-          {currentStepPageData?.description}
+          {currentStepData?.description}
         </div>
       </div>
       <div className="cs-content" style={{height:'60vh'}}>
@@ -386,7 +373,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
                     className="sub-text"
                     style={{ display: showGradeDesc ? "flex" : "none" }}
                   >
-                    {gradeDescription}
+                    {currentStepData?.description}
                   </div>
                 </div>
                 <div className="micro-text-div">
@@ -405,7 +392,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
                     className="sub-text"
                     style={{ display: showStreamDesc ? "flex" : "none" }}
                   >
-                    {streamDescription}
+                    {currentStepData?.description}
                   </div>
                 </div>
                 <div className="micro-text-div">
@@ -424,7 +411,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
                     className="sub-text"
                     style={{ display: showCurriculumDesc ? "flex" : "none" }}
                   >
-                    {curriculumDescription}
+                    {currentStepData?.description}
                   </div>
                 </div>
                 <div className="micro-text-div">
@@ -445,7 +432,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
                     className="sub-text"
                     style={{ display: showGradePointDesc ? "flex" : "none" }}
                   >
-                    {gradePointDescription}
+                    {currentStepData?.description}
                   </div>
                 </div>
                 <div className="micro-text-div">
@@ -466,7 +453,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
                     className="sub-text"
                     style={{ display: showFinancialDesc ? "flex" : "none" }}
                   >
-                    {financialDescription}
+                    {currentStepData?.description}
                   </div>
                 </div>
                 <div className="micro-text-div">
@@ -485,7 +472,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
                     className="sub-text"
                     style={{ display: showPersonalityDesc ? "flex" : "none" }}
                   >
-                    {personalityDescription}
+                    {currentStepData?.description}
                   </div>
                 </div>
               </div>
@@ -501,6 +488,9 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
                     ? currentStepData?.name
                     : currentStepPageData?.name}
                 </span>
+                <div className="step-description">
+      {currentStepData?.description || currentStepPageData?.description}
+    </div>
               </div>
               <div className="nano-overall-div">
                 {stepServices?.length > 0
@@ -996,17 +986,17 @@ const Carousel1 = ({
         <div className="speed-div">
           <span>Offered By: </span>
             <div style={{ marginLeft: "10px" }}>
-              {item?.ServiceDetails[0]?.productcreatoremail?.substring(0, 10)}
+              {item?.ServiceDetails[0]?.productcreatoremail?.substring(0, 10) || "Edutechex"}
             </div>
         </div>
         <div className="speed-div">
           <span>Billing Type:</span>
-          <span>{item?.ServiceDetails[0]?.chargingtype}</span>
+          <span>{item?.ServiceDetails[0]?.chargingtype || "Onetime"}</span>
         </div>
         <div className="speed-div">
             <span>Cost:</span>
             <span>
-            {item?.ServiceDetails[0]?.billing_cycle?.lifetime?.price || item?.ServiceDetails[0]?.billing_cycle?.monthly?.price || item?.ServiceDetails[0]?.billing_cycle?.annual?.price} {item?.ServiceDetails[0]?.billing_cycle?.lifetime?.coin || item?.ServiceDetails[0]?.billing_cycle?.monthly?.coin || item?.ServiceDetails[0]?.billing_cycle?.annual?.coin}
+            {item?.ServiceDetails[0]?.billing_cycle?.lifetime?.price || item?.ServiceDetails[0]?.billing_cycle?.monthly?.price || item?.ServiceDetails[0]?.billing_cycle?.annual?.price} {item?.ServiceDetails[0]?.billing_cycle?.lifetime?.coin || item?.ServiceDetails[0]?.billing_cycle?.monthly?.coin || item?.ServiceDetails[0]?.billing_cycle?.annual?.coin || "500 USD"}
             </span>
           </div>
         {/* {Object.entries(item?.ServiceDetails[0]?.billing_cycle).map(([key, value]) => (

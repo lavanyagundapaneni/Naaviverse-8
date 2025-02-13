@@ -46,17 +46,32 @@ const Loginpage = () => {
     localStorage.clear();
   }, []);
 
-  const getProfilePic = (email, type) => {
-    axios.get(`https://careers.marketsverse.com/${type==="Users" ? "users":"partner"}/get?email=${email}`).then(({data}) => {
-      if(data.status){
-        if(type === "Users"){
-          localStorage.setItem('userProfilePic', data?.data[0]?.profilePicture)
-        }else{
-          localStorage.setItem('userProfilePic', data?.data[0]?.logo)
+  const getProfilePic = async (email, loginType) => {
+    try {
+      const url = loginType === "Users" 
+        ? `/api/auth/get-profile-pic` 
+        : `/api/partner/get-profile-pic`;
+  
+      const response = await axios.get(url, { params: { email } }); // ✅ FIXED: Pass email
+  
+      const data = response.data;
+  
+      if (data.status) {
+        const profilePic = data?.profilePic; // ✅ FIXED: Changed from `profilePicture` to `profilePic`
+  
+        if (profilePic) {
+          localStorage.setItem("userProfilePic", profilePic);
+          return profilePic;
         }
       }
-    })
-  }
+  
+      return null;
+    } catch (error) {
+      console.error("Error fetching profile picture:", error);
+      return null;
+    }
+  };
+  
 
   const handleLogin = () => {
     setIsLoading(true);

@@ -10,6 +10,20 @@ const partnerSchema = new mongoose.Schema({
     OTPAttempts: { type: Number, default: 0 },
     isBlocked: { type: Boolean, default: false },
     OTPverified: { type: Boolean, default: false },
+
+    firstName: { type: String },
+    lastName: { type: String },
+    businessName: { type: String },
+    logo: { type: String }, // URL of the business logo
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    pincode: { type: String },
+    country: { type: String },
+    description: { type: String },
+    website: { type: String },
+    type: { type: String }, // Type of business
+    yourPosition: { type: String } // Partner's position in the business
 }, {
     timestamps: true
 });

@@ -31,13 +31,12 @@ const Pathview = () => {
     personalityToggle,
     setPersonalityToggle,
   } = useContext(GlobalContex);
+
   const [loading, setLoading] = useState(false);
   const [pathViewData, setPathViewData] = useState([]);
   const userProfile = JSON.parse(localStorage.getItem("userProfile"));
 
-
   useEffect(() => {
-    
     setLoading(true);
     axios
       .get(`/api/userpaths/programs`, {
@@ -50,11 +49,9 @@ const Pathview = () => {
           ...(financialToggle && { financialSituation: userProfile.finance}),
           ...(personalityToggle && { personality: userProfile.personality})
         },
-
       })
       .then((response) => {
         let result = response?.data?.data;
-        // console.log(result, "path view result");
         setPathViewData(result);
         setLoading(false);
       })
@@ -72,6 +69,13 @@ const Pathview = () => {
         ?.includes(searchTerm?.toLowerCase()) ||
       entry?.program?.toLowerCase()?.includes(searchTerm?.toLowerCase())
   );
+
+  const handlePathSelection = (selectedPath) => {
+    setPathItemSelected(true);
+    localStorage.setItem("selectedPath", JSON.stringify(selectedPath?.nameOfPath));
+    setSelectedPathItem(selectedPath);
+    localStorage.setItem("selectedPathId", selectedPath?._id); // Save the selected Path ID to localStorage
+  };
 
   return (
     <div className="pathviewPage">
@@ -105,15 +109,7 @@ const Pathview = () => {
               <div
                 className="each-pv-data"
                 key={i}
-                onClick={() => {
-                  setPathItemSelected(true);
-                  localStorage.setItem(
-                    "selectedPath",
-                    JSON.stringify(e?.nameOfPath)
-                  );
-                  // console.log(e?.nameOfPath, 'selected path');
-                  setSelectedPathItem(e);
-                }}
+                onClick={() => handlePathSelection(e)} // Use the function to handle path selection
               >
                 <div className="each-pv-name">{e?.school}</div>
                 <div className="each-pv-name">{e?.program}</div>
@@ -140,4 +136,3 @@ const Pathview = () => {
 };
 
 export default Pathview;
-

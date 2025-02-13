@@ -23,7 +23,7 @@ const JourneyPage = () => {
       // console.log(selectedPathData, "selected path name");
       axios
         .get(
-          `https://careers.marketsverse.com/paths/get?nameOfPath=${selectedPathData}`
+          `/api/userpaths/programs?nameOfPath=${selectedPathData}`
         )
         .then((response) => {
           let result = response?.data?.data[0];
@@ -93,7 +93,7 @@ const JourneyPage = () => {
         ) : (
           <div className="bold-text">
             {selectedPathItem?.length > 0
-              ? selectedPathItem?.destination_institution
+              ? selectedPathItem?.school
               : ""}
           </div>
         )}

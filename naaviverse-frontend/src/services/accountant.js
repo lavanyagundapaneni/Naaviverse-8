@@ -211,18 +211,26 @@ export const CreatePopularService = (object) => {
 // Check status of an accountant for logged in user
 
 export const CheckStatusAccountant = async (mailId) => {
-  // console.log(mailId, 'mailId')
   try {
-    const response = await axios.get(
-      `https://careers.marketsverse.com/partner/get?email=${mailId}`
-    );
-    console.log(response, "CheckStatusAccountant");
-    return response;
+    console.log("Checking status for email:", mailId);
+    
+    const response = await axios.get(`/api/partner/get?email=${mailId}`);
+    console.log("API Response:", response.data);
+
+    const result = response?.data;
+
+    if (result.success && result.data) {
+      return { success: true, data: result.data };
+    } else {
+      console.log("Profile incomplete or missing. Reason:", result.message);
+      return { success: false, message: result.message, missingFields: result.missingFields || [] };
+    }
   } catch (error) {
-    console.log(error, "CheckStatusAccountant error");
-    return error;
+    console.error("CheckStatusAccountant error:", error);
+    return { success: false, error: error.message };
   }
 };
+
 
 // Unfollow a brand
 

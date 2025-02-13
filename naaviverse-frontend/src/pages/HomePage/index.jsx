@@ -8,7 +8,7 @@ import MobMenu from "../../components/mobMenu/mobMenu";
 import Navbar from "../../components/Navbar/index.jsx";
 
 //images
-import homepageImg from "../../static/images/homepageImg.png";
+import homepageImg from "../../static/images/homepageImg.webp";
 import discoverIcon from "../../static/images/homepage/discoverIcon.svg";
 import refineIcon from "../../static/images/homepage/refineIcon.svg";
 import mentorIcon from "../../static/images/homepage/mentorIcon.svg";

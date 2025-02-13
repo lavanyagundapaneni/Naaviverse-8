@@ -9,6 +9,10 @@ const {
   logout,
   verifyOTP,
   updatePassword,
+  getAllPartners,
+  updatePartnerProfile,
+  getPartnerByEmail,
+  getPartnerProfilePic,
 
 } = require("../controllers/partners.controller");
 
@@ -22,4 +26,8 @@ router.post("/updatepassword", updatePassword);
 router.post("/resetPassword/:token", resetPassword);
 router.post("/confirmation", sendConfirmationEmail);
 router.post("/login", login);
+router.get("/getpartners", getAllPartners);
+router.put('/add', updatePartnerProfile);
+router.get('/get', getPartnerByEmail);
+router.get('/get-profile-pic', getPartnerProfilePic);
 module.exports = router;

@@ -54,6 +54,7 @@ const PathComponent = () => {
   const [pathSelectedLocation, setPathSelectedLocation] = useState(null);
   const [pathShowDirections, setPathShowDirections] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
+  const [selectedPathId, setSelectedPathId] = useState(null);
   const {
     searchTerm,
     setSearchterm,
@@ -191,6 +192,8 @@ const PathComponent = () => {
     }
   };
 
+  
+
   const fetchPlaceDetails = async (placeId) => {
     // console.log(placeId, 'placeid')
     if (placeId !== null) {
@@ -235,33 +238,40 @@ const PathComponent = () => {
   function reload() {
     setsideNav("My Journey");
     setSelectedPathItem([]);
-    setPathItemSelected(false);
-    setPathItemStep(1);
+    setPathItemSelected(true);
+    setPathItemStep(3);
+    navigate("/dashboard/users");
   }
 
   const pathSelection = () => {
     setLoading(true);
     let body = {
-      email: userDetails?.user?.email,
-      pathId: selectedPathItem?._id,
+        email: userDetails?.email,
+        pathId: selectedPathItem?._id, // Selected from UI
     };
+
     axios
-      .post(`https://careers.marketsverse.com/userpaths/add`, body)
-      .then((response) => {
-        let result = response?.data;
-        // console.log(result, "pathSelection result");
-        if (result?.status) {
-          myTimeout();
-          setLoading(false);
-          setPathItemStep(3);
-        } else {
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        console.log(error, "pathSelection error");
-      });
-  };
+        .post(`/api/fetch/selectpath`, body)
+        .then((response) => {
+            let result = response?.data;
+            console.log("Path Selection Result:", result);
+
+            if (result?.pathId) {
+                localStorage.setItem("selectedPathId", result.pathId); // Store pathId
+                setSelectedPathId(result.pathId); // Update state
+            }
+
+            setLoading(false);
+
+            // Call reload function to update the UI
+            reload();
+        })
+        .catch((error) => {
+            console.error("Error in path selection:", error.response?.data || error);
+            setLoading(false);
+        });
+};
+
 
   const fetchUserProfile = async () => {
     try {

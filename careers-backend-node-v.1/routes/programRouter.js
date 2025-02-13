@@ -30,4 +30,52 @@ router.get('/programs', async (req, res) => {
   }
 });
 
+
+
+
+// Endpoint to fetch steps for a specific path
+router.get("/steps", async (req, res) => {
+  try {
+    const pathId = req.query.pathId;
+
+    if (!pathId) {
+      return res.status(400).json({
+        success: false,
+        message: "pathId is required in the query parameters.",
+      });
+    }
+
+    // Fetch the full path details from the database
+    const path = await Program.findById(pathId);
+
+    if (!path) {
+      return res.status(404).json({
+        success: false,
+        message: "Path not found.",
+      });
+    }
+
+    // Return full details including steps
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: path._id,
+        school: path.school,
+        program: path.program,
+        description: path.description,
+        steps: path.steps,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching path details and steps:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+});
+
+
+
+
 module.exports = router;

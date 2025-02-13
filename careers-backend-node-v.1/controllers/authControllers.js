@@ -398,6 +398,49 @@ const updatePassword = async (req, res) => {
     });
   }
 };
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find(); // Fetch all users from the database
+
+    // Return the users
+    return res.status(200).json({
+      successful: true,
+      data: users, // Send the array of users in the 'data' field
+      message: "Users fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    return res.status(500).json({
+      successful: false,
+      message: "Failed to fetch users",
+    });
+  }
+};
+
+
+const getUserProfilePic = async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).json({ status: false, message: "Email is required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || !user.profilePicture) {
+      return res.status(404).json({ status: false, message: "User profile picture not found" });
+    }
+
+    res.json({ status: true, profilePic: user.profilePicture });
+  } catch (error) {
+    console.error("Error fetching user profile picture:", error);
+    res.status(500).json({ status: false, message: "Server Error" });
+  }
+};
+
+
+
 
 module.exports = {
   signUp,
@@ -409,4 +452,6 @@ module.exports = {
   logout,
   verifyOTP,
   updatePassword,
+  getAllUsers,
+  getUserProfilePic,
 };

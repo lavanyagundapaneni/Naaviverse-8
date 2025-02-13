@@ -60,17 +60,26 @@ const StepPage = ({ productDataArray, selectedPathId, showSelectedPath, selected
 
 
   useEffect(() => {
-    console.log(loc?.pathname?.split("/").pop(), "lwefjkwebfjerwf")
-    const stepId = loc?.pathname?.split("/").pop();
-    if(stepId){
-      axios.get(`https://careers.marketsverse.com/steps/get?step_id=${stepId}`).then(({data}) => {
-        if(data.status){
-          console.log(data, "lkwehfkjewhfkejrf")
-          setCurrentStepData(data?.data[0])
-        }
-      })
+    const storedStepId = localStorage.getItem("selectedStepId"); // Retrieve the Step ID from localStorage
+    if (storedStepId) {
+      axios
+        .get(`/api/fetch/steps/get?step_id=${storedStepId}`)
+        .then(({ data }) => {
+          if (data.status) {
+            console.log(data, "lkwehfkjewhfkejrf");
+            setCurrentStepData(data?.data); // Access data directly, not as an array
+          } else {
+            // Handle the case where the backend returns an error
+            console.error("Error from backend:", data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching step data:", error);
+        });
     }
-  }, [])
+  }, []);
+// Run the effect only once when the component mounts
+  
 
 
   const handleLogout = () => {
@@ -191,19 +200,19 @@ const StepPage = ({ productDataArray, selectedPathId, showSelectedPath, selected
           </div>
           <div className="bold-text">
             <div>
-              {currentStepData?.name}
+              {currentStepData?.name }
             </div>
-            <div>
-              Apx Takes{" "}
-              {currentStepDataLength
-                ? currentStepDataLength
-                : currentStepPageData?.length}{" "}
-              Days
-            </div>
-          </div>
-          <div style={{fontSize:'16px', fontWeight:300, lineHeight:'30px'}}>
+            <div className="macro-text-div">
             {currentStepData?.description}
+                  
+            </div>
+            
+            <div>
+  Apx Takes {currentStepPageData?.length > 0 ? currentStepPageData.length : 3} Days
+</div>
+
           </div>
+          
         </div>
         <div className="cs-content" style={{height:'67vh'}}>
           <div className="overall-cs-content">
@@ -211,11 +220,18 @@ const StepPage = ({ productDataArray, selectedPathId, showSelectedPath, selected
               <div className="macro-text">Macro View:</div>
               <div className="macro-content">
                 <div className="step-text">
+                
                   {currentStepData?.name
                     ? currentStepData?.name
                     : currentStepPageData?.name}
                 </div>
                 <div className="macro-text-div">
+                {console.log(
+              'Macro View Description:',
+              currentStepData?.description
+                ? currentStepData?.description
+                : currentStepPageData?.description
+            )}
                   {currentStepData?.description
                     ? currentStepData?.description
                     : currentStepPageData?.description}
@@ -250,7 +266,9 @@ const StepPage = ({ productDataArray, selectedPathId, showSelectedPath, selected
                       className="sub-text"
                       style={{ display: showGradeDesc ? "flex" : "none" }}
                     >
-                      {gradeDescription}
+                      {currentStepData?.description
+                    ? currentStepData?.description
+                    : currentStepPageData?.description}
                     </div>
                   </div>
                   <div className="micro-text-div">
@@ -288,7 +306,7 @@ const StepPage = ({ productDataArray, selectedPathId, showSelectedPath, selected
                       className="sub-text"
                       style={{ display: showCurriculumDesc ? "flex" : "none" }}
                     >
-                      {curriculumDescription}
+                      {currentStepData?.description}
                     </div>
                   </div>
                   <div className="micro-text-div">

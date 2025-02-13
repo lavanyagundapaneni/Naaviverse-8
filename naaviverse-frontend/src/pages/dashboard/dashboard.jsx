@@ -226,7 +226,7 @@ const Dashboard = () => {
     if (userDetails) {
       axios
         .get(
-          `https://careers.marketsverse.com/userpaths/getCurrentStep?email=${userDetails?.email}`
+          `/api/userpaths/programs?email=${userDetails?.email}`
         )
         .then(({ data }) => {
           if (data.status) {
