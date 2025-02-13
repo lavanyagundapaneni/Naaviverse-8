@@ -3,7 +3,7 @@ name: Deploy Frontend to Server
 on:
   push:
     branches:
-      - 1/2/2025  # Branch triggering the workflow
+      - 13/02/25  # Branch triggering the workflow
 
 jobs:
   deploy:
@@ -23,5 +23,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@www.naaviverse.com << 'EOF'
             set -e  # Exit immediately if any command fails
             cd /home/ubuntu/Naaviverse-8
-            ./deploy.sh 1/2/2025  # Execute the deployment script
+            ./deploy.sh 13/02/25  # Execute the deployment script
           EOF
