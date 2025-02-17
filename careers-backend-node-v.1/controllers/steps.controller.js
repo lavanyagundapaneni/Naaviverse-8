@@ -283,10 +283,47 @@ const restoreStep = async (req, res) => {
     })
 }
 
+const getActiveSteps = async (req, res) => {
+    try {
+        const { email } = req.query;
+
+        if (!email) {
+            return res.status(400).json({
+                status: false,
+                message: "Email is required.",
+            });
+        }
+
+        // Fetch only active steps
+        const steps = await stepModel.find({ email, status: "active" });
+
+        if (steps.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No active steps found.",
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: "Active steps retrieved successfully.",
+            data: steps,
+        });
+    } catch (error) {
+        console.error("Error fetching active steps:", error);
+        return res.status(500).json({
+            status: false,
+            message: "Internal server error.",
+        });
+    }
+};
+
+
 module.exports = {
     addStep,
     getSteps,
     updateStep,
     deleteStep,
     restoreStep,
+    getActiveSteps,
 }

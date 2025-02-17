@@ -8,9 +8,9 @@ router.post("/add", pathController.addPath);
 router.get("/get", pathController.getPath);
 router.get("/get/specific", pathController.getPathSpecific);
 router.post("/get", pathController.getPathNormal);
-router.put("/update/:id", pathController.updatePath);
 router.delete("/delete/:id", pathController.deletePath);
 router.put("/restore/:id",  [verifyToken], pathController.restorePath);
-router.put("/updateFields",  pathController.updateFields)
+router.put("/updateFields",  pathController.updateFields);
+router.patch("/edit", pathController.updatePath)
 
 module.exports = router;

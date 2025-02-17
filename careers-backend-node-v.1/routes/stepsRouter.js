@@ -10,5 +10,6 @@ router.put("/update/:id",[verifyToken], stepsController.updateStep);
 // router.put("/complete/:id", stepsController.updateCompletedStep);
 router.delete("/delete/:id", stepsController.deleteStep);
 router.put("/restore/:id",[verifyToken], stepsController.restoreStep);
+router.get("/active", stepsController.getActiveSteps);
 
 module.exports = router;

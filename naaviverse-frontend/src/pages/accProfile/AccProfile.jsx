@@ -220,6 +220,8 @@ const AccProfile = () => {
   const [newSpecialities, setNewSpecialities] = useState(false);
   const [newCoverPic, setNewCoverPic] = useState(false);
   const [newProfilePic, setNewProfilePic] = useState();
+  const [partnerStepsData, setPartnerStepsData] = useState([]);
+
 
   const [backupPathList, setBackupPathList] = useState([]);
   const [showBackupPathList, setShowBackupPathList] = useState(false);
@@ -397,6 +399,26 @@ const AccProfile = () => {
       lastModified: originalFile.lastModified,
     });
   }
+
+
+  const getActiveSteps = () => {
+    console.log("getActiveSteps called");
+    setLoading(true);
+    let email = userDetails?.email;
+
+    axios
+        .get(`/api/steps/active?email=${email}`)
+        .then((response) => {
+            let result = response?.data?.data;
+            console.log(result, "Active Steps Fetched");
+            setPartnerStepsData(result);
+            setLoading(false);
+        })
+        .catch((error) => {
+            console.error(error, "Error fetching active steps");
+            setLoading(false);
+        });
+};
 
   //upload end here
 
@@ -1124,7 +1146,7 @@ const AccProfile = () => {
     // console.log(personality, "api body");
     setCreatingPath(true);
     axios
-      .post(`/paths/add`, {
+      .post(`/api/paths/add`, {
         ...pathSteps,
         performance: gradeAvg,
         curriculum: curriculum,
@@ -1132,6 +1154,8 @@ const AccProfile = () => {
         stream: stream,
         financialSituation: finance,
         personality: personality,
+
+        
       })
       .then((response) => {
         let result = response?.data;
@@ -2515,7 +2539,9 @@ const AccProfile = () => {
                           cursor: "pointer",
                         }}
                         onClick={() => {
-                          setStepsToggle(!stepsToggle);
+                          console.log("Click event triggered");
+                          getActiveSteps();
+        setStepsToggle((prev) => !prev); 
                         }}
                       >
                         <div
@@ -2545,7 +2571,7 @@ const AccProfile = () => {
                         className="hidden-steps"
                         style={{ display: stepsToggle ? "flex" : "none" }}
                       >
-                        {allSteps?.map((e, i) => {
+                        {partnerStepsData?.map((e, i) => {
                           return (
                             <div
                               className="each-hidden-step"

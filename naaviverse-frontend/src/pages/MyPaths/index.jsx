@@ -4,6 +4,7 @@ import Skeleton from "react-loading-skeleton";
 import "./mypaths.scss";
 import axios from "axios";
 import { Draggable } from "react-drag-reorder";
+import EditPathForm from "../MyPaths/paths.jsx";
 
 // images
 import dummy from "./dummy.svg";
@@ -355,6 +356,8 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
       });
   };
 
+
+  
   const handleAddService = (newId) => {
     setActionLoading(true);
 
@@ -421,20 +424,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     }
   }, [selectedStepId]);
 
-  // useEffect(() => {
-  //   if (userDetails) {
-  //     axios
-  //       .get(
-  //         `https://careers.marketsverse.com/userpaths/getCurrentStep?email=${userDetails?.user?.email}`
-  //       )
-  //       .then(({ data }) => {
-  //         if (data.status) {
-  //           // console.log(data.data[0].StepDetails[0].other_data, "ProductKeys");
-  //           setProductKeys(data.data[0].StepDetails[0].other_data);
-  //         }
-  //       });
-  //   }
-  // }, []);
+ 
 
   const fetchProductData = async (apiKey) => {
     try {
@@ -454,22 +444,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     console.log(stepActionStep, "ejbfkwjebfkwef");
   }, [stepActionStep]);
 
-  // const fetchData = async () => {
-  //   setProductDataArray([]);
-  //   console.log(productKeys, "ewlkhflkwheflwerf")
-  //   if (productKeys) {
-  //     const apiKeys = Object.values(productKeys);
-  //     const fetchDataPromises = apiKeys.map((item) => fetchProductData(item));
-
-  //     try {
-  //       const results = await Promise.all(fetchDataPromises);
-  //       const updatedProductDataArray = results.filter(Boolean);
-  //       setProductDataArray([...updatedProductDataArray]);
-  //     } catch (error) {
-  //       console.error("Error fetching product data:", error);
-  //     }
-  //   }
-  // };
+  
   const fetchData = async () => {
     setProductDataArray([]);
     console.log(productKeys, "ewlkhflkwheflwerf");
@@ -667,6 +642,13 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
     setMypathsMenu("Paths");
   }, []);
 
+
+  const handleEditSubmit = () => {
+    setPathActionStep(1); // Reset pathActionStep after edit submission
+};
+
+  
+
   return (
     <div className="mypaths">
       <div className="mypaths-menu">
@@ -746,23 +728,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
             Pending Paths
           </div>
         )}
-        {/* <div
-          className="each-mypath-menu"
-          style={{
-            fontWeight: mypathsMenu === "Steps" ? "700" : "",
-            background:
-              mypathsMenu === "Steps" ? "rgba(241, 241, 241, 0.5)" : "",
-          }}
-          onClick={() => {
-            setMypathsMenu("Steps");
-            if(viewPathEnabled) {
-              setViewPathEnabled(false);
-              setViewPathData([]);
-            }
-          }}
-        >
-          Steps
-        </div> */}
+        
       </div>
       <div className="mypaths-content">
         {
@@ -921,94 +887,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
           ) : (
             ""
           )
-          // : (
-          //   <>
-          //     <div className="mypathsNav">
-          //       <div className="mypathsName">Name</div>
-          //       <div className="mypathsCountry">Length</div>
-          //       <div className="mypathsCountry">Cost Structure</div>
-          //       <div className="mypathsMicrosteps">Services</div>
-          //     </div>
-          //     <div className="mypathsScroll-div">
-          //       {loading
-          //         ? Array(10)
-          //             .fill("")
-          //             ?.map((e, i) => {
-          //               return (
-          //                 <div className="each-mypaths-data1" key={i}>
-          //                   <div className="each-mypaths-detail">
-          //                     <div className="each-mypathsName">
-          //                       <Skeleton width={100} height={30} />
-          //                     </div>
-          //                     <div className="each-mypathsCountry">
-          //                       <Skeleton width={100} height={30} />
-          //                     </div>
-          //                     <div className="each-mypathsCountry">
-          //                       <Skeleton width={100} height={30} />
-          //                     </div>
-          //                     <div className="each-mypathsMicrosteps">
-          //                       <Skeleton width={100} height={30} />
-          //                     </div>
-          //                   </div>
-          //                   <div className="each-mypaths-desc">
-          //                     <div className="each-mypaths-desc-txt">
-          //                       <Skeleton width={100} height={30} />
-          //                     </div>
-          //                     <div className="each-mypaths-desc-txt1">
-          //                       <Skeleton width={"100%"} height={30} />
-          //                     </div>
-          //                   </div>
-          //                 </div>
-          //               );
-          //             })
-          //         : filteredPartnerStepsData?.map((e, i) => {
-          //             return (
-          //               <div
-          //                 className="each-mypaths-data1"
-          //                 key={i}
-          //                 onClick={() => {
-          //                   setSelectedStepId(e?._id);
-          //                   setStepActionEnabled(true);
-          //                 }}
-          //               >
-          //                 <div className="each-mypaths-detail">
-          //                   <div className="each-mypathsName">
-          //                     <div>
-          //                       <div>{e?.name}</div>
-          //                       <div
-          //                         style={{
-          //                           fontSize: "0.8rem",
-          //                           fontWeight: "300",
-          //                         }}
-          //                       >
-          //                         {e?._id}
-          //                       </div>
-          //                     </div>
-          //                   </div>
-          //                   <div className="each-mypathsCountry">
-          //                     {e?.length ? e?.length : 0} Days
-          //                   </div>
-          //                   <div className="each-mypathsCountry">{e?.cost}</div>
-          //                   <div className="each-mypathsMicrosteps">
-          //                     {e?.other_data
-          //                       ? Object.keys(e.other_data).length
-          //                       : 0}
-          //                   </div>
-          //                 </div>
-          //                 <div className="each-mypaths-desc">
-          //                   <div className="each-mypaths-desc-txt">
-          //                     Description
-          //                   </div>
-          //                   <div className="each-mypaths-desc-txt1">
-          //                     {e?.description}
-          //                   </div>
-          //                 </div>
-          //               </div>
-          //             );
-          //           })}
-          //     </div>
-          //   </>
-          // )
+          
         }
 
         {pathActionEnabled && (
@@ -1048,6 +927,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
                     className="acc-step-box4"
                     onClick={() => {
                       setPathActionStep(4);
+                      
                     }}
                   >
                     Edit path
@@ -1056,6 +936,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
                     className="acc-step-box4"
                     onClick={() => {
                       setPathActionStep(2);
+                      
                     }}
                   >
                     Delete path
@@ -1070,14 +951,7 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
                       Reject Path
                     </div>
                   )}
-                  {/* <div
-                    className="acc-step-box4"
-                    onClick={() => {
-                      setPathActionStep(9);
-                    }}
-                  >
-                    Add Services
-                  </div> */}
+                  
                   <div
                     className="acc-step-box4"
                     onClick={() => {
@@ -1122,7 +996,9 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
                   <div
                     className="acc-step-box4"
                     onClick={() => {
-                      setPathActionStep(4);
+                       // Ensure this is being updated
+  
+                    setPathActionStep(4);
                     }}
                   >
                     Edit path
@@ -1178,613 +1054,31 @@ const MyPaths = ({ search, admin, fetchAllServicesAgain, stpesMenu }) => {
             ) : (
               ""
             )}
+            
+           
+           
+
 
             {pathActionStep === 3 && (
               <div className="success-box2">Path Successfully Deleted</div>
             )}
 
-            {pathActionStep === 4 &&
-              (editPaths === "default" ? (
-                <div className="acc-mt-div">
-                  <div className="acc-sub-text">
-                    What type of data do you want to edit?
-                  </div>
-                  <div className="acc-scroll-div">
-                    {/* <div
-                      className="acc-step-box4"
-                      onClick={() => {
-                        setEditPaths("Edit meta data");
-                      }}
-                    >
-                      Edit meta data
-                    </div> */}
-                    <div
-                      className="acc-step-box4"
-                      onClick={() => {
-                        setEditPaths("Edit steps");
-                      }}
-                    >
-                      Edit steps
-                    </div>
-                    {/* <div
-                      className="acc-step-box4"
-                      onClick={() => {
-                        setEditPaths("Edit who qualifies");
-                      }}
-                    >
-                      Edit who qualifies
-                    </div> */}
-                  </div>
-                  <div
-                    className="goBack3"
-                    onClick={() => {
-                      setPathActionStep(1);
-                    }}
-                  >
-                    Go Back
-                  </div>
-                </div>
-              ) : editPaths === "Edit meta data" ? (
-                metaDataStep === "default" ? (
-                  <div className="acc-mt-div">
-                    <div className="acc-sub-text">
-                      Which meta data do you want to edit?
-                    </div>
-                    <div className="acc-scroll-div">
-                      <div
-                        className="acc-step-box4"
-                        onClick={() => {
-                          setMetaDataStep("nameOfPath");
-                        }}
-                      >
-                        Name
-                      </div>
-                      <div
-                        className="acc-step-box4"
-                        onClick={() => {
-                          setMetaDataStep("length");
-                        }}
-                      >
-                        Length
-                      </div>
-                      <div
-                        className="acc-step-box4"
-                        onClick={() => {
-                          setMetaDataStep("description");
-                        }}
-                      >
-                        Description
-                      </div>
-                      <div
-                        className="acc-step-box4"
-                        onClick={() => {
-                          setMetaDataStep("path_type");
-                        }}
-                      >
-                        Path type
-                      </div>
-                      <div
-                        className="acc-step-box4"
-                        onClick={() => {
-                          setMetaDataStep("destination_institution");
-                        }}
-                      >
-                        Destination institution
-                      </div>
-                      <div
-                        className="acc-step-box4"
-                        onClick={() => {
-                          setMetaDataStep("program");
-                        }}
-                      >
-                        Program
-                      </div>
-                      <div
-                        className="acc-step-box4"
-                        onClick={() => {
-                          setMetaDataStep("city");
-                        }}
-                      >
-                        City
-                      </div>
-                      <div
-                        className="acc-step-box4"
-                        onClick={() => {
-                          setMetaDataStep("country");
-                        }}
-                      >
-                        Country
-                      </div>
-                    </div>
-                    <div
-                      className="goBack3"
-                      onClick={() => {
-                        setEditPaths("default");
-                      }}
-                    >
-                      Go Back
-                    </div>
-                  </div>
-                ) : metaDataStep === "success" ? (
-                  <div className="success-box2">
-                    You have successfully updated the{" "}
-                    {metaDataStep === "nameOfPath"
-                      ? "name"
-                      : metaDataStep === "path_type"
-                      ? "path type"
-                      : metaDataStep === "destination_institution"
-                      ? "destination institution"
-                      : metaDataStep}{" "}
-                    for this page. You will automatically be redirected to the
-                    updated path page.
-                  </div>
-                ) : (
-                  <>
-                    <div className="acc-mt-div">
-                      <div className="acc-scroll-div">
-                        <div className="acc-sub-textt">
-                          Current{" "}
-                          {metaDataStep === "nameOfPath"
-                            ? "name"
-                            : metaDataStep === "path_type"
-                            ? "path type"
-                            : metaDataStep === "destination_institution"
-                            ? "destination institution"
-                            : metaDataStep}
-                        </div>
-                        <div className="acc-step-box5">
-                          {selectedPath?.[metaDataStep] || ""}
-                        </div>
-                        <div className="acc-sub-textt">
-                          New{" "}
-                          {metaDataStep === "nameOfPath"
-                            ? "name"
-                            : metaDataStep === "path_type"
-                            ? "path type"
-                            : metaDataStep === "destination_institution"
-                            ? "destination institution"
-                            : metaDataStep}
-                        </div>
-                        <div className="acc-step-box6">
-                          <input
-                            type="text"
-                            placeholder={`Enter ${
-                              metaDataStep === "nameOfPath"
-                                ? "name"
-                                : metaDataStep === "path_type"
-                                ? "path type"
-                                : metaDataStep === "destination_institution"
-                                ? "destination institution"
-                                : metaDataStep
-                            }`}
-                            onChange={(e) => {
-                              setNewValue(e.target.value);
-                            }}
-                            value={newValue}
-                          />
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          opacity: newValue?.length > 1 ? "1" : "0.5",
-                          cursor:
-                            newValue?.length > 1 ? "pointer" : "not-allowed",
-                        }}
-                        className="save-Btn"
-                        onClick={() => {
-                          if (newValue?.length > 1) {
-                            editMetaData(metaDataStep);
-                          }
-                        }}
-                      >
-                        Save Changes
-                      </div>
-                      <div
-                        className="goBack3"
-                        onClick={() => {
-                          setMetaDataStep("default");
-                        }}
-                      >
-                        Go Back
-                      </div>
-                    </div>
-                    {actionLoading ? (
-                      <div className="popularlogo">
-                        <img className="popularlogoimg" src={lg1} alt="" />
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                  </>
-                )
-              ) : editPaths === "Edit steps" ? (
-                <div className="acc-mt-div">
-                  <div className="acc-sub-text">
-                    How do you want to edit the steps in this path?
-                  </div>
-                  <div className="acc-scroll-div">
-                    <div
-                      className="acc-step-box4"
-                      onClick={(e) => {
-                        setEditPaths("add_step");
-                      }}
-                    >
-                      Add new step
-                    </div>
-                    <div
-                      className="acc-step-box4"
-                      onClick={(e) => {
-                        setEditPaths("remove_step");
-                      }}
-                    >
-                      Remove existing step
-                    </div>
-                    {/* <div className="acc-step-box4">
-                      Edit backup path for existing step
-                    </div>
-                    */}
-                    <div
-                      className="acc-step-box"
-                      onClick={(e) => {
-                        setEditPaths("reorder_step");
-                      }}
-                    >
-                      Reorder existing steps
-                    </div>
-                  </div>
-                  <div
-                    className="goBack3"
-                    onClick={() => {
-                      setEditPaths("default");
-                    }}
-                  >
-                    Go Back
-                  </div>
-                </div>
-              ) : editPaths === "add_step" ? (
-                <div className="acc-mt-div">
-                  <div className="acc-sub-text">
-                    Which step do you want to add?
-                  </div>
-                  <div className="acc-scroll-div">
-                    {remainingStepData?.map((item) => (
-                      <div
-                        className="acc-step-box6"
-                        onClick={(e) => {
-                          setEditPaths("add_sub_step");
-                          setStepId(item?._id);
-                        }}
-                      >
-                        <div style={{ fontWeight: 600, fontSize: "14px" }}>
-                          {item?.name}
-                        </div>
-                        <br />
-                        <div
-                          style={{
-                            fontWeight: 300,
-                            fontSize: "12px",
-                            lineHeight: "25px",
-                            paddingBottom: "10px",
-                            borderBottom: "1px solid #e7e7e7",
-                          }}
-                        >
-                          {item?.description?.substring(0, 150) + "..."}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div
-                    className="goBack3"
-                    onClick={() => {
-                      setEditPaths("default");
-                    }}
-                  >
-                    Go Back
-                  </div>
-                </div>
-              ) : editPaths === "add_sub_step" ? (
-                <div className="acc-mt-div">
-                  <div className="acc-sub-text">
-                    Select backup path for this step
-                  </div>
-                  <div
-                    className="acc-scroll-div"
-                    style={{ height: "55vh !important" }}
-                  >
-                    {backupPathData?.map(
-                      (item) =>
-                        item?._id !== selectedPath?._id && (
-                          <div
-                            className="substepstyle"
-                            onClick={(e) => {
-                              setEditPaths("show_all_paths");
-                              setBackupPathId(item?._id);
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontWeight: 600,
-                                fontSize: "14px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <div>{item?.program}</div>
-                              <div>{item?.destination_institution}</div>
-                            </div>
-                            <div
-                              style={{
-                                fontWeight: 300,
-                                fontSize: "12px",
-                                lineHeight: "25px",
-                              }}
-                            >
-                              {item?.description?.substring(0, 150) + "..."}
-                            </div>
-                            <br />
-                            <div
-                              style={{
-                                paddingBottom: "10px",
-                                fontWeight: 300,
-                                fontSize: "12px",
-                                lineHeight: "25px",
-                              }}
-                            >
-                              Path id: {item?._id}
-                            </div>
-                          </div>
-                        )
-                    )}
-                  </div>
-                  <div>
-                    <div
-                      className="goBack5"
-                      onClick={() => {
-                        setEditPaths("show_all_paths");
-                        setBackupPathId(null);
-                      }}
-                    >
-                      Continue Without Backup Path
-                    </div>
 
-                    <div
-                      className="goBack3"
-                      onClick={() => {
-                        setEditPaths("default");
-                      }}
-                    >
-                      Go Back
-                    </div>
-                  </div>
-                </div>
-              ) : editPaths === "show_all_paths" ? (
-                <div className="acc-mt-div">
-                  <div className="acc-sub-text">
-                    Select the positioning of the new step
-                  </div>
-                  <div className="acc-scroll-div" style={{}}>
-                    {selectedPath?.the_ids?.length > 0 ? (
-                      selectedPath?.the_ids?.map((item, index) => (
-                        <>
-                          <div className="subpathstyle">
-                            <div style={{ fontWeight: 600, fontSize: "14px" }}>
-                              <div>{selectedPath?.nameOfPath}</div>
-                            </div>
-                            <div
-                              style={{
-                                fontWeight: 300,
-                                fontSize: "12px",
-                                lineHeight: "25px",
-                              }}
-                            >
-                              {selectedPath?.description?.substring(0, 150) +
-                                "..."}
-                            </div>
-                            <br />
-                            <div
-                              style={{
-                                fontWeight: 600,
-                                fontSize: "14px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                paddingBottom: "10px",
-                              }}
-                            >
-                              Backup Path
-                            </div>
-                            <div
-                              style={{
-                                borderRadius: "15px",
-                                border: "1px solid #e7e7e7",
-                                padding: "10px",
-                              }}
-                            >
-                              {item?._id}
-                            </div>
-                          </div>
-                          <center>
-                            <div
-                              className="placehere"
-                              onClick={(e) =>
-                                handlePlace(selectedPath, index + 1)
-                              }
-                            >
-                              Place Here
-                            </div>
-                          </center>
-                        </>
-                      ))
-                    ) : (
-                      <div
-                        className="placehere"
-                        onClick={(e) => handlePlace(selectedPath, 0)}
-                      >
-                        Place Here
-                      </div>
-                    )}
-                  </div>
-                  <div
-                    className="goBack3"
-                    onClick={() => {
-                      setEditPaths("default");
-                    }}
-                  >
-                    Go Back
-                  </div>
-                </div>
-              ) : editPaths === "remove_step" ? (
-                <div className="acc-mt-div">
-                  <div className="acc-sub-text">
-                    Select the positioning of the new step
-                  </div>
-                  <div className="acc-scroll-div" style={{}}>
-                    {selectedPath?.the_ids?.map((item, index) => (
-                      <>
-                        <div
-                          className="subpathstyle"
-                          style={{ position: "relative" }}
-                        >
-                          <div
-                            className="deletePathStyle"
-                            onClick={(e) =>
-                              handledeletePathPosition(selectedPath, item?._id)
-                            }
-                          >
-                            <img src={require("./delete.svg").default} alt="" />
-                          </div>
-                          <div style={{ fontWeight: 600, fontSize: "14px" }}>
-                            <div>{selectedPath?.nameOfPath}</div>
-                          </div>
-                          <div
-                            style={{
-                              fontWeight: 300,
-                              fontSize: "12px",
-                              lineHeight: "25px",
-                            }}
-                          >
-                            {selectedPath?.description?.substring(0, 150) +
-                              "..."}
-                          </div>
-                          <br />
-                          <div
-                            style={{
-                              fontWeight: 600,
-                              fontSize: "14px",
-                              display: "flex",
-                              justifyContent: "space-between",
-                              paddingBottom: "10px",
-                            }}
-                          >
-                            Backup Path
-                          </div>
-                          <div
-                            style={{
-                              borderRadius: "15px",
-                              border: "1px solid #e7e7e7",
-                              padding: "10px",
-                            }}
-                          >
-                            {item?._id}
-                          </div>
-                        </div>
-                      </>
-                    ))}
-                  </div>
-                  <div
-                    className="goBack3"
-                    onClick={() => {
-                      setEditPaths("default");
-                    }}
-                  >
-                    Go Back
-                  </div>
-                </div>
-              ) : editPaths === "reorder_step" ? (
-                <div className="acc-mt-div">
-                  <div className="acc-sub-text">
-                    Select the positioning of the new step
-                  </div>
-                  <div className="acc-scroll-div" style={{}}>
-                    <Draggable onPosChange={getChangedPos}>
-                      {selectedPath?.the_ids?.map((item, index) => (
-                        <>
-                          <div
-                            className="subpathstyle"
-                            style={{ position: "relative" }}
-                          >
-                            <div style={{ fontWeight: 600, fontSize: "14px" }}>
-                              <div>{selectedPath?.nameOfPath}</div>
-                            </div>
-                            <div
-                              style={{
-                                fontWeight: 300,
-                                fontSize: "12px",
-                                lineHeight: "25px",
-                              }}
-                            >
-                              {selectedPath?.description?.substring(0, 150) +
-                                "..."}
-                            </div>
-                            <br />
-                            <div
-                              style={{
-                                fontWeight: 600,
-                                fontSize: "14px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                paddingBottom: "10px",
-                              }}
-                            >
-                              Backup Path
-                            </div>
-                            <div
-                              style={{
-                                borderRadius: "15px",
-                                border: "1px solid #e7e7e7",
-                                padding: "10px",
-                              }}
-                            >
-                              {item?._id}
-                            </div>
-                          </div>
-                        </>
-                      ))}
-                    </Draggable>
-                  </div>
-                  <div
-                    className="goBack3"
-                    onClick={() => {
-                      setEditPaths("default");
-                    }}
-                  >
-                    Go Back
-                  </div>
-                </div>
-              ) : editPaths === "Edit who qualifies" ? (
-                <div className="acc-mt-div">
-                  <div className="acc-sub-text">
-                    Which of the current coordinates do you want to edit?
-                  </div>
-                  <div className="acc-scroll-div">
-                    <div className="acc-step-box4">Grade</div>
-                    <div className="acc-step-box4">Grade point avg</div>
-                    <div className="acc-step-box4">Curriculum</div>
-                    <div className="acc-step-box4">Stream</div>
-                    <div className="acc-step-box4">Financial situation</div>
-                    <div className="acc-step-box4">Personality</div>
-                  </div>
-                  <div
-                    className="goBack3"
-                    onClick={() => {
-                      setEditPaths("default");
-                    }}
-                  >
-                    Go Back
-                  </div>
-                </div>
-              ) : (
-                ""
-              ))}
+{pathActionStep === 4 && (
+    <EditPathForm
+        selectedPath={selectedPath}
+        onSave={(updatedPath) => {
+            console.log("Updated Path Data:", updatedPath);
+            setTimeout(() => {
+                setPathActionStep(null); // Close form after success message
+            }, 2000);
+        }}
+        onCancel={() => setPathActionStep(null)} // Close form on cancel
+    />
+)}
+
+
+            
             {pathActionStep === 5 && (
               <div className="acc-mt-div">
                 <div className="acc-sub-text">
