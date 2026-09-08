@@ -7,7 +7,7 @@ import Step4 from "../dashboard/MallProduct/Step4.jsx";
 import CoinComponent from "../dashboard/MallProduct/CoinComponent.jsx";
 import { useRazorpayPayment } from "../../app/useRazorpayPayment";
 import { useNavigate } from "react-router-dom";
-import logo from "../../static/images/logo.svg";
+import logo from "../../logos/naavi_final_logo2.png";
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -1211,7 +1211,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
       {popup && (
         <div className="popup-overlay" onClick={() => { setPopup(false); setPopupContent("default"); setPopupDetails(""); }}>
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-            <div><img src={logo} alt="" /></div>
+            <div><img src={logo} alt="Naavi" className="modal-step-logo" style={{ maxHeight: "45px", maxWidth: "160px", objectFit: "contain" }} /></div>
 
             {popupContent === "default" && popupDetails === "yes" && (
               <>

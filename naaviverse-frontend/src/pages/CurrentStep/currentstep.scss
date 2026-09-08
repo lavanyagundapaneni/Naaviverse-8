@@ -1408,6 +1408,12 @@ $proplus-btn-hover:   #fad6b0;
     align-items: center;
     box-shadow: $shadow-lg;
 
+    .modal-step-logo, img {
+      max-height: 45px;
+      max-width: 160px;
+      object-fit: contain;
+    }
+
     .popup-text {
       width: 100%;
       text-align: center;
