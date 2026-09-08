@@ -396,9 +396,15 @@ const SubscriptionGate = ({ onBack, onSubscribe, subscribing, initialTier = null
 };
 
 /* ─── Subscription Success ──────────────────────────────────────── */
-const SubscriptionSuccess = ({ plan, planTier, onStartLearning }) => {
-  const meta = PLAN_META[planTier] || PLAN_META.standard;
+const SubscriptionSuccess = ({ plan, planTier, tier, onStartLearning }) => {
+  const isNano = tier === "nano";
+  const meta = isNano
+    ? (NANO_PLAN_META[planTier] || NANO_PLAN_META.standard)
+    : (PLAN_META[planTier] || PLAN_META.standard);
   const color = PLAN_COLORS[planTier]?.accent || "#3b82f6";
+  const monthlyPriceStr = meta.monthlyPrice || (meta.monthlyAmt ? `₹${meta.monthlyAmt.toLocaleString()}` : "");
+  const annualPriceStr = meta.annualPrice || (meta.annualAmt ? `₹${meta.annualAmt.toLocaleString()}` : "");
+
   return (
     <div className="sub-success">
       <div className="sub-success__inner">
@@ -413,11 +419,11 @@ const SubscriptionSuccess = ({ plan, planTier, onStartLearning }) => {
           Welcome to Naavi {meta.label}!
         </h2>
         <p className="sub-success__desc">
-          You now have <strong>{meta.credits} credits</strong> to unlock Micro &amp; Nano views across your learning steps.
+          You now have <strong>{meta.credits} Credits</strong> To Unlock Micro &amp; Nano Views Across Your Learning Steps.
         </p>
         <div className="sub-success__plan-pill" style={{ background: PLAN_COLORS[planTier]?.bg, color, border: `1px solid ${PLAN_COLORS[planTier]?.border}` }}>
           {meta.label} {plan === "annual" ? "Annual" : "Monthly"} —{" "}
-          {plan === "annual" ? meta.annualPrice + "/year" : meta.monthlyPrice + "/month"}
+          {plan === "annual" ? (annualPriceStr ? annualPriceStr + "/year" : "") : (monthlyPriceStr ? monthlyPriceStr + "/Month" : "")}
         </div>
         <button className="sub-success__cta" onClick={onStartLearning}>Start Learning →</button>
       </div>
@@ -452,6 +458,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
   const [showSuccess, setShowSuccess] = useState(false);
   const [subscribedPlan, setSubscribedPlan] = useState("");
   const [subscribedPlanTier, setSubscribedPlanTier] = useState("");
+  const [subscribedTier, setSubscribedTier] = useState("");
   const [subGateInitialTier, setSubGateInitialTier] = useState(null);
   const [showNanoGate, setShowNanoGate] = useState(false);
 
@@ -548,6 +555,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
       setShowNanoGate(false);
       setSubscribedPlan(billing);
       setSubscribedPlanTier(basePlanTier);
+      setSubscribedTier(actualTier);
       setSubscribing(false);
       setSubError("");
       setShowSuccess(true);
@@ -806,6 +814,7 @@ const CurrentStep = ({ productDataArray, selectedPathId, showSelectedPath, selec
         <SubscriptionSuccess
           plan={subscribedPlan}
           planTier={subscribedPlanTier}
+          tier={subscribedTier}
           onStartLearning={async () => {
             await verifySubscription();
             setShowSuccess(false);
