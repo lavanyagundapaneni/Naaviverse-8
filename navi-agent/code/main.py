@@ -6,7 +6,7 @@ import datetime
 import time
 import certifi
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -128,6 +128,12 @@ class UpdatePathRequest(BaseModel):
     edited_by: Optional[str] = None
     feedback_text: Optional[str] = None
     feedback_category: Optional[str] = "general"
+
+class CategoryValidationRequest(BaseModel):
+    category: str
+    current_position: str
+    destination_goal: str
+
 
 class AdminStepRequest(BaseModel):
     path_id: str
@@ -2826,6 +2832,15 @@ async def generate_path_stream(req: PathGenerationRequest):
         },
     )
 
+@app.post("/api/validate-category-consistency")
+async def api_validate_category_consistency(req: CategoryValidationRequest):
+    from category_validator import validate_category_consistency
+    return validate_category_consistency(
+        selected_category=req.category,
+        current_position=req.current_position,
+        destination_goal=req.destination_goal
+    )
+
 @app.post("/api/path")
 async def generate_path(req: PathGenerationRequest):
     current = req.current_position.strip()
@@ -2941,193 +2956,326 @@ async def generate_path_audit(req: PathAuditRequest):
         raise HTTPException(status_code=500, detail=f"AI Path Audit Generation Failed: {str(e)}. Please retry.")
 
 
+def classify_pathway_category(doc: dict) -> str:
+    cat = (
+        doc.get("category")
+        or doc.get("content_category")
+        or (doc.get("profile") or {}).get("activeSegment")
+        or (doc.get("profile") or {}).get("category")
+        or doc.get("focus")
+    )
+    if cat:
+        resolved = resolve_focus_category(str(cat))
+        if resolved in ["academic", "practical", "jobs", "non_academic"]:
+            return resolved
+
+    current = doc.get("current_position", "") or ""
+    goal = doc.get("target_goal", "") or ""
+    if current or goal:
+        try:
+            from category_validator import analyze_category_consistency
+            res = analyze_category_consistency(current, goal, "academic")
+            detected = res.get("detected_category")
+            if detected in ["academic", "practical", "jobs", "non_academic"]:
+                return detected
+        except Exception:
+            pass
+
+    return "academic"
+
+
+ANALYTICS_CATEGORY_META = {
+    "academic": {
+        "key": "academic",
+        "label": "Academic & Research",
+        "description": "Degree pathways, university admissions & academic honors",
+        "color": "#10b981",
+    },
+    "practical": {
+        "key": "practical",
+        "label": "Practical & Skills",
+        "description": "Portfolios, technical certs, bootcamps & skills",
+        "color": "#0ea5e9",
+    },
+    "jobs": {
+        "key": "jobs",
+        "label": "Jobs & Careers",
+        "description": "Role readiness, job prep, interviews & placement",
+        "color": "#f59e0b",
+    },
+    "non_academic": {
+        "key": "non_academic",
+        "label": "Non-Academic Counselling",
+        "description": "Wellbeing, mindset, routine & generic coaching",
+        "color": "#8b5cf6",
+    },
+}
+
+
+def _parse_analytics_dt_utc(val) -> Optional[datetime.datetime]:
+    if not val:
+        return None
+    if isinstance(val, datetime.datetime):
+        if val.tzinfo is None:
+            return val.replace(tzinfo=datetime.timezone.utc)
+        return val.astimezone(datetime.timezone.utc)
+    if isinstance(val, str):
+        try:
+            cleaned = val.replace("Z", "+00:00")
+            dt = datetime.datetime.fromisoformat(cleaned)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=datetime.timezone.utc)
+            return dt.astimezone(datetime.timezone.utc)
+        except Exception:
+            return None
+    return None
+
+
 @app.get("/api/admin/analytics")
-async def get_admin_analytics():
-    # 1. Counts
-    pending_count = await pending_paths_collection.count_documents({})
-    published_count = await published_paths_collection.count_documents({})
-    total_generated = pending_count + published_count
-
-    # 1b. This week count (paths created in last 7 days)
+async def get_admin_analytics(time_range: Optional[str] = Query("all", alias="range")):
     now_utc = datetime.datetime.now(datetime.timezone.utc)
-    week_ago = now_utc - datetime.timedelta(days=7)
-    week_ago_iso = week_ago.isoformat()
-    this_week_count = 0
-    for col in [pending_paths_collection, published_paths_collection]:
-        cur = col.find({"created_at": {"$gte": week_ago_iso}}, {"_id": 1})
-        async for _ in cur:
-            this_week_count += 1
 
-    # 2. Average Review Time (days)
-    cursor = published_paths_collection.find({}, {"created_at": 1, "published_at": 1})
-    times = []
-    async for doc in cursor:
-        created = doc.get("created_at")
-        published = doc.get("published_at")
-        if created and published:
-            try:
-                if isinstance(created, str):
-                    created = datetime.datetime.fromisoformat(created.replace("Z", "+00:00"))
-                if isinstance(published, str):
-                    published = datetime.datetime.fromisoformat(published.replace("Z", "+00:00"))
-                if created.tzinfo is not None and published.tzinfo is None:
-                    published = published.replace(tzinfo=datetime.timezone.utc)
-                elif created.tzinfo is None and published.tzinfo is not None:
-                    created = created.replace(tzinfo=datetime.timezone.utc)
-                delta = published - created
-                times.append(delta.total_seconds() / (24 * 3600))
-            except Exception:
+    # 1. Determine cutoff date if filtering by date range
+    range_clean = (time_range or "all").lower().strip()
+    cutoff_date: Optional[datetime.datetime] = None
+    if range_clean == "7d":
+        cutoff_date = now_utc - datetime.timedelta(days=7)
+    elif range_clean == "30d":
+        cutoff_date = now_utc - datetime.timedelta(days=30)
+    elif range_clean == "90d":
+        cutoff_date = now_utc - datetime.timedelta(days=90)
+
+    # 2. Fetch all raw pathway records (excluding large heavy steps)
+    projection = {
+        "_id": 1,
+        "current_position": 1,
+        "target_goal": 1,
+        "profile": 1,
+        "category": 1,
+        "content_category": 1,
+        "focus": 1,
+        "status": 1,
+        "created_at": 1,
+        "published_at": 1,
+        "updated_at": 1,
+        "roadmap_data.steps": 1,
+    }
+
+    pending_docs = []
+    cursor_p = pending_paths_collection.find({}, projection).sort("created_at", -1)
+    async for d in cursor_p:
+        d["status"] = "under_admin_review"
+        pending_docs.append(d)
+
+    published_docs = []
+    cursor_pub = published_paths_collection.find({}, projection).sort("created_at", -1)
+    async for d in cursor_pub:
+        d["status"] = "published"
+        published_docs.append(d)
+
+    all_raw_docs = pending_docs + published_docs
+
+    # Filter by range if applicable
+    filtered_docs = []
+    for doc in all_raw_docs:
+        c_dt = _parse_analytics_dt_utc(doc.get("created_at"))
+        if cutoff_date is not None:
+            if not c_dt or c_dt < cutoff_date:
                 continue
+        doc["_parsed_created_at"] = c_dt
+        doc["_parsed_published_at"] = _parse_analytics_dt_utc(doc.get("published_at"))
+        filtered_docs.append(doc)
 
-    avg_review_time = round(sum(times) / len(times), 1) if times else 2.4
+    # Real counts
+    total_generated = len(filtered_docs)
+    published_count = sum(1 for d in filtered_docs if d["status"] == "published")
+    pending_count = sum(1 for d in filtered_docs if d["status"] == "under_admin_review")
+    draft_count = 0  # Real data: no fake draft inflation
+    publish_rate = round((published_count / total_generated) * 100) if total_generated > 0 else 0
 
-    # 3. Status Breakdown
-    draft_count = max(5, int(total_generated * 0.1))
-    total_with_drafts = total_generated + draft_count
-    
-    published_pct = round((published_count / total_with_drafts) * 100) if total_with_drafts else 74
-    pending_pct = round((pending_count / total_with_drafts) * 100) if total_with_drafts else 17
-    draft_pct = 100 - published_pct - pending_pct
+    # Paths created in the last 7 calendar days
+    week_ago_utc = now_utc - datetime.timedelta(days=7)
+    this_week_count = sum(
+        1 for d in all_raw_docs
+        if _parse_analytics_dt_utc(d.get("created_at")) and _parse_analytics_dt_utc(d.get("created_at")) >= week_ago_utc
+    )
 
-    # 4. Pathways over time (last 6 months)
-    now = datetime.datetime.now(datetime.timezone.utc)
-    months_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    last_6_months = []
-    for i in range(5, -1, -1):
-        m_date = now - datetime.timedelta(days=i*30)
-        last_6_months.append({
-            "name": months_names[m_date.month - 1],
-            "month_num": m_date.month,
-            "year": m_date.year,
-            "generated": 0,
-            "published": 0
+    # Real review turnaround time calculation across published paths
+    review_durations = []
+    for d in filtered_docs:
+        if d["status"] == "published":
+            c = d.get("_parsed_created_at")
+            p = d.get("_parsed_published_at")
+            if c and p and p >= c:
+                delta_sec = (p - c).total_seconds()
+                review_durations.append(delta_sec)
+
+    avg_review_seconds = round(sum(review_durations) / len(review_durations), 1) if review_durations else None
+    formatted_review_time = "—"
+    if avg_review_seconds is not None:
+        if avg_review_seconds < 60:
+            formatted_review_time = f"{int(avg_review_seconds)}s"
+        elif avg_review_seconds < 3600:
+            formatted_review_time = f"{round(avg_review_seconds / 60, 1)}m"
+        elif avg_review_seconds < 86400:
+            formatted_review_time = f"{round(avg_review_seconds / 3600, 1)}h"
+        else:
+            formatted_review_time = f"{round(avg_review_seconds / 86400, 1)}d"
+
+    # Category distribution across the 4 core categories
+    category_counts = {
+        "academic": 0,
+        "practical": 0,
+        "jobs": 0,
+        "non_academic": 0,
+    }
+    for d in filtered_docs:
+        cat_key = classify_pathway_category(d)
+        if cat_key in category_counts:
+            category_counts[cat_key] += 1
+        else:
+            category_counts["academic"] += 1
+
+    categories_list = []
+    for cat_key in ["academic", "practical", "jobs", "non_academic"]:
+        meta = ANALYTICS_CATEGORY_META[cat_key]
+        c_count = category_counts[cat_key]
+        c_pct = round((c_count / total_generated) * 100) if total_generated > 0 else 0
+        categories_list.append({
+            "key": cat_key,
+            "label": meta["label"],
+            "description": meta["description"],
+            "color": meta["color"],
+            "count": c_count,
+            "pct": c_pct,
         })
 
-    async def count_paths_in_months(collection, is_published):
-        cursor = collection.find({}, {"created_at": 1})
-        async for doc in cursor:
-            created = doc.get("created_at")
-            if not created:
-                continue
-            try:
-                if isinstance(created, str):
-                    created = datetime.datetime.fromisoformat(created.replace("Z", "+00:00"))
-                for m in last_6_months:
-                    if created.month == m["month_num"] and created.year == m["year"]:
-                        m["generated"] += 1
-                        if is_published:
-                            m["published"] += 1
-                        break
-            except Exception:
-                continue
+    # Real monthly trend (past 6 calendar months) - ZERO hardcoded base numbers
+    months_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    monthly_trend = []
+    for i in range(5, -1, -1):
+        target_month_dt = now_utc - datetime.timedelta(days=i * 30.4)
+        m_num = target_month_dt.month
+        y_num = target_month_dt.year
+        monthly_trend.append({
+            "name": months_names[m_num - 1],
+            "month_num": m_num,
+            "year": y_num,
+            "generated": 0,
+            "published": 0,
+        })
 
-    await count_paths_in_months(pending_paths_collection, False)
-    await count_paths_in_months(published_paths_collection, True)
+    for d in filtered_docs:
+        c_dt = d.get("_parsed_created_at")
+        if c_dt:
+            for m in monthly_trend:
+                if c_dt.month == m["month_num"] and c_dt.year == m["year"]:
+                    m["generated"] += 1
+                    if d["status"] == "published":
+                        m["published"] += 1
+                    break
 
-    base_generated = [35, 42, 48, 55, 64, 72]
-    base_published = [28, 34, 38, 42, 49, 55]
-    for idx, m in enumerate(last_6_months):
-        if idx < len(base_generated):
-            m["generated"] += base_generated[idx]
-            m["published"] += base_published[idx]
+    # Lifecycle Progression Funnel
+    funnel = [
+        {
+            "stage": "Generated",
+            "count": total_generated,
+            "pct": 100 if total_generated > 0 else 0,
+            "description": "Total pathways structured and stored by engine",
+        },
+        {
+            "stage": "Under Review",
+            "count": pending_count,
+            "pct": round((pending_count / total_generated) * 100) if total_generated > 0 else 0,
+            "description": "Pathways undergoing review & curation by admins",
+        },
+        {
+            "stage": "Published",
+            "count": published_count,
+            "pct": round((published_count / total_generated) * 100) if total_generated > 0 else 0,
+            "description": "Approved, student-facing verified pathways",
+        },
+    ]
 
-    # 5. Recent Pathways
-    recent_list = []
-    p_cursor = pending_paths_collection.find({}).sort("created_at", -1).limit(5)
-    async for doc in p_cursor:
-        doc["status"] = "Pending"
-        recent_list.append(doc)
-    pub_cursor = published_paths_collection.find({}).sort("created_at", -1).limit(5)
-    async for doc in pub_cursor:
-        doc["status"] = "Published"
-        recent_list.append(doc)
+    # Recent Pathway Activity (sorted latest first)
+    sorted_paths = sorted(
+        filtered_docs,
+        key=lambda x: x.get("_parsed_created_at") or datetime.datetime.min.replace(tzinfo=datetime.timezone.utc),
+        reverse=True,
+    )
 
-    recent_list.sort(key=lambda x: x.get("created_at") or datetime.datetime.min, reverse=True)
-    recent_list = recent_list[:5]
-
-    recent_pathways = []
-    for doc in recent_list:
-        profile = doc.get("profile") or {}
-        student_name = profile.get("name") or "Anonymous Student"
-        goal = doc.get("target_goal") or "N/A"
+    recent_activity = []
+    for doc in sorted_paths[:10]:
+        prof = doc.get("profile") or {}
+        student_name = prof.get("name") or "Anonymous Student"
+        goal = doc.get("target_goal") or "Target Pathway Goal"
+        current_pos = doc.get("current_position") or "Current Starting Point"
         roadmap = doc.get("roadmap_data") or {}
         steps = roadmap.get("steps") or []
-        
-        recent_pathways.append({
-            "student": student_name,
-            "goal": goal,
+        cat_key = classify_pathway_category(doc)
+        created_iso = doc.get("_parsed_created_at").isoformat() if doc.get("_parsed_created_at") else None
+        pub_iso = doc.get("_parsed_published_at").isoformat() if doc.get("_parsed_published_at") else None
+
+        recent_activity.append({
+            "id": str(doc["_id"]),
+            "student_name": student_name,
+            "target_goal": goal,
+            "current_position": current_pos,
+            "category": cat_key,
+            "category_label": ANALYTICS_CATEGORY_META[cat_key]["label"],
             "status": doc["status"],
-            "steps": len(steps)
+            "status_label": "Published" if doc["status"] == "published" else "Pending Review",
+            "steps_count": len(steps),
+            "created_at": created_iso,
+            "published_at": pub_iso,
         })
-
-    if not recent_pathways:
-        recent_pathways = [
-            { "student": "Arjun S.", "goal": "CS • Oxford", "status": "Published", "steps": 6 },
-            { "student": "Priya M.", "goal": "Medicine • AIIMS", "status": "Pending", "steps": 8 },
-            { "student": "Karan R.", "goal": "MBA • IIM", "status": "Pending", "steps": 7 },
-            { "student": "Sneha T.", "goal": "Design • NID", "status": "Published", "steps": 5 },
-            { "student": "Rohan V.", "goal": "Law • NLU", "status": "Draft", "steps": 6 }
-        ]
-
-    # 6. Top goals generated
-    goal_counts = {
-        "Computer Science": 88,
-        "Medicine • MBBS": 54,
-        "MBA / Management": 43,
-        "Engineering • IIT": 33,
-        "Law • NLU": 23,
-        "Design • NID": 15
-    }
-    async def aggregate_goals(collection):
-        cursor = collection.find({}, {"target_goal": 1})
-        async for doc in cursor:
-            g = doc.get("target_goal")
-            if g:
-                g_lower = g.strip().lower()
-                if any(k in g_lower for k in ["computer", "cs", "software", "coding", "programming", "programmer", "ai", "machine learning", "developer", "web dev", "data science"]):
-                    goal_counts["Computer Science"] += 1
-                elif any(k in g_lower for k in ["medicine", "mbbs", "doctor", "aiims", "dentist", "medical", "biology", "surgeon", "healthcare"]):
-                    goal_counts["Medicine • MBBS"] += 1
-                elif any(k in g_lower for k in ["mba", "management", "business", "finance", "iim", "consulting", "marketing", "strategy", "commerce"]):
-                    goal_counts["MBA / Management"] += 1
-                elif any(k in g_lower for k in ["engineering", "iit", "btech", "mechanical", "civil", "electrical", "aerospace", "tech", "technology"]):
-                    goal_counts["Engineering • IIT"] += 1
-                elif any(k in g_lower for k in ["law", "nlu", "clat", "advocate", "lawyer", "judiciary", "legal"]):
-                    goal_counts["Law • NLU"] += 1
-                elif any(k in g_lower for k in ["design", "nid", "fashion", "architecture", "nift", "ux", "ui", "art", "creative"]):
-                    goal_counts["Design • NID"] += 1
-
-    await aggregate_goals(pending_paths_collection)
-    await aggregate_goals(published_paths_collection)
-
-    sorted_goals = sorted(goal_counts.items(), key=lambda x: x[1], reverse=True)[:6]
-    max_val = sorted_goals[0][1] if sorted_goals else 88
-
-    top_goals = []
-    colors = ["var(--blue)", "var(--accent)", "var(--yellow)", "#9B51E0", "var(--coral)", "#E040FB"]
-    for idx, (label, val) in enumerate(sorted_goals):
-        top_goals.append({
-            "label": label,
-            "value": val,
-            "maxVal": max_val,
-            "color": colors[idx % len(colors)]
-        })
-
 
     return {
+        "range": range_clean,
+        "overview": {
+            "total_generated": total_generated,
+            "published_count": published_count,
+            "pending_count": pending_count,
+            "draft_count": draft_count,
+            "publish_rate": publish_rate,
+            "this_week_count": this_week_count,
+            "avg_review_time_seconds": avg_review_seconds,
+            "avg_review_time_formatted": formatted_review_time,
+        },
+        "lifecycle_funnel": funnel,
+        "monthly_trend": monthly_trend,
+        "categories": categories_list,
+        "recent_activity": recent_activity,
+        # Backwards compatibility fields
         "total_generated": total_generated,
         "pending_count": pending_count,
         "published_count": published_count,
         "this_week": this_week_count,
-        "avg_review_time": f"{avg_review_time}d",
-        "line_chart_months": [{ "name": m["name"], "generated": m["generated"], "published": m["published"] } for m in last_6_months],
+        "avg_review_time": formatted_review_time,
+        "line_chart_months": [{ "name": m["name"], "generated": m["generated"], "published": m["published"] } for m in monthly_trend],
         "status_slices": [
-            { "label": "Published", "value": published_count, "pct": published_pct, "color": "#2CA852" },
-            { "label": "Pending", "value": pending_count, "pct": pending_pct, "color": "#F9B000" },
-            { "label": "Draft", "value": draft_count, "pct": draft_pct, "color": "#80868B" }
+            { "label": "Published", "value": published_count, "pct": round((published_count / (total_generated or 1)) * 100), "color": "#10b981" },
+            { "label": "Pending", "value": pending_count, "pct": round((pending_count / (total_generated or 1)) * 100), "color": "#f59e0b" },
+            { "label": "Draft", "value": draft_count, "pct": 0, "color": "#94a3b8" },
         ],
-        "recent_pathways": recent_pathways,
-        "top_goals": top_goals
+        "recent_pathways": [
+            {
+                "student": r["student_name"],
+                "goal": r["target_goal"],
+                "status": "Published" if r["status"] == "published" else "Pending",
+                "steps": r["steps_count"],
+                "pathId": r["id"],
+            }
+            for r in recent_activity
+        ],
+        "top_goals": [
+            {
+                "label": c["label"],
+                "value": c["count"],
+                "color": c["color"],
+            }
+            for c in categories_list
+        ],
     }
 
 # Admin Endpoint: Get all paths under review

@@ -1,6 +1,4 @@
-//dashboard.jsx::
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import './Dashboard.scss';
 import {
   IconArrowRight, IconBrain, IconNavigation, IconRoute, IconCheck,
@@ -33,6 +31,8 @@ const STEP_COLORS = [
 ];
 
 import SegmentSelector from "../components/SegmentSelector";
+import CategoryMismatchWarning from "../components/CategoryMismatchWarning";
+import { analyzeCategoryConsistency } from "../utils/categoryConsistencyValidator";
 import {
   SEGMENTS,
   SEGMENT_CONFIGS,
@@ -404,6 +404,26 @@ export default function Dashboard({ profile, pathData, userInput, initialCurrent
     }
   };
 
+  const [allowCrossCategory, setAllowCrossCategory] = useState(false);
+  const currentTextareaRef = useRef(null);
+  const goalTextareaRef = useRef(null);
+
+  // Validate category consistency against Current Position & Destination Goal
+  const categoryConsistency = analyzeCategoryConsistency(activeSegment, current, goal);
+
+  const handleSwitchToDetectedCategory = (detectedKey) => {
+    handleSegmentChange(detectedKey);
+    setAllowCrossCategory(false);
+    setError("");
+  };
+
+  const handleFocusInputs = () => {
+    if (currentTextareaRef.current) {
+      currentTextareaRef.current.focus();
+      currentTextareaRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   // Regenerate a single step's description + all views (macro/micro/nano)
   const handleRegenerateStep = async (e, step) => {
     e.stopPropagation();
@@ -734,6 +754,14 @@ export default function Dashboard({ profile, pathData, userInput, initialCurrent
       return;
     }
 
+    if (categoryConsistency.status === "strong_mismatch" && !allowCrossCategory && !promptText) {
+      setError(`⚠️ Category Mismatch: You selected "${categoryConsistency.selectedCategory.label}", but your inputs appear to belong to "${categoryConsistency.detectedCategory.label}". Please switch categories or check "Allow intentional cross-category path" to continue.`);
+      if (currentTextareaRef.current) {
+        currentTextareaRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+
     const isRegen = isTabRegen && pathData !== null && pathData !== undefined;
     console.log("[Naavi Dashboard] generate() invoked:", {
       current: activeCurrent,
@@ -960,11 +988,16 @@ export default function Dashboard({ profile, pathData, userInput, initialCurrent
               <span className="db-input-kicker">Current position</span>
             </div>
             <textarea
+              ref={currentTextareaRef}
               className="db-textarea"
               rows={3}
               placeholder={currentPlaceholder}
               value={current}
-              onChange={e => setCurrent(e.target.value)}
+              onChange={e => {
+                setCurrent(e.target.value);
+                setAllowCrossCategory(false);
+                setError("");
+              }}
               disabled={loading}
             />
 
@@ -977,6 +1010,7 @@ export default function Dashboard({ profile, pathData, userInput, initialCurrent
               <span className="db-input-kicker">Future goal</span>
             </div>
             <textarea
+              ref={goalTextareaRef}
               className="db-textarea"
               rows={3}
               placeholder={goalPlaceholder}
@@ -988,9 +1022,23 @@ export default function Dashboard({ profile, pathData, userInput, initialCurrent
                 // Avoid double middle dots
                 formatted = formatted.replace(/\s*•\s*•\s*/g, ' • ');
                 setGoal(formatted);
+                setAllowCrossCategory(false);
+                setError("");
               }}
               disabled={loading}
               onKeyDown={e => e.key === "Enter" && e.ctrlKey && isGoalValid && generate()}
+            />
+
+            {/* Category Consistency Validation Warning */}
+            <CategoryMismatchWarning
+              validation={categoryConsistency}
+              allowCrossCategory={allowCrossCategory}
+              onToggleCrossCategory={checked => {
+                setAllowCrossCategory(checked);
+                if (checked) setError("");
+              }}
+              onSwitchCategory={handleSwitchToDetectedCategory}
+              onFocusInputs={handleFocusInputs}
             />
 
             {/* Naavi Goal Validation Widget */}

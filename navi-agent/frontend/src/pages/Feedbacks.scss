@@ -48,6 +48,8 @@ $cat-general: #6b7a8d;
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 22px;
+        gap: 16px;
+        flex-wrap: wrap;
 
         .display-title {
             font-size: 28px;
@@ -60,6 +62,43 @@ $cat-general: #6b7a8d;
             font-size: 14px;
             max-width: 560px;
             line-height: 1.5;
+        }
+
+        .btn-add-curation {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: $teal;
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
+            transition: all 0.2s ease;
+            margin-top: 8px;
+
+            &:hover {
+                background: $teal-deep;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35);
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+
+            &.active {
+                background: #e2e8f0;
+                color: #334155;
+                box-shadow: none;
+
+                &:hover {
+                    background: #cbd5e1;
+                }
+            }
         }
     }
 
@@ -95,20 +134,25 @@ $cat-general: #6b7a8d;
     }
 
     // ---------- Layout ----------
-    // minmax(0, 1fr) is the key fix: a plain `1fr` track refuses to shrink
-    // below the intrinsic (min-content) width of what's inside it, so a wide
-    // table used to blow the main pane out past the viewport and shove the
-    // side panel + tabs off-screen. minmax(0, 1fr) lets the track shrink and
-    // the table's own overflow-x:auto takes over instead.
+    // In curation-closed state, table takes 100% available width.
+    // In curation-open state on large desktop, it shares space with the curation panel.
     .fb-layout {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 360px;
         gap: 22px;
         align-items: start;
         width: 100%;
+        transition: grid-template-columns 0.3s ease;
 
-        @media (max-width: 1080px) {
+        &.curation-closed {
             grid-template-columns: minmax(0, 1fr);
+        }
+
+        &.curation-open {
+            grid-template-columns: minmax(0, 1fr) 380px;
+
+            @media (max-width: 1180px) {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
     }
 
@@ -538,11 +582,42 @@ $cat-general: #6b7a8d;
         }
     }
 
+    // ---------- Backdrop for Drawer on Tablet/Mobile ----------
+    .curation-backdrop {
+        display: none;
+
+        @media (max-width: 1180px) {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(3px);
+            z-index: 1040;
+            animation: fbFadeIn 0.2s ease;
+        }
+    }
+
     // ---------- Side pane / form ----------
     .fb-side-pane {
         position: sticky;
         top: 20px;
         min-width: 0;
+        animation: fbFadeIn 0.25s ease;
+
+        @media (max-width: 1180px) {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 440px;
+            max-width: 100vw;
+            z-index: 1050;
+            overflow-y: auto;
+            padding: 16px;
+            background: #ffffff;
+            box-shadow: -8px 0 32px rgba(15, 23, 42, 0.15);
+            animation: fbDrawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
     }
 
     .fb-form-card {
@@ -550,10 +625,54 @@ $cat-general: #6b7a8d;
         background: linear-gradient(160deg, #ffffff 0%, $teal-soft 130%);
         backdrop-filter: blur(6px);
 
-        .fb-form-title {
-            font-size: 16px;
-            margin: 0 0 4px;
-            color: $teal-deep;
+        .fb-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+
+            .fb-form-header-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .fb-form-title {
+                font-size: 16px;
+                margin: 0;
+                color: $teal-deep;
+            }
+
+            .fb-form-badge {
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 7px;
+                border-radius: 999px;
+                background: rgba(15, 118, 110, 0.12);
+                color: $teal-deep;
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+            }
+
+            .btn-close-curation {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                border-radius: 8px;
+                border: 1px solid $border;
+                background: #ffffff;
+                color: $muted;
+                cursor: pointer;
+                transition: all 0.15s ease;
+
+                &:hover {
+                    background: $danger-soft;
+                    color: $danger;
+                    border-color: rgba(226, 87, 76, 0.3);
+                }
+            }
         }
 
         .fb-form-desc {
@@ -617,6 +736,35 @@ $cat-general: #6b7a8d;
         line-height: 1.4;
     }
 
+    .fb-form-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 14px;
+
+        .btn-cancel-curation {
+            padding: 11px 16px;
+            border-radius: 10px;
+            border: 1px solid $border;
+            background: #ffffff;
+            color: $muted;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+
+            &:hover {
+                background: #f1f5f9;
+                color: $ink;
+            }
+        }
+
+        .btn-primary.fb-submit-btn {
+            flex: 1;
+            margin-top: 0;
+        }
+    }
+
     .btn-primary.fb-submit-btn {
         width: 100%;
         display: flex;
@@ -638,6 +786,16 @@ $cat-general: #6b7a8d;
             background: $teal;
             transform: translateY(-1px);
         }
+    }
+
+    @keyframes fbDrawerSlideIn {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+
+    @keyframes fbFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 
     // ---------- Small screens ----------

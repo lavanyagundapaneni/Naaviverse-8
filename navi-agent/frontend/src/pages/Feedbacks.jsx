@@ -50,6 +50,20 @@ export default function Feedbacks() {
   const [curriculum, setCurriculum] = useState("");
   const [stream, setStream] = useState("");
 
+  // UI State: whether Curation Caster is expanded/visible
+  const [isCurationOpen, setIsCurationOpen] = useState(false);
+
+  // Close panel on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isCurationOpen) {
+        setIsCurationOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isCurationOpen]);
+
   const flash = (msg) => {
     setSuccessMsg(msg);
     setTimeout(() => setSuccessMsg(""), 3000);
@@ -150,6 +164,7 @@ export default function Feedbacks() {
       setGrade("");
       setCurriculum("");
       setStream("");
+      setIsCurationOpen(false);
       loadData();
     } catch (err) {
       setError(err.message);
@@ -237,6 +252,14 @@ export default function Feedbacks() {
             Monitor student marketplace clicks and capture curation feedback to improve AI generation quality.
           </p>
         </div>
+        <button
+          type="button"
+          className={`btn-add-curation ${isCurationOpen ? "active" : ""}`}
+          onClick={() => setIsCurationOpen(prev => !prev)}
+        >
+          <PlusIcon size={16} />
+          <span>{isCurationOpen ? "Close Curation" : "Add Curation"}</span>
+        </button>
       </div>
 
       {successMsg && (
@@ -253,7 +276,7 @@ export default function Feedbacks() {
         </div>
       )}
 
-      <div className="fb-layout">
+      <div className={`fb-layout ${isCurationOpen ? "curation-open" : "curation-closed"}`}>
 
         {/* Main Content Pane */}
         <div className="fb-main-pane">
@@ -431,87 +454,122 @@ export default function Feedbacks() {
           )}
         </div>
 
-        {/* Curation Form Side Pane */}
-        <div className="fb-side-pane">
-          <div className="fb-form-card card">
-            <h3 className="fb-form-title">⚡ Curation Caster</h3>
-            <p className="fb-form-desc">
-              Write explicit curation feedback guidelines. The AI generator retrieves matching rules to customize resources & milestones.
-            </p>
-
-            <form onSubmit={handleSubmitDirective}>
-              <div className="form-group">
-                <label>Category Context</label>
-                <select value={category} onChange={e => setCategory(e.target.value)}>
-                  <option value="resources">Marketplace & Resources (Recommended)</option>
-                  <option value="academics">Academics & Subject Choices</option>
-                  <option value="timeline">Milestone Timelines</option>
-                  <option value="general">General Guideline</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Target Goal / Keyword</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Data Science, SAT Prep, Stanford CS"
-                  value={targetGoal}
-                  onChange={e => setTargetGoal(e.target.value)}
-                  required
-                />
-                <span className="field-hint">The target goal must match terms in the student's query.</span>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Target Grade</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    placeholder="e.g. 10"
-                    value={grade}
-                    onChange={e => setGrade(e.target.value)}
-                  />
+        {/* Curation Form Side Pane / Drawer */}
+        {isCurationOpen && (
+          <>
+            <div
+              className="curation-backdrop"
+              onClick={() => setIsCurationOpen(false)}
+              aria-hidden="true"
+            />
+            <aside className="fb-side-pane" aria-label="Curation Caster Form">
+              <div className="fb-form-card card">
+                <div className="fb-form-header">
+                  <div className="fb-form-header-title">
+                    <h3 className="fb-form-title">⚡ Curation Caster</h3>
+                    <span className="fb-form-badge">AI Directive</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-close-curation"
+                    onClick={() => setIsCurationOpen(false)}
+                    title="Close Curation Caster"
+                    aria-label="Close"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
                 </div>
-                <div className="form-group">
-                  <label>Curriculum</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. IB, CBSE"
-                    value={curriculum}
-                    onChange={e => setCurriculum(e.target.value)}
-                  />
-                </div>
-              </div>
+                <p className="fb-form-desc">
+                  Write explicit curation feedback guidelines. The AI generator retrieves matching rules to customize resources &amp; milestones.
+                </p>
 
-              <div className="form-group">
-                <label>Stream Focus</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Science, Commerce, Arts"
-                  value={stream}
-                  onChange={e => setStream(e.target.value)}
-                />
-              </div>
+                <form onSubmit={handleSubmitDirective}>
+                  <div className="form-group">
+                    <label>Category Context</label>
+                    <select value={category} onChange={e => setCategory(e.target.value)}>
+                      <option value="resources">Marketplace &amp; Resources (Recommended)</option>
+                      <option value="academics">Academics &amp; Subject Choices</option>
+                      <option value="timeline">Milestone Timelines</option>
+                      <option value="general">General Guideline</option>
+                    </select>
+                  </div>
 
-              <div className="form-group">
-                <label>AI Curation Instruction</label>
-                <textarea
-                  rows={4}
-                  placeholder="e.g. For low budget profiles, do not recommend Scaler Academy. Recommend free options like freeCodeCamp and Kaggle. Highlight project outcomes."
-                  value={directiveText}
-                  onChange={e => setDirectiveText(e.target.value)}
-                  required
-                />
-              </div>
+                  <div className="form-group">
+                    <label>Target Goal / Keyword</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Data Science, SAT Prep, Stanford CS"
+                      value={targetGoal}
+                      onChange={e => setTargetGoal(e.target.value)}
+                      required
+                    />
+                    <span className="field-hint">The target goal must match terms in the student's query.</span>
+                  </div>
 
-              <button type="submit" className="btn-primary fb-submit-btn">
-                <PlusIcon size={14} /> Save Learning Memory
-              </button>
-            </form>
-          </div>
-        </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Target Grade</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="12"
+                        placeholder="e.g. 10"
+                        value={grade}
+                        onChange={e => setGrade(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Curriculum</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. IB, CBSE"
+                        value={curriculum}
+                        onChange={e => setCurriculum(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Stream Focus</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Science, Commerce, Arts"
+                      value={stream}
+                      onChange={e => setStream(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>AI Curation Instruction</label>
+                    <textarea
+                      rows={4}
+                      placeholder="e.g. For low budget profiles, do not recommend Scaler Academy. Recommend free options like freeCodeCamp and Kaggle. Highlight project outcomes."
+                      value={directiveText}
+                      onChange={e => setDirectiveText(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="fb-form-actions">
+                    <button
+                      type="button"
+                      className="btn-cancel-curation"
+                      onClick={() => setIsCurationOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn-primary fb-submit-btn">
+                      <PlusIcon size={14} /> Save Learning Memory
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </aside>
+          </>
+        )}
 
       </div>
     </div>
