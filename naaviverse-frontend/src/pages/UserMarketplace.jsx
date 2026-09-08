@@ -1036,7 +1036,13 @@ const CheckoutPage = ({ cart, onConfirm, onBack }) => {
     setFieldErrors({});
     setPayError("");
 
-    const externalItem = cart.find((item) => item.checkoutType === "external");
+    const externalItem = cart.find(
+      (item) =>
+        item.checkoutType === "external" ||
+        item.partnerType === "external" ||
+        item.isExternal === true ||
+        item.external === true
+    );
 
     if (externalItem) {
       sessionStorage.setItem("naaviExclusiveItem", JSON.stringify(externalItem));
@@ -1055,45 +1061,105 @@ const CheckoutPage = ({ cart, onConfirm, onBack }) => {
       return;
     }
 
+    // INTERNAL PARTNER — REAL RAZORPAY PAYMENT
     setSubmitting(true);
 
-    axios
-      .post(`${process.env.REACT_APP_API_BASE_URL || ""}/api/payment/mock-purchase`, {
-        userEmail: email,
-        items: cart.map((item) => ({
-          _id: item._id,
-          name: item.name,
-          layer: item.layer,
-          cost: item.cost,
-          partnerId: item.partnerId || null,
-          partner_email: item.partner_email || null,
-        })),
-        total,
-        orderId: genOrderId(),
-      })
-      .then((res) => {
-        setSubmitting(false);
-        onConfirm({
-          orderId: res.data?.orderId || genOrderId(),
-          total,
-          itemCount: cart.length,
-          date: new Date(),
-          studentEmail: email,
-          item: cart[0],
-        });
-      })
-      .catch((err) => {
-        console.error("Mock purchase API failed:", err);
-        setSubmitting(false);
-        onConfirm({
-          orderId: genOrderId(),
-          total,
-          itemCount: cart.length,
-          date: new Date(),
-          studentEmail: email,
-          item: cart[0],
-        });
+    const loadRazorpayScript = () =>
+      new Promise((resolve) => {
+        if (window.Razorpay) return resolve(true);
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
       });
+
+    loadRazorpayScript().then(async (loaded) => {
+      if (!loaded) {
+        setSubmitting(false);
+        setPayError("Could not load Razorpay SDK. Please check your internet connection.");
+        return;
+      }
+
+      try {
+        const orderRes = await axios.post(`${process.env.REACT_APP_API_BASE_URL || ""}/api/payment/marketplace-order`, {
+          userEmail: email,
+          items: cart.map((item) => ({
+            _id: item._id,
+            name: item.name,
+            layer: item.layer,
+            cost: item.cost,
+            partnerId: item.partnerId || null,
+            partner_email: item.partner_email || null,
+          })),
+          total,
+          currency: "INR",
+        });
+
+        if (!orderRes.data?.success) {
+          setSubmitting(false);
+          setPayError(orderRes.data?.error || "Failed to create payment order.");
+          return;
+        }
+
+        const order = orderRes.data.order;
+
+        const options = {
+          key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+          amount: order.amount,
+          currency: order.currency || "INR",
+          name: "Naavi Marketplace",
+          description: cart.map((i) => i.name).join(", "),
+          order_id: order.id,
+          prefill: {
+            name: fullName,
+            email: email,
+            contact: phone,
+          },
+          theme: { color: "#4f46e5" },
+          handler: async (response) => {
+            try {
+              const verifyRes = await axios.post(`${process.env.REACT_APP_API_BASE_URL || ""}/api/payment/marketplace-verify`, {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                items: cart,
+                userEmail: email,
+              });
+
+              setSubmitting(false);
+              if (verifyRes.data?.success) {
+                onConfirm({
+                  orderId: response.razorpay_order_id,
+                  total,
+                  itemCount: cart.length,
+                  date: new Date(),
+                  studentEmail: email,
+                  item: cart[0],
+                });
+              } else {
+                setPayError(verifyRes.data?.message || "Payment verification failed.");
+              }
+            } catch (err) {
+              setSubmitting(false);
+              setPayError("Payment verification failed. Please contact support.");
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              setSubmitting(false);
+            },
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error("Marketplace Razorpay Order error:", err);
+        setSubmitting(false);
+        setPayError(err?.response?.data?.error || err.message || "Order creation failed.");
+      }
+    });
   };
 
   return (
@@ -1175,7 +1241,7 @@ const CheckoutPage = ({ cart, onConfirm, onBack }) => {
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Secured Checkout Simulation. Choose pay button below to proceed.
+              100% Secure Checkout via Razorpay. Choose Pay Button Below To Proceed.
             </div>
             {payError && <div className="rzp-pay-error">{payError}</div>}
           </div>
@@ -1204,13 +1270,13 @@ const CheckoutPage = ({ cart, onConfirm, onBack }) => {
             <button className="os-pay-btn rzp-pay-btn" onClick={handlePayClick} disabled={submitting}>
               {submitting ? (
                 <span className="rzp-btn-inner">
-                  <span className="rzp-mini-spinner" /> Processing Mock Payment…
+                  <span className="rzp-mini-spinner" /> Processing Payment…
                 </span>
               ) : (
                 <span className="rzp-btn-inner">Pay ₹{total === 0 ? "0" : total.toLocaleString("en-IN")}</span>
               )}
             </button>
-            <p className="rzp-secure-text">100% Secure. Mock checkout processor active.</p>
+            <p className="rzp-secure-text">100% Secure Encrypted Razorpay Checkout.</p>
           </div>
         </div>
       </div>

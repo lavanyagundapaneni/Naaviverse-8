@@ -59,8 +59,8 @@ export default function UserTopHeader({ onBack }) {
       let pathName = localStorage.getItem("selectedPathName");
       let stepsCount = localStorage.getItem("selectedPathSteps");
 
-      // If we have pathId but not cached name or steps, fetch from backend
-      if (pathId && (!pathName || !stepsCount)) {
+      // Always fetch latest path details & exact step count for the active pathId
+      if (pathId) {
         try {
           const res = await axios.get(`${BASE_URL}/api/userpaths/steps?pathId=${pathId}`);
           if (res.data?.status && res.data?.data) {
@@ -70,9 +70,9 @@ export default function UserTopHeader({ onBack }) {
               pathName = fetchedName;
               localStorage.setItem("selectedPathName", fetchedName);
             }
-            if (count) {
-              stepsCount = `${count} steps`;
-              localStorage.setItem("selectedPathSteps", `${count} steps`);
+            if (count > 0) {
+              stepsCount = `${count} Steps`;
+              localStorage.setItem("selectedPathSteps", `${count} Steps`);
             }
           }
         } catch (err) {
@@ -97,9 +97,9 @@ export default function UserTopHeader({ onBack }) {
                 pathName = fetchedName;
                 localStorage.setItem("selectedPathName", fetchedName);
               }
-              if (count) {
-                stepsCount = `${count} steps`;
-                localStorage.setItem("selectedPathSteps", `${count} steps`);
+              if (count > 0) {
+                stepsCount = `${count} Steps`;
+                localStorage.setItem("selectedPathSteps", `${count} Steps`);
               }
             }
           }
@@ -109,7 +109,7 @@ export default function UserTopHeader({ onBack }) {
       }
 
       setToLabel(pathName || "Please select");
-      setStepsLabel(stepsCount || (pathName ? "5 steps" : "Please select"));
+      setStepsLabel(stepsCount || "Please select");
     } catch (e) {
       console.error("Error updating UserTopHeader:", e);
     }
