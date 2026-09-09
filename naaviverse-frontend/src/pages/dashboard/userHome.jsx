@@ -794,11 +794,7 @@ export default function UserHome() {
   };
 
   const SubscriptionsPanel = () => {
-    // If backend returns plan subscriptions, use them; otherwise default to sample plan subscriptions (Naavi Pro Nano Plan, Naavi Pro Plus Plan)
-    const displaySubs = subscriptions.length > 0 ? subscriptions : [
-      { id: "sub-1", name: "Naavi Pro Nano Plan", service: "Plan Subscription", billing: "Monthly", amount: "₹8,300", date: "Apr 29, 2026", status: "Paid", partner: "Naavi" },
-      { id: "sub-2", name: "Naavi Pro Plus Plan", service: "Plan Subscription", billing: "Monthly", amount: "₹8,300", date: "Apr 29, 2026", status: "Paid", partner: "Naavi" }
-    ];
+    const displaySubs = subscriptions;
 
     return (
       <div className="uh-panel">
@@ -809,8 +805,12 @@ export default function UserHome() {
           </button>
         </div>
 
-        {subsLoading && subscriptions.length === 0 ? (
+        {subsLoading ? (
           <div className="uh-loading">Loading subscriptions…</div>
+        ) : displaySubs.length === 0 ? (
+          <div className="uh-empty" style={{ padding: "20px 0", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
+            No active plan subscriptions found.
+          </div>
         ) : (
           <>
             <div className="uh-purchases-list" style={{ gap: "8px" }}>
@@ -1039,7 +1039,7 @@ export default function UserHome() {
         </div>
         <div className="uh-bs-div" />
         <div className="uh-bs-item" onClick={() => setActiveTab("subscriptions")}>
-          <span className="uh-bs-num">{subscriptions.length > 0 ? subscriptions.length : 2}</span>
+          <span className="uh-bs-num">{subscriptions.length}</span>
           <span className="uh-bs-label">Subscriptions</span>
           <Icon type="arrow-r" size={11} color="#3b82f6" />
         </div>
