@@ -3606,6 +3606,22 @@ async def admin_delete_step(req: AdminStepRequest):
 async def admin_regenerate_step(req: AdminStepRequest):
     return await apply_admin_step_mutation(req, "regenerate")
 
+async def trigger_instant_node_sync(path_id: str):
+    """
+    Triggers an instant sync on the Node backend so published paths appear
+    in the student dashboard immediately without waiting for background cooldowns.
+    """
+    import urllib.request
+    node_url = os.environ.get("NODE_BACKEND_URL", "http://localhost:4545").rstrip("/")
+    sync_endpoint = f"{node_url}/api/agent-paths/sync"
+    try:
+        req = urllib.request.Request(sync_endpoint, data=b"{}", headers={"Content-Type": "application/json"}, method="POST")
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, lambda: urllib.request.urlopen(req, timeout=5))
+        print(f"[InstantSync] Successfully notified Node backend at {sync_endpoint} for path {path_id}")
+    except Exception as e:
+        print(f"[InstantSync Warning] Could not notify Node backend ({sync_endpoint}): {e}")
+
 # Update a path (Commit curation overrides & Publish)
 @app.put("/api/paths/{path_id}")
 async def update_path(path_id: str, req: UpdatePathRequest):
@@ -3675,6 +3691,10 @@ async def update_path(path_id: str, req: UpdatePathRequest):
             
             # Delete from pending_paths
             await pending_paths_collection.delete_one({"_id": obj_id})
+            
+            # Trigger immediate background sync to Node backend (bypassing 5-minute cooldown)
+            asyncio.create_task(trigger_instant_node_sync(path_id))
+
             return {"message": "Successfully published career path", "status": "published"}
         else:
             # Just update the pending path
@@ -3699,6 +3719,9 @@ async def update_path(path_id: str, req: UpdatePathRequest):
                 "updated_at": datetime.datetime.now(datetime.timezone.utc)
             }}
         )
+        if req.status == "published":
+            asyncio.create_task(trigger_instant_node_sync(path_id))
+
         return {"message": f"Successfully updated career path status to {req.status}", "status": req.status}
         
     raise HTTPException(status_code=404, detail="Career path not found")

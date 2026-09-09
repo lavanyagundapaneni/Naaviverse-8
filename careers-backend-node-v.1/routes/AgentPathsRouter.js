@@ -14,6 +14,18 @@ const { getAgentPaths, getAgentPathById } = require('../controllers/AgentPathsCo
 // Optional filters: ?grade=11&stream=MPC&curriculum=CBSE&personality=investigative
 router.get('/', getAgentPaths);
 
+// POST /api/agent-paths/sync
+// Triggers an immediate sync of published paths from the AI Agent
+router.post('/sync', async (req, res) => {
+  try {
+    const { syncAgentPaths } = require('../controllers/AgentPathsController');
+    syncAgentPaths().catch(err => console.error('[AgentSync] Triggered sync error:', err.message));
+    return res.status(200).json({ status: true, message: 'Sync initiated immediately' });
+  } catch (err) {
+    return res.status(500).json({ status: false, message: err.message });
+  }
+});
+
 // GET /api/agent-paths/:agentPathId
 // Returns a single path from the AI Agent by its ID
 router.get('/:agentPathId', getAgentPathById);
