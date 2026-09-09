@@ -308,8 +308,17 @@ const getDashboardStats = async (req, res) => {
       };
     });
 
-    // ── 11. Fetch live activity stream ──────────────────────────────────────
+    // ── 11. Fetch live activity stream & generate real notifications ───────
     const liveActivity = await fetchPartnerLiveActivity({ email });
+
+    const notifications = liveActivity.map(act => ({
+      id: act.id,
+      type: act.type || "purchase",
+      title: act.type === "purchase" ? "New Marketplace Purchase" : act.type === "path" ? "Path Selection" : "Notification",
+      desc: `${act.name} ${act.action}`,
+      time: act.time || "Recently",
+      unread: true,
+    }));
 
     return res.status(200).json({
       status: true,
@@ -323,6 +332,7 @@ const getDashboardStats = async (req, res) => {
         totalMarketplacePurchases,
         totalMarketplaceRevenue,
         liveActivity,
+        notifications,
       },
     });
   } catch (err) {

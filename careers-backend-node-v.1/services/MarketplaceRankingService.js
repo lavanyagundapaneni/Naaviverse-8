@@ -327,19 +327,25 @@ async function getRankedMarketplaceItems(filter = {}, userContext = {}) {
 
   const partnerEmails = [...new Set(items.map((it) => it.partner_email?.trim()).filter(Boolean))];
   const Partner = require("../models/PartnerModel");
-  const partners = await Partner.find({ email: { $in: partnerEmails } }).select("email partnerId").lean();
+  const regexEmails = partnerEmails.map(e => new RegExp(`^${e.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}$`, "i"));
+  const partners = await Partner.find({ email: { $in: regexEmails } }).select("email partnerId creationSource partnerType").lean();
 
   const partnerMap = new Map();
   partners.forEach((p) => {
-    if (p.email) partnerMap.set(p.email.toLowerCase().trim(), p.partnerId);
+    if (p.email) partnerMap.set(p.email.toLowerCase().trim(), p);
   });
 
   const enrichedItems = items.map((item) => {
     const enriched = { ...item };
     const emailKey = item.partner_email?.toLowerCase().trim();
     if (emailKey && partnerMap.has(emailKey)) {
-      enriched.checkoutType = "external";
-      enriched.partnerId = partnerMap.get(emailKey);
+      const p = partnerMap.get(emailKey);
+      const isInternal = p.creationSource === "admin_created" || (p.partnerType || "").toLowerCase() === "internal";
+      enriched.checkoutType = isInternal ? "internal" : "external";
+      enriched.partnerId = p.partnerId;
+      enriched.creationSource = p.creationSource;
+      enriched.partnerType = p.partnerType;
+      enriched.partnerRole = item.role || item.category || p.partnerType;
     } else {
       enriched.checkoutType = "internal";
     }

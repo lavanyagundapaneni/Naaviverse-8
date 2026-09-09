@@ -666,73 +666,108 @@ const Loginpage = ({ initialType }) => {
     };
 
     // ── RENDER: FORCE PASSWORD CHANGE FORM (Internal Partner First Login) ──
-    const renderForcePasswordChange = () => (
-        <div className="login-box">
-            <div className="full-logo-box">
-                <img className="full-logo" src={logo} alt="Naaviverse" />
-            </div>
+    const renderForcePasswordChange = () => {
+        const isMinLength = forceNewPassword.length >= 6;
+        const isMatching = forceConfirmPassword.length > 0 && forceNewPassword === forceConfirmPassword;
+        const isPasswordValid = isMinLength && forceNewPassword === forceConfirmPassword;
 
-            <div className="login-welcome">
-                <div className="welcome-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span>Set Permanent Password</span>
+        return (
+            <div className="login-box">
+                <div className="full-logo-box">
+                    <img className="full-logo" src={logo} alt="Naaviverse" />
                 </div>
-                <div className="welcome-subtitle">
-                    You are logging in with a temporary password. Please set your new permanent password to secure your partner account.
-                </div>
-            </div>
 
-            {forcePasswordError && (
-                <div className="prompt-div" style={{ background: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626", padding: "10px 14px", borderRadius: "8px", fontSize: "0.82rem", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span>⚠️ {forcePasswordError}</span>
+                <div className="login-welcome">
+                    <div className="welcome-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span>Set Permanent Password</span>
+                    </div>
+                    <div className="welcome-subtitle">
+                        You are logging in with a temporary password. Please set your new permanent password to secure your partner account.
+                    </div>
                 </div>
-            )}
 
-            <div className="input-box password-box">
-                <LockIcon />
-                <input
-                    className="input-inp"
-                    type={forceEye1 ? "text" : "password"}
-                    placeholder="New Password (min. 6 characters)"
-                    value={forceNewPassword}
-                    onChange={(e) => {
-                        setForcePasswordError("");
-                        setForceNewPassword(e.target.value);
+                {forcePasswordError && (
+                    <div className="prompt-div" style={{ background: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626", padding: "10px 14px", borderRadius: "8px", fontSize: "0.82rem", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span>⚠️ {forcePasswordError}</span>
+                    </div>
+                )}
+
+                <div className="input-box password-box">
+                    <LockIcon />
+                    <input
+                        className="input-inp"
+                        type={forceEye1 ? "text" : "password"}
+                        placeholder="New Password (min. 6 characters)"
+                        value={forceNewPassword}
+                        onChange={(e) => {
+                            setForcePasswordError("");
+                            setForceNewPassword(e.target.value);
+                        }}
+                    />
+                    <div className="eye-icon" onClick={() => setForceEye1(!forceEye1)}>
+                        <EyeIcon open={forceEye1} />
+                    </div>
+                </div>
+                {forceNewPassword.length > 0 && forceNewPassword.length < 6 && (
+                    <div style={{ fontSize: "0.78rem", color: "#dc2626", marginTop: "4px", paddingLeft: "4px" }}>
+                        Password must be at least 6 characters
+                    </div>
+                )}
+
+                <div className="input-box password-box" style={{ marginTop: "12px" }}>
+                    <LockIcon />
+                    <input
+                        className="input-inp"
+                        type={forceEye2 ? "text" : "password"}
+                        placeholder="Confirm New Password"
+                        value={forceConfirmPassword}
+                        onChange={(e) => {
+                            setForcePasswordError("");
+                            setForceConfirmPassword(e.target.value);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && isPasswordValid) handleForcePasswordUpdate(e);
+                        }}
+                    />
+                    <div className="eye-icon" onClick={() => setForceEye2(!forceEye2)}>
+                        <EyeIcon open={forceEye2} />
+                    </div>
+                </div>
+
+                {forceConfirmPassword.length > 0 && (
+                    <div style={{
+                        fontSize: "0.8rem",
+                        fontWeight: "500",
+                        marginTop: "6px",
+                        paddingLeft: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        color: isMatching && isMinLength ? "#16a34a" : "#dc2626"
+                    }}>
+                        {isMatching && isMinLength ? (
+                            <><span>✓</span> Passwords match</>
+                        ) : !isMinLength ? (
+                            <><span>✕</span> Password must be at least 6 characters</>
+                        ) : (
+                            <><span>✕</span> Passwords do not match</>
+                        )}
+                    </div>
+                )}
+
+                <div
+                    className={`login-btn ${forcePasswordLoading || !isPasswordValid ? "disabled" : ""}`}
+                    style={{ marginTop: "20px" }}
+                    onClick={(e) => {
+                        if (!isPasswordValid || forcePasswordLoading) return;
+                        handleForcePasswordUpdate(e);
                     }}
-                />
-                <div className="eye-icon" onClick={() => setForceEye1(!forceEye1)}>
-                    <EyeIcon open={forceEye1} />
+                >
+                    {forcePasswordLoading ? "Updating Password..." : "Set Password & Continue"}
                 </div>
             </div>
-
-            <div className="input-box password-box" style={{ marginTop: "12px" }}>
-                <LockIcon />
-                <input
-                    className="input-inp"
-                    type={forceEye2 ? "text" : "password"}
-                    placeholder="Confirm New Password"
-                    value={forceConfirmPassword}
-                    onChange={(e) => {
-                        setForcePasswordError("");
-                        setForceConfirmPassword(e.target.value);
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") handleForcePasswordUpdate(e);
-                    }}
-                />
-                <div className="eye-icon" onClick={() => setForceEye2(!forceEye2)}>
-                    <EyeIcon open={forceEye2} />
-                </div>
-            </div>
-
-            <div
-                className={`login-btn ${forcePasswordLoading || !forceNewPassword || !forceConfirmPassword ? "disabled" : ""}`}
-                style={{ marginTop: "20px" }}
-                onClick={handleForcePasswordUpdate}
-            >
-                {forcePasswordLoading ? "Updating Password..." : "Set Password & Continue"}
-            </div>
-        </div>
-    );
+        );
+    };
 
     // ── RENDER: MAIN LOGIN FORM ──
     const renderLoginForm = () => (

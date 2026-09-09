@@ -90,9 +90,9 @@ const MyPathsAdmin = ({ search, admin, fetchAllServicesAgain, stepDataPage }) =>
     if (isAgentGenerated(path)) {
       return "AI Generated";
     }
-    const pd = path?.partnerDetails;
-    const name = pd?.businessName || pd?.username || (pd?.firstName ? `${pd.firstName} ${pd.lastName || ''}`.trim() : "") || path?.email;
-    return name ? `Manual • ${name}` : "Manual";
+    const pd = Array.isArray(path?.partnerDetails) ? path?.partnerDetails[0] : path?.partnerDetails;
+    const email = path?.email || pd?.email || pd?.loginEmail;
+    return email ? `Manual • ${email}` : "Manual";
   };
 
   // ─── layerConfig — reads actual names/descriptions from the step document ───

@@ -602,7 +602,7 @@ const getPath = async (req, res) => {
       filter._id = new mongoose.Types.ObjectId(req.query.path_id);
     }
 
-    if (req.query.email) filter.email = req.query.email;
+    if (req.query.email) filter.email = { $regex: `^${req.query.email.trim()}$`, $options: "i" };
     if (req.query.nameOfPath) filter.nameOfPath = req.query.nameOfPath;
     if (req.query.program) filter.program = req.query.program;
 

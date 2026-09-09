@@ -604,9 +604,13 @@ const InternalPartners = () => {
                     <label>Phone Number</label>
                     <input
                       type="text"
-                      placeholder="+91 98765 43210"
+                      placeholder="e.g. 9876543210"
+                      maxLength={10}
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setFormData({ ...formData, phone: val });
+                      }}
                     />
                   </div>
                 </div>

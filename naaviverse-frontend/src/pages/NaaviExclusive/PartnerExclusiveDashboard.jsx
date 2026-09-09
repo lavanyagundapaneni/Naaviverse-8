@@ -146,13 +146,39 @@ export default function PartnerExclusiveDashboard() {
     return stats?.feedbacks || [];
   }, [stats]);
 
-  // Settings states
+  const refundsList = useMemo(() => {
+    return stats?.refunds || [];
+  }, [stats]);
+
+  // Settings states initialized dynamically from profile
   const [payoutForm, setPayoutForm] = useState({
-    bankName: "HDFC Bank",
-    accountNumber: "•••• •••• 9876",
-    ifsc: "HDFC0001234",
-    holderName: currentPartner?.businessName || currentPartner?.username || partner?.businessName || partner?.username || "John Doe",
+    bankName: partner?.bankName || "",
+    accountNumber: partner?.accountNumber || "",
+    ifsc: partner?.ifsc || "",
+    holderName: currentPartner?.businessName || currentPartner?.username || partner?.businessName || partner?.username || "",
   });
+
+  useEffect(() => {
+    if (currentPartner || partner) {
+      const p = currentPartner || partner;
+      setPayoutForm(prev => ({
+        bankName: p.bankName || prev.bankName || "",
+        accountNumber: p.accountNumber || prev.accountNumber || "",
+        ifsc: p.ifsc || prev.ifsc || "",
+        holderName: p.businessName || p.username || p.name || prev.holderName || "",
+      }));
+    }
+  }, [currentPartner, partner]);
+
+  const handleSavePayout = () => {
+    const updated = {
+      ...currentPartner,
+      ...payoutForm,
+    };
+    setCurrentPartner(updated);
+    localStorage.setItem("partner", JSON.stringify(updated));
+    alert("Payout settings updated successfully!");
+  };
 
   const fetchStats = useCallback(async (isSilent = false) => {
     if (!partner || (!partner.partnerId && !partner.email)) return;
@@ -571,24 +597,27 @@ export default function PartnerExclusiveDashboard() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Skills Workshop</td>
-                            <td><span className="px-tbl-email">lisa.wong@email.com</span></td>
-                            <td><span className="px-tbl-amount">₹499</span></td>
-                            <td>Accidental double billing</td>
-                            <td>
-                              <span className="px-badge badge-pending">Pending</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Online Tutoring</td>
-                            <td><span className="px-tbl-email">sarah.jones@email.com</span></td>
-                            <td><span className="px-tbl-amount">₹2,000</span></td>
-                            <td>Reschedule &amp; cancellation</td>
-                            <td>
-                              <span className="px-badge badge-paid">Processed</span>
-                            </td>
-                          </tr>
+                          {refundsList.length ? (
+                            refundsList.map((r, idx) => (
+                              <tr key={r._id || idx}>
+                                <td>{r.service || r.productName || "Marketplace Item"}</td>
+                                <td><span className="px-tbl-email">{r.studentEmail || r.email || "—"}</span></td>
+                                <td><span className="px-tbl-amount">{formatCurrency(r.amount || 0)}</span></td>
+                                <td>{r.reason || "—"}</td>
+                                <td>
+                                  <span className={`px-badge badge-${(r.status || "pending").toLowerCase()}`}>
+                                    {r.status || "Pending"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="5" className="px-table-empty">
+                                No refund requests found.
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -718,6 +747,7 @@ export default function PartnerExclusiveDashboard() {
                             <label>Account holder name</label>
                             <input
                               type="text"
+                              placeholder="Enter account holder name"
                               value={payoutForm.holderName}
                               onChange={(e) => setPayoutForm({ ...payoutForm, holderName: e.target.value })}
                             />
@@ -726,6 +756,7 @@ export default function PartnerExclusiveDashboard() {
                             <label>Bank name</label>
                             <input
                               type="text"
+                              placeholder="Enter bank name"
                               value={payoutForm.bankName}
                               onChange={(e) => setPayoutForm({ ...payoutForm, bankName: e.target.value })}
                             />
@@ -734,6 +765,7 @@ export default function PartnerExclusiveDashboard() {
                             <label>Account number</label>
                             <input
                               type="text"
+                              placeholder="Enter account number"
                               value={payoutForm.accountNumber}
                               onChange={(e) => setPayoutForm({ ...payoutForm, accountNumber: e.target.value })}
                             />
@@ -742,12 +774,13 @@ export default function PartnerExclusiveDashboard() {
                             <label>IFSC code</label>
                             <input
                               type="text"
+                              placeholder="Enter IFSC code"
                               value={payoutForm.ifsc}
                               onChange={(e) => setPayoutForm({ ...payoutForm, ifsc: e.target.value })}
                             />
                           </div>
                         </div>
-                        <button className="px-btn-primary" onClick={() => alert("Payout settings updated successfully!")}>
+                        <button className="px-btn-primary" onClick={handleSavePayout}>
                           Save changes
                         </button>
                       </div>

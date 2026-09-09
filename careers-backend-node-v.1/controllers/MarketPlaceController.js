@@ -345,10 +345,13 @@ const getMarketplaceItemById = async (req, res) => {
     // Enrich with dynamic checkoutType based on registered partner
     const Partner = require("../models/PartnerModel");
     if (item.partner_email) {
-      const partner = await Partner.findOne({ email: item.partner_email.trim() }).select("partnerId").lean();
+      const partner = await Partner.findOne({ email: { $regex: `^${item.partner_email.trim()}$`, $options: "i" } }).select("partnerId creationSource partnerType").lean();
       if (partner) {
-        item.checkoutType = "external";
+        const isInternal = partner.creationSource === "admin_created" || (partner.partnerType || "").toLowerCase() === "internal";
+        item.checkoutType = isInternal ? "internal" : "external";
         item.partnerId = partner.partnerId;
+        item.creationSource = partner.creationSource;
+        item.partnerType = partner.partnerType;
       } else {
         item.checkoutType = "internal";
       }
@@ -379,15 +382,19 @@ const getMarketplaceByPartnerId = async (req, res) => {
 
     // Find all active marketplace items for this partner
     const items = await marketplaceModel.find({
-      partner_email: partner.email,
+      partner_email: { $regex: `^${partner.email.trim()}$`, $options: "i" },
       status: "active"
     }).lean();
+
+    const isInternal = partner.creationSource === "admin_created" || (partner.partnerType || "").toLowerCase() === "internal";
 
     // Enrich all items with dynamic fields
     const enrichedItems = items.map(item => {
       return {
         ...item,
-        checkoutType: "external",
+        checkoutType: isInternal ? "internal" : "external",
+        creationSource: partner.creationSource,
+        partnerType: partner.partnerType,
         partnerId: partner.partnerId
       };
     });
@@ -400,7 +407,10 @@ const getMarketplaceByPartnerId = async (req, res) => {
         email: partner.email,
         website: partner.website,
         firstName: partner.firstName,
-        lastName: partner.lastName
+        lastName: partner.lastName,
+        partnerType: partner.partnerType,
+        creationSource: partner.creationSource,
+        isInternal,
       },
       data: enrichedItems
     });

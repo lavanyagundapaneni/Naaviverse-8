@@ -54,14 +54,21 @@ const StepIndicator = ({ step }) => (
   </div>
 );
 
-// ─── Item Summary Card ─────────────────────────────────────────────────────────
 const ItemSummaryCard = ({ item }) => {
   const isFree = !item.cost || item.cost === "Free";
+  const isInternalPartner =
+    item?.checkoutType === "internal" ||
+    item?.creationSource === "admin_created" ||
+    (item?.partnerType || "").toLowerCase() === "internal" ||
+    item?.isInternal === true;
+
   return (
     <div className="ne-summary-card">
       <div className="ne-sc-top">
         <div className="ne-sc-topline">
-          <span className="ne-sc-badge">External Partner</span>
+          <span className="ne-sc-badge">
+            {isInternalPartner ? "Internal Partner" : "External Partner"}
+          </span>
           <span className="ne-sc-signal">Verified</span>
         </div>
         <div className="ne-sc-name">{item.name || "Service"}</div>
@@ -573,7 +580,10 @@ const NaaviExclusivePage = () => {
               partner_email: partnerInfo.email,
               businessName: partnerInfo.businessName,
               websiteUrl: partnerInfo.website,
-              partnerId: partnerInfo.partnerId
+              partnerId: partnerInfo.partnerId,
+              partnerType: partnerInfo.partnerType,
+              creationSource: partnerInfo.creationSource,
+              isInternal: partnerInfo.isInternal,
             });
           }
         }
@@ -594,8 +604,10 @@ const NaaviExclusivePage = () => {
   // Parse user profile from localStorage
   const userObj = (() => {
     try {
-      const parsed = JSON.parse(localStorage.getItem("user") || "{}");
-      return parsed;
+      const raw = localStorage.getItem("user");
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed?.user || parsed || {};
     } catch (e) {
       return {};
     }
@@ -609,14 +621,39 @@ const NaaviExclusivePage = () => {
     } catch (e) { return null; }
   })();
 
+  const initialFullName = prefilled?.fullName || userObj.name || userObj.fullName || userObj.displayName || userObj.username || localStorage.getItem("userName") || "";
+  const initialEmail = prefilled?.email || userObj.email || localStorage.getItem("loginEmail") || "";
+  const initialPhone = prefilled?.phone || userObj.phone || userObj.phoneNumber || userObj.mobile || "";
+
   const [form, setForm] = useState({
-    fullName: prefilled?.fullName || userObj.name || localStorage.getItem("userName") || "",
-    email: prefilled?.email || userObj.email || localStorage.getItem("loginEmail") || "",
-    phone: prefilled?.phone || userObj.phone || userObj.phoneNumber || "",
+    fullName: initialFullName,
+    email: initialEmail,
+    phone: initialPhone,
     dob: userObj.dob || "",
-    institution: userObj.institution || userObj.schoolName || "",
+    institution: userObj.institution || userObj.schoolName || userObj.school || "",
     notes: "",
   });
+
+  useEffect(() => {
+    const targetEmail = form.email || initialEmail;
+    if (targetEmail) {
+      axios
+        .get(`${BASE_URL}/api/users/get/${encodeURIComponent(targetEmail)}`)
+        .then((res) => {
+          if (res.data?.status && res.data?.data) {
+            const uData = res.data.data;
+            setForm((prev) => ({
+              ...prev,
+              fullName: prev.fullName || uData.name || uData.fullName || uData.username || "",
+              email: prev.email || uData.email || "",
+              phone: prev.phone || uData.phoneNumber || uData.phone || uData.mobile || "",
+              institution: prev.institution || uData.school || uData.institution || "",
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   const handleFormChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -654,6 +691,12 @@ const NaaviExclusivePage = () => {
     }
   };
 
+  const isInternalPartner =
+    item?.checkoutType === "internal" ||
+    item?.creationSource === "admin_created" ||
+    (item?.partnerType || "").toLowerCase() === "internal" ||
+    item?.isInternal === true;
+
   return (
     <div className="ne-root">
       <header className="ne-header">
@@ -661,7 +704,9 @@ const NaaviExclusivePage = () => {
           <div className="ne-logo">
             <img src={naaviLogo} alt="naavi" className="ne-logo-img" />
           </div>
-          <div className="ne-header-tag">External Partner Checkout</div>
+          <div className="ne-header-tag">
+            {isInternalPartner ? "Internal Partner Checkout" : "External Partner Checkout"}
+          </div>
         </div>
       </header>
 

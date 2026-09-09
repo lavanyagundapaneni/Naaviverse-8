@@ -9,8 +9,8 @@ import FindBetterMatchModal from "../components/MarketplaceReplacement/FindBette
 import AssistanceRequestModal from "../components/MarketplaceReplacement/AssistanceRequestModal";
 import AssistanceChatDrawer from "../components/MarketplaceReplacement/AssistanceChatDrawer";
 
-// Use process.env for Create React App
-const API = process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_API_URL || "http://localhost:4545";
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_API_URL || "http://localhost:4545";
+const API = BASE_URL;
 const MONGO_ID_RE = /^[a-f\d]{24}$/i;
 
 const LAYER_META = {
@@ -425,17 +425,41 @@ function diversify(list) {
 const CATEGORY_TAG_STYLES = {
   university: { label: "University", color: "#3E7BFA", bg: "#EAF1FF" },
   institute: { label: "Institute", color: "#D97706", bg: "#FFF6E4" },
-  mentor: { label: "Mentor", color: "#8B5CF6", bg: "#F1EEFB" },
+  mentor: { label: "Mentor", color: "#059669", bg: "#ECFDF5" },
+  mentors: { label: "Mentor", color: "#059669", bg: "#ECFDF5" },
   bootcamp: { label: "Bootcamp", color: "#E5473C", bg: "#FDEBEA" },
   certification: { label: "Certification", color: "#1FA655", bg: "#E9F8EE" },
   course: { label: "Course", color: "#1FA655", bg: "#E9F8EE" },
   vendor: { label: "Vendor", color: "#3E7BFA", bg: "#EAF1FF" },
+  vendors: { label: "Vendor", color: "#3E7BFA", bg: "#EAF1FF" },
   distributor: { label: "Distributor", color: "#8B5CF6", bg: "#F1EEFB" },
+  distributors: { label: "Distributor", color: "#8B5CF6", bg: "#F1EEFB" },
 };
 
 const getCategoryMeta = (item) => {
-  const cat = String(item.cat || item.category || item.role || "University").toLowerCase();
-  return CATEGORY_TAG_STYLES[cat] || { label: cat.toUpperCase(), color: "#3E7BFA", bg: "#EAF1FF" };
+  const candidateKeys = [
+    item.role,
+    item.category,
+    item.cat,
+    item.partnerRole,
+    item.partnerType,
+  ].filter(Boolean);
+
+  for (const rawKey of candidateKeys) {
+    const k = String(rawKey).toLowerCase().trim();
+    if (CATEGORY_TAG_STYLES[k]) {
+      return CATEGORY_TAG_STYLES[k];
+    }
+  }
+
+  const allText = candidateKeys.join(" ").toLowerCase();
+  if (allText.includes("distribut")) return CATEGORY_TAG_STYLES.distributor;
+  if (allText.includes("vendor")) return CATEGORY_TAG_STYLES.vendor;
+  if (allText.includes("mentor")) return CATEGORY_TAG_STYLES.mentor;
+  if (allText.includes("institut") || allText.includes("universit")) return CATEGORY_TAG_STYLES.institution;
+
+  const fallbackLabel = candidateKeys[0] || "Distributor";
+  return { label: String(fallbackLabel).toUpperCase(), color: "#8B5CF6", bg: "#F1EEFB" };
 };
 
 // ─── Component 2: <MarketplaceCard /> ─────────────────────────────────────────
@@ -997,24 +1021,70 @@ const StepBar = ({ currentPage, onStepChange }) => {
 
 // ─── Checkout Page ────────────────────────────────────────────────────────────
 const CheckoutPage = ({ cart, onConfirm, onBack }) => {
-  const userRaw = (() => {
+  const getUserFromStorage = () => {
     try {
-      return JSON.parse(localStorage.getItem("user"));
+      const raw = localStorage.getItem("user");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed?.user || parsed;
     } catch {
       return null;
     }
-  })();
-  const userEmail = userRaw?.user?.email || userRaw?.email || "guest@naaviverse.com";
-  const userName = userRaw?.user?.displayName || userRaw?.displayName || "Guest User";
+  };
 
-  const [fullName, setFullName] = useState(userName);
-  const [email, setEmail] = useState(userEmail);
-  const [phone, setPhone] = useState("");
+  const userRaw = getUserFromStorage();
+  const initialEmail =
+    userRaw?.email ||
+    userRaw?.user?.email ||
+    localStorage.getItem("loginEmail") ||
+    "";
+  const initialName =
+    userRaw?.name ||
+    userRaw?.fullName ||
+    userRaw?.displayName ||
+    userRaw?.username ||
+    localStorage.getItem("userName") ||
+    "";
+  const initialPhone =
+    userRaw?.phoneNumber ||
+    userRaw?.phone ||
+    userRaw?.mobile ||
+    "";
+
+  const [fullName, setFullName] = useState(initialName);
+  const [email, setEmail] = useState(initialEmail);
+  const [phone, setPhone] = useState(initialPhone);
   const [prefDate, setPrefDate] = useState("");
   const [timeSlot, setTimeSlot] = useState("10:00 AM");
   const [submitting, setSubmitting] = useState(false);
   const [payError, setPayError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+
+  useEffect(() => {
+    const targetEmail = email || initialEmail;
+    if (targetEmail) {
+      axios
+        .get(`${BASE_URL}/api/users/get/${encodeURIComponent(targetEmail)}`)
+        .then((res) => {
+          if (res.data?.status && res.data?.data) {
+            const uData = res.data.data;
+            const fetchedName = uData.name || uData.fullName || uData.username;
+            if (fetchedName) {
+              setFullName(fetchedName);
+            }
+            if (uData.email) {
+              setEmail(uData.email);
+            }
+            if (uData.phoneNumber || uData.phone || uData.mobile) {
+              setPhone(uData.phoneNumber || uData.phone || uData.mobile);
+            }
+          }
+        })
+        .catch((err) => {
+          console.warn("Could not fetch profile details for checkout:", err?.message);
+        });
+    }
+  }, []);
 
   const subtotal = cart.reduce((a, s) => a + itemPrice(s), 0);
   const tax = Math.round(subtotal * 0.18);

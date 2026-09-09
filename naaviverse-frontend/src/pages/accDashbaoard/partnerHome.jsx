@@ -12,30 +12,6 @@ function getPartnerEmail() {
   } catch { return null; }
 }
 
-const LIVE_ACTIVITY = [
-  { id: "a1", name: "Anisha R.", initials: "A", color: "#0d9488", action: "Selected Yale Economics path", time: "2m ago", type: "path", typeBg: "rgba(13,148,136,.18)", typeColor: "#0d9488" },
-  { id: "a2", name: "Ravi K.", initials: "R", color: "#f4845f", action: "Purchased Expert 1:1 Session (₹4,999)", time: "8m ago", type: "purchase", typeBg: "rgba(244,132,95,.18)", typeColor: "#e55a2b" },
-  { id: "a4", name: "Dev P.", initials: "D", color: "#0d9488", action: "Selected MIT Computer Science path", time: "45m ago", type: "path", typeBg: "rgba(13,148,136,.18)", typeColor: "#0d9488" },
-  { id: "a5", name: "Priya T.", initials: "P", color: "#f4845f", action: "Purchased Full Path Bundle (₹9,999)", time: "1h ago", type: "purchase", typeBg: "rgba(244,132,95,.18)", typeColor: "#e55a2b" },
-  { id: "a7", name: "Kavya L.", initials: "K", color: "#0d9488", action: "Selected Pre-Med Johns Hopkins path", time: "3h ago", type: "path", typeBg: "rgba(13,148,136,.18)", typeColor: "#0d9488" },
-  { id: "a8", name: "Sneha M.", initials: "S", color: "#f59e0b", action: "Purchased Data Analytics Pack (₹2,499)", time: "4h ago", type: "purchase", typeBg: "rgba(245,158,11,.18)", typeColor: "#d97706" },
-  { id: "a9", name: "Rohit B.", initials: "R", color: "#0d9488", action: "Selected AI for Finance path", time: "5h ago", type: "path", typeBg: "rgba(13,148,136,.18)", typeColor: "#0d9488" },
-  { id: "a10", name: "Neha G.", initials: "N", color: "#f4845f", action: "Purchased Cloud Computing Bundle (₹5,499)", time: "6h ago", type: "purchase", typeBg: "rgba(244,132,95,.18)", typeColor: "#e55a2b" },
-  { id: "a11", name: "Arun S.", initials: "A", color: "#0d9488", action: "Selected Blockchain Fundamentals path", time: "7h ago", type: "path", typeBg: "rgba(13,148,136,.18)", typeColor: "#0d9488" },
-  { id: "a12", name: "Pooja M.", initials: "P", color: "#f59e0b", action: "Purchased Full Stack Bootcamp (₹3,999)", time: "8h ago", type: "purchase", typeBg: "rgba(245,158,11,.18)", typeColor: "#d97706" },
-];
-
-
-
-const NOTIFICATIONS = [
-  { id: 1, type: "purchase", title: "New purchase", desc: "Anisha R. purchased Data Science Pack", time: "5 min ago", unread: true },
-  { id: 2, type: "approval", title: "Path approved", desc: '"AI for Finance" path is now live', time: "1 hr ago", unread: true },
-  { id: 4, type: "purchase", title: "Bundle purchase", desc: "Priya T. purchased Full Path Bundle (₹9,999)", time: "3 hr ago", unread: true },
-  { id: 5, type: "path", title: "Path selected", desc: "Dev P. selected MIT Computer Science path", time: "5 hr ago", unread: true },
-  { id: 6, type: "approval", title: "Review required", desc: '"Blockchain Fundamentals" awaiting review', time: "Yesterday", unread: false },
-  { id: 8, type: "purchase", title: "Session purchase", desc: "Kavya L. purchased Expert 1:1 Session", time: "2 days ago", unread: false },
-];
-
 const NOTIF_CFG = {
   purchase: { bg: "#dcfce7", color: "#15803d", icon: "🛒", label: "Purchase" },
   approval: { bg: "#fef3c7", color: "#b45309", icon: "✅", label: "Approval" },
@@ -43,17 +19,7 @@ const NOTIF_CFG = {
   system: { bg: "#f1f5f9", color: "#475569", icon: "ℹ️", label: "System" },
 };
 
-const PENDING_ACTIONS = [
-  { id: "p1", label: "Awaiting approval", desc: "Blockchain Fundamentals", urgency: "high", nav: "paths" },
-  { id: "p2", label: "Unread messages", desc: "3 users sent queries", urgency: "high", nav: "home" },
-  { id: "p3", label: "Steps need review", desc: "2 steps flagged by users", urgency: "medium", nav: "paths" },
-  { id: "p4", label: "Upgrade available", desc: "Move to Premium plan", urgency: "low", nav: "marketplace" },
-  { id: "p5", label: "Draft path incomplete", desc: "AI for Designers — 40% done", urgency: "medium", nav: "paths" },
-];
-
 const urgencyOrder = { high: 0, medium: 1, low: 2 };
-const sortedActions = [...PENDING_ACTIONS].sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]);
-const highCount = PENDING_ACTIONS.filter(a => a.urgency === "high").length;
 
 const WEEKLY_RETENTION = {
   days: ["M", "T", "W", "T", "F", "S", "S"],
@@ -79,7 +45,7 @@ export default function PartnerHome({ setispopular }) {
   const [activityTab, setActivityTab] = useState("All");
   const [showNotif, setShowNotif] = useState(false);
   const [notifFilter, setNotifFilter] = useState("all");
-  const [notifications, setNotifications] = useState(NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
   const [showAllActivity, setShowAllActivity] = useState(false);
   const [dashStats, setDashStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -89,8 +55,30 @@ export default function PartnerHome({ setispopular }) {
 
   const notifRef = useRef(null);
   const unread = notifications.filter(n => n.unread).length;
-  const markAllRead = () => setNotifications(p => p.map(n => ({ ...n, unread: false })));
-  const markRead = id => setNotifications(p => p.map(n => n.id === id ? { ...n, unread: false } : n));
+
+  const markAllRead = () => {
+    setNotifications(p => p.map(n => ({ ...n, unread: false })));
+    try {
+      const email = getPartnerEmail();
+      if (email) {
+        const allIds = notifications.map(n => n.id);
+        localStorage.setItem(`read_notifs_${email}`, JSON.stringify(allIds));
+      }
+    } catch {}
+  };
+
+  const markRead = id => {
+    setNotifications(p => p.map(n => n.id === id ? { ...n, unread: false } : n));
+    try {
+      const email = getPartnerEmail();
+      if (email) {
+        const raw = localStorage.getItem(`read_notifs_${email}`);
+        const readIds = new Set(raw ? JSON.parse(raw) : []);
+        readIds.add(id);
+        localStorage.setItem(`read_notifs_${email}`, JSON.stringify([...readIds]));
+      }
+    } catch {}
+  };
 
   useEffect(() => {
     const h = e => { if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotif(false); };
@@ -104,7 +92,31 @@ export default function PartnerHome({ setispopular }) {
     try {
       setStatsLoading(true); setStatsError(null);
       const res = await axios.get(`${BASE_URL}/api/partner-dashboard/stats`, { params: { email } });
-      if (res.data?.status) setDashStats(res.data.data);
+      if (res.data?.status) {
+        setDashStats(res.data.data);
+        const rawNotifs = res.data.data?.notifications || res.data.data?.liveActivity || [];
+        let readIds = new Set();
+        try {
+          const raw = localStorage.getItem(`read_notifs_${email}`);
+          if (raw) readIds = new Set(JSON.parse(raw));
+        } catch {}
+
+        const formattedNotifs = rawNotifs.map(act => {
+          const isPurchase = act.type === "purchase";
+          const isPath = act.type === "path";
+          const title = act.title || (isPurchase ? "New Marketplace Purchase" : isPath ? "Path Selection" : "Notification");
+          const desc = act.desc || `${act.name ? act.name + " " : ""}${act.action || ""}`;
+          return {
+            id: act.id,
+            type: act.type || "purchase",
+            title,
+            desc,
+            time: act.time || "Recently",
+            unread: !readIds.has(act.id),
+          };
+        });
+        setNotifications(formattedNotifs);
+      }
       else setStatsError(res.data?.message || "Failed to load stats");
     } catch { setStatsError("Could not load dashboard data."); }
     finally { setStatsLoading(false); }
@@ -133,6 +145,9 @@ export default function PartnerHome({ setispopular }) {
   const totalMarketplaceRevenue = dashStats?.totalMarketplaceRevenue ?? 0;
   const totalBundles = MARKETPLACE_ITEMS.filter(m => m.type === "Bundle").reduce((s, m) => s + (m.purchases || 0), 0);
   const LIVE_ACTIVITY = dashStats?.liveActivity || [];
+  const pendingActions = dashStats?.pendingActions || [];
+  const sortedActions = [...pendingActions].sort((a, b) => (urgencyOrder[a.urgency] ?? 2) - (urgencyOrder[b.urgency] ?? 2));
+  const highCount = pendingActions.filter(a => a.urgency === "high").length;
   const actFiltered = activityTab === "All"
     ? LIVE_ACTIVITY
     : LIVE_ACTIVITY.filter(a => (a.type || "").toLowerCase() === activityTab.toLowerCase());
@@ -215,40 +230,48 @@ export default function PartnerHome({ setispopular }) {
             <div className="ph-page-header-left">
               <div className="ph-page-header-content">
                 <h2>Pending Actions</h2>
-                <p>{highCount} urgent · {PENDING_ACTIONS.length} total items need attention</p>
+                <p>{highCount} urgent · {pendingActions.length} total items need attention</p>
               </div>
             </div>
           </div>
 
           <div className="ph-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Action</th>
-                  <th>Details</th>
-                  <th>Priority</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedActions.map(action => (
-                  <tr key={action.id} className="ph-table-row">
-                    <td><div className="ph-cell-name">{action.label}</div></td>
-                    <td style={{ fontSize: 12, color: "#64748b" }}>{action.desc}</td>
-                    <td>
-                      <span className={`ph-status-pill ${action.urgency === "high" ? "ph-status-pending" : action.urgency === "medium" ? "ph-status-inactive" : "ph-status-active"}`}>
-                        {action.urgency === "high" ? "Urgent" : action.urgency === "medium" ? "Medium" : "Low"}
-                      </span>
-                    </td>
-                    <td>
-                      <button className="ph-view-btn" onClick={() => setView(action.nav)}>
-                        Go <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8 6 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </button>
-                    </td>
+            {pendingActions.length === 0 ? (
+              <div style={{ padding: "48px 16px", textAlign: "center", color: "#94a3b8" }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>✨</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: "#475569", marginBottom: 4 }}>No pending actions</div>
+                <div style={{ fontSize: 13, color: "#94a3b8" }}>All items are currently up to date.</div>
+              </div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>Priority</th>
+                    <th></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {sortedActions.map(action => (
+                    <tr key={action.id} className="ph-table-row">
+                      <td><div className="ph-cell-name">{action.label}</div></td>
+                      <td style={{ fontSize: 12, color: "#64748b" }}>{action.desc}</td>
+                      <td>
+                        <span className={`ph-status-pill ${action.urgency === "high" ? "ph-status-pending" : action.urgency === "medium" ? "ph-status-inactive" : "ph-status-active"}`}>
+                          {action.urgency === "high" ? "Urgent" : action.urgency === "medium" ? "Medium" : "Low"}
+                        </span>
+                      </td>
+                      <td>
+                        <button className="ph-view-btn" onClick={() => setView(action.nav)}>
+                          Go <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8 6 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
@@ -531,10 +554,19 @@ export default function PartnerHome({ setispopular }) {
       <style>{`@keyframes ph-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
       <div className="ph-header">
         <div>
-          <div className="ph-welcome" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            Welcome back, <span className="ph-accent">{partnerName}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, position: "relative" }}>
+            <div className="ph-welcome" style={{ margin: 0 }}>
+              Welcome back, <span className="ph-accent">{partnerName}</span>
+            </div>
             <div ref={notifRef} className="ph-notif-wrap">
-              <button className="ph-bell-btn" onClick={() => setShowNotif(p => !p)}>
+              <button
+                type="button"
+                className="ph-bell-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowNotif(p => !p);
+                }}
+              >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -546,27 +578,33 @@ export default function PartnerHome({ setispopular }) {
                     <span className="ph-notif-dd-title">Notifications</span>
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       {unread > 0 && <span className="ph-notif-new-badge">{unread} new</span>}
-                      <button className="ph-mark-all-btn" onClick={markAllRead}>Mark all read</button>
+                      <button className="ph-mark-all-btn" onClick={(e) => { e.stopPropagation(); markAllRead(); }}>Mark all read</button>
                     </div>
                   </div>
                   <div className="ph-notif-dd-list">
-                    {notifications.slice(0, 5).map(n => {
-                      const cfg = NOTIF_CFG[n.type] || NOTIF_CFG.system;
-                      return (
-                        <div key={n.id} className={`ph-notif-dd-item ${n.unread ? "unread" : ""}`} onClick={() => markRead(n.id)}>
-                          <div className="ph-notif-dd-icon" style={{ background: cfg.bg }}>{cfg.icon}</div>
-                          <div className="ph-notif-dd-body">
-                            <div className="ph-notif-dd-item-title">{n.title}</div>
-                            <div className="ph-notif-dd-item-desc">{n.desc}</div>
-                            <div className="ph-notif-dd-item-time">{n.time}</div>
+                    {notifications.length === 0 ? (
+                      <div style={{ padding: "24px 16px", textAlign: "center", color: "#94a3b8", fontSize: 13 }}>
+                        No new notifications
+                      </div>
+                    ) : (
+                      notifications.slice(0, 5).map(n => {
+                        const cfg = NOTIF_CFG[n.type] || NOTIF_CFG.system;
+                        return (
+                          <div key={n.id} className={`ph-notif-dd-item ${n.unread ? "unread" : ""}`} onClick={(e) => { e.stopPropagation(); markRead(n.id); }}>
+                            <div className="ph-notif-dd-icon" style={{ background: cfg.bg }}>{cfg.icon}</div>
+                            <div className="ph-notif-dd-body">
+                              <div className="ph-notif-dd-item-title">{n.title}</div>
+                              <div className="ph-notif-dd-item-desc">{n.desc}</div>
+                              <div className="ph-notif-dd-item-time">{n.time}</div>
+                            </div>
+                            {n.unread && <div className="ph-unread-dot" />}
                           </div>
-                          {n.unread && <div className="ph-unread-dot" />}
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
                   <div className="ph-notif-dd-footer">
-                    <button className="ph-view-all-notif-btn" onClick={() => { setShowNotif(false); setView("notifications"); }}>View all notifications →</button>
+                    <button className="ph-view-all-notif-btn" onClick={(e) => { e.stopPropagation(); setShowNotif(false); setView("notifications"); }}>View all notifications →</button>
                   </div>
                 </div>
               )}
@@ -632,10 +670,12 @@ export default function PartnerHome({ setispopular }) {
             </div>
             <span className="ph-stat-badge">{highCount > 0 ? `${highCount} urgent` : "All clear"}</span>
           </div>
-          <div className="ph-stat-val">{PENDING_ACTIONS.length}</div>
+          <div className="ph-stat-val">{pendingActions.length}</div>
           <div className="ph-stat-label">Pending Actions</div>
           <div className="ph-stat-sub">
-            {sortedActions.slice(0, 2).map(a => a.label).join(" · ")}
+            {pendingActions.length > 0
+              ? sortedActions.slice(0, 2).map(a => a.label).join(" · ")
+              : "No pending items"}
           </div>
           <button className="ph-stat-btn" onClick={() => setView("actions")}>View All →</button>
         </div>
