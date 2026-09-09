@@ -46,8 +46,67 @@ function getSegmentKeyInProfile(segmentKey) {
 }
 
 function getSegmentPositionAndGoal(profile, segmentKey) {
-  // PART 4 & 5: No default data. Current position and destination start empty.
-  // Student Signals do NOT define current position or destination.
+  if (!profile) return { current: "", goal: "" };
+
+  const geo = profile.personalityGeography || {};
+  const aca = profile.academics || {};
+  const ps = profile.practicalSkills || {};
+  const jc = profile.jobsCareers || {};
+  const nac = profile.nonAcademicCounselling || {};
+
+  const locationStr = [geo.city, geo.state, geo.country].filter(Boolean).join(", ") || profile.city || profile.country || "";
+
+  if (segmentKey === SEGMENTS.ACADEMICS) {
+    const parts = [];
+    if (aca.gradeLevel) parts.push(aca.gradeLevel);
+    else if (aca.educationStage) parts.push(aca.educationStage);
+    else if (profile.grade) parts.push(`Grade ${profile.grade}`);
+
+    if (aca.academicStream) parts.push(`${aca.academicStream} Stream`);
+    else if (profile.stream) parts.push(`${profile.stream} Stream`);
+
+    if (aca.curriculum) parts.push(aca.curriculum);
+    else if (profile.curriculum) parts.push(profile.curriculum);
+
+    if (aca.schoolName || aca.schoolOrCollege || profile.school) parts.push(aca.schoolName || aca.schoolOrCollege || profile.school);
+    if (locationStr) parts.push(locationStr);
+
+    const current = parts.filter(Boolean).join(" • ");
+    return { current, goal: "" };
+  }
+
+  if (segmentKey === SEGMENTS.PRACTICAL) {
+    const parts = [];
+    if (ps.targetSkill) parts.push(ps.targetSkill);
+    if (ps.skillLevel) parts.push(`${ps.skillLevel} Level`);
+    if (ps.learningMode) parts.push(ps.learningMode);
+    if (locationStr) parts.push(locationStr);
+
+    const current = parts.filter(Boolean).join(" • ");
+    return { current, goal: "" };
+  }
+
+  if (segmentKey === SEGMENTS.JOBS_CAREERS) {
+    const parts = [];
+    if (jc.currentRole) parts.push(jc.currentRole);
+    if (jc.yearsOfExperience) parts.push(`${jc.yearsOfExperience} Experience`);
+    if (jc.industry) parts.push(jc.industry);
+    if (locationStr) parts.push(locationStr);
+
+    const current = parts.filter(Boolean).join(" • ");
+    return { current, goal: "" };
+  }
+
+  if (segmentKey === SEGMENTS.NON_ACADEMIC_COUNSELLING) {
+    const parts = [];
+    if (nac.concernArea) parts.push(nac.concernArea);
+    if (nac.currentChallenge) parts.push(nac.currentChallenge);
+    if (locationStr) parts.push(locationStr);
+
+    const current = parts.filter(Boolean).join(" • ");
+    return { current, goal: "" };
+  }
+
   return { current: "", goal: "" };
 }
 
@@ -337,7 +396,7 @@ export default function Dashboard({ profile, pathData, userInput, initialCurrent
   const [regeneratingStepId, setRegeneratingStepId] = useState(null);
   const [stepRegenError, setStepRegenError] = useState("");
 
-  // Sync segment from profile on mount, and restore active inputs if roadmap is loaded
+  // Sync segment & autofill initial inputs from profile on mount
   useEffect(() => {
     if (profile?.activeSegment && !activeSegment) {
       setActiveSegmentLocal(profile.activeSegment);
@@ -348,17 +407,27 @@ export default function Dashboard({ profile, pathData, userInput, initialCurrent
     if (pathData && userInput) {
       if (userInput.current && !current) setCurrent(userInput.current);
       if (userInput.goal && !goal) setGoal(userInput.goal);
+    } else if (profile && !current) {
+      const targetSeg = activeSegment || profile.activeSegment || SEGMENTS.ACADEMICS;
+      const autofill = getSegmentPositionAndGoal(profile, targetSeg);
+      if (autofill.current) setCurrent(autofill.current);
+      if (autofill.goal) setGoal(autofill.goal);
     }
   }, [profile, pathData, userInput]);
 
   const handleSegmentChange = async (newSegment, defaultSub) => {
-    // PART 2 & 4: Switch category — current/goal stay as-is (user controls them)
     setActiveSegmentLocal(newSegment);
-    setActiveSubSegmentLocal(defaultSub || getDefaultSubSegment(newSegment));
+    const sub = defaultSub || getDefaultSubSegment(newSegment);
+    setActiveSubSegmentLocal(sub);
+
+    // Autofill Current Position and Goal from Student Signals for this category
+    const autofill = getSegmentPositionAndGoal(profile, newSegment);
+    if (autofill.current) setCurrent(autofill.current);
+    if (autofill.goal) setGoal(autofill.goal);
 
     // Clear existing path when category changes
     if (onPathGenerated) {
-      onPathGenerated(null, { current, goal });
+      onPathGenerated(null, { current: autofill.current || current, goal: autofill.goal || goal });
     }
 
     if (profile && onProfileUpdated) {
